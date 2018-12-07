@@ -1,6 +1,6 @@
 # Random Variables and Event Probabilities
 
-## Random Variables
+## Random variables
 
 Let $Y$ be the result of a fair coin flip.  Not a general coin flip,
 but a specific instance of flipping a specific coin at a specific
@@ -34,82 +34,82 @@ $$
 \mbox{Pr}[Y = 1] = 0.5.
 $$
 
-The events $Y = 1$ and $Y = 0$ are mutually exclusive in that only one
-of them can occur.  They are also exhaustive in that one or the other
-has to occur.  In general, the chance of any of a set of mutually
-exclusive events occurring is the sum of their probabilities.
-Furthermore, the sum of the probability of a sequence of mutually
-exclusive and exhaustive events is 100%.  Fairness has $\mbox{Pr}[Y =
-0] = 0.5$, and sure enough,
+In order for the flip to be fair, we must have $\mbox{Pr}[Y = 0] =
+0.5$, too.  The two events $Y = 1$ and $Y = 0$ are mutually exclusive
+in the sense that both of them cannot occur at the same time.  In
+probabilistic notation,
 
 $$
-= \mbox{Pr}[Y = 0] + \mbox{Pr}[Y = 1]
-= 1.
+\mbox{Pr}[Y = 1 \ \mbox{and} \ Y = 0] = 0.
 $$
 
-In this particular case, the event in question is $Y = 1 \,
-\mathrm{or} \, Y= 0$.  Events may be put together by logical
-conjunction or disjunction.
+The events $Y = 1$ and $Y = 0$ are also exhaustive, in the sense that
+at least one of them must occur.  In probabilistic notation,
+
+$$
+\mbox{Pr}[Y = 1 \ \mbox{or} \ Y = 0] = 1.
+$$
+
+In these cases, events can be conjoined (with "and") or disjoined
+(with "or");  they can also be negated.  For example,
+
+$$
+\mbox{Pr}[Y \neq 1] = 0.5.
+$$
+
 
 ## Sample spaces and possible worlds
 
-Different values of a random variable represent different ways the
-world can be, i.e., a *possible world*.  Even though the coin flip
-will have a specific outcome in a given world, we consider other
-possible ways the world could have been.  The key to statistical
-inference lies in this leap of counterfactual reasoning---considering
-that the world may have turned out differently than it actually did.
+Even though the coin flip will have a specific outcome in the real
+world, we consider alternative ways the world could have been.  Thus
+even if the coin lands heads ($Y = 1$), we entertain the possibility
+that it could've landed tails ($Y = 0$).  Such counterfactual
+reasoning is the key to understanding probability theory and applied
+statistical inference.
 
-Without loss of generality, we can think of all of the possible worlds
-as being balls in an urn.^[For those who are counting, there will
-usually be uncountably many balls in the urn.]  Each ball provides a
-list of each random variable and the value it takes on in that world.
-The set of all balls is called a *sample space*---it determines the
-scope of the random variables in play.^[Notationally, the sample space
-is usually written as $\Omega$, the capitalized form of the last
-letter in the Greek alphabet.]  One or more of the balls may even
-represent the values of the random variables in the "real" world.
+An alternative way the world could be, that is, a *possible world*,
+will determine the value of every random variable. The collection of
+all such possible worlds is called the *sample space*.^[The sample
+space conventionally written as $\Omega$, the capitalized form of the
+last letter in the Greek alphabet.]  The sample space may be
+conceptualized as an urn containing a ball for each possible way the
+world can be.  On each ball is written the value of every random
+variable.^[Formally, a random variable $X$ can be represented as a
+function from the sample space to a real value, i.e., $X:\Omega
+\rightarrow \mathbb{R}$. For each possible world $\omega \in \Omega$,
+the variable $X$ takes on a specific value $X(\omega) \in
+\mathbb{R}$.]
 
-Events are represented as a collections of balls in the
-urn.^[Formally, an event is a subset of the sample space, $E \subseteq
-\Omega$.]  For instance, the event $Y = 0$ of our coin landing tails
-is represented by the set of all balls in the urn on which the value 0
-is recorded for the variable $Y$.
-
-
-
-
-## More stuff
+Now consider the event $Y = 0$, in which our coin flip lands tails. In
+some worlds, the event occurs (i.e., $0$ is the value recorded for
+$Y$) and in others it doesn't.  An event picks out the subset of
+worlds in which it occurs.^[Formally, an event is defined by a subset
+of the sample space, $E \subseteq \Omega$.]
 
 
+## Simulating random variables
 
-Random variables can represent unequal odds, such as whether a
-roulette ball lands in a red pocket.^[18 out of 38 in a double-zero
-wheel.]  They may also represent counts, such as the number of views
-of a social media item or the number of points scored by a team in a
-competition.  Random variables can also represent continuous
-quantities, such as the location from which a shot is taken in a
-sporting event or the angle at which a spinner lands after being spun.
+We are now going to turn our attention to computation, and in
+particular, simulation, with which we will use to estimate event
+probabilities.
 
-Random variables can also be multivariate, such as the result of five
-cards drawn from a deck of cards without replacement, or the heights
-of the students in next year's introductory statistics class.  They
-may also be compound---a sequence of random variables can be used to
-represent the distance traveled during the year for each employee of a
-company and a random variable can also be used to represent the total
-distance traveled by each employee.
-
-## Simulation
-
-*Random number generation.* We will assume that we have a primitive
-function `uniform_01_rng()`, which when called, behaves much like it
-has a 50% chance of returning 0 and a 50% chance of returning 1.^[Such
-functions are implemented using *pseudorandom number generators*,
-algorithms which generate a deterministic sequences of values with
-many of the properties of random sequences.]  Roughly speaking,
+The primitive unit of simulation is a function that acts like a random
+number generator.  But we only have computers to work with and they
+are deterministic.  At best, we can created so-called *pseudorandom
+number generators*.  Pseudorandom number generators, if they are well
+coded, produce deterministic streams of output that appear to be
+random.^[There is a large literature on pseudorandom number generators
+and tests for measurable differences from truly random streams.]
+  
+For the time being, we will assume we have a primitive pseudorandom
+number generator `uniform_01_rng()`, which behaves roughly like it has
+a 50% chance of returning 1 and a 50% chance of returning 0.^[The name
+arises because random variables in which every possible outcome is
+equally likely are said to be *uniform*.]  That is, our pseudorandom
+number generator behaves as if
 
 $$
-\mathrm{uniform\_01\_rng}()
+\mathtt{uniform\_01\_rng}()
 =
 \begin{cases}
 0 & \mathrm{with \ a} \ 50\% \ \mathrm{chance}
@@ -118,8 +118,18 @@ $$
 \end{cases}
 $$
 
-A simple program to generate a realization of a random coin flip and
-assign it to an integer variable `y` could be coded as follows.
+Suppose we want to simulate our random variable $Y$.  We can do so by
+calling `uniform_01_rng` and noting the answer.
+
+Throughout this book, we will provide computer programs in the form of
+pseudocode, which is not a particular programming language, but should
+be precise enough to be coded in a concrete programming language of
+the reader's choice.^[The actual programs for this book are coded in R
+and available from the source repository for this book.]
+
+A simple program to generate a realization of a random coin flip,
+assign it to an integer variable `y`, and print the result could be
+coded as follows.
 
 ```
 int y = uniform_01_rng()
@@ -140,6 +150,77 @@ the following output.
 ```{r}
 printf("y = %d", rbinom(1, 1, 0.5))
 ```
+
+If we run it a nine more times, it might print
+
+```{r}
+printf("y = %d", rbinom(1, 1, 0.5))
+printf("y = %d", rbinom(1, 1, 0.5))
+printf("y = %d", rbinom(1, 1, 0.5))
+printf("y = %d", rbinom(1, 1, 0.5))
+printf("y = %d", rbinom(1, 1, 0.5))
+printf("y = %d", rbinom(1, 1, 0.5))
+printf("y = %d", rbinom(1, 1, 0.5))
+printf("y = %d", rbinom(1, 1, 0.5))
+printf("y = %d", rbinom(1, 1, 0.5))
+```
+When we say it might print these things, we mean the results will
+depend on the pseudorandom number generator `uniform_01_rng()`.  
+
+## Seeding a simulation
+
+Simulations can be made exactly reproducible by setting what is known
+as the *seed* of a pseudorandom number generator.  This seed
+establishes the deterministic sequence of results that the
+pseudorandom number generator produces.  For instance, contrast the program
+
+```
+seed_rng(1234)
+for (n in 1:10) print uniform_01_rng()
+for (n in 1:10) print uniform_01_rng()
+```
+
+which produces the output
+
+```{r}
+set.seed(1234)
+for (n in 1:10) { cat(rbinom(1, 1, 0.5)); cat(' ') }
+for (n in 1:10) { cat(rbinom(1, 1, 0.5)); cat(' ') }
+```
+
+with the program
+
+```
+seed_rng(1234)
+for (n in 1:10) print uniform_01_rng()
+seed_rng(1234)
+for (n in 1:10) print uniform_01_rng()
+```
+
+which produces
+
+```{r}
+set.seed(1234)
+for (n in 1:10) { cat(rbinom(1, 1, 0.5)); cat(' ') }
+set.seed(1234)
+for (n in 1:10) { cat(rbinom(1, 1, 0.5)); cat(' ') }
+```
+
+Resetting the seed in the second case causes exactly the same ten
+pseudorandom numbers to be generated a second time.
+
+
+Now when we run twice, we get the same sequence of draws
+from the pseudorandom number generators.
+
+
+
+Every well-written simulation should allow the seed to be set
+manually.
+
+
+## Seeding random number generators.
+
 
 
 *Simulation and random variables.* The program could be expanded with
@@ -187,25 +268,26 @@ y_{10}^{(1)}$ on the first row up through $y_1^{(5)}, \ldots,
 y_{10}^{(5)}$ on the last row.
 
 
-## Seeding a simulation
 
-Simulations can be made exactly reproducible by setting the
-pseudorandom number generator seed.
 
-```
-seed_rng(1234)
-for (n in 1:5) print uniform_01_rng() ' '
-```
 
-Now when we run twice, we get the same sequence of draws
-from the pseudorandom number generators.
 
-```{r}
-set.seed(1234)
-for (n in 1:10) { cat(rbinom(1, 1, 0.5)); cat(' ') }
-set.seed(1234)
-for (n in 1:10) { cat(rbinom(1, 1, 0.5)); cat(' ') }
-```
+## More stuff
 
-Every well-written simulation should allow the seed to be set
-manually.
+
+
+Random variables can represent unequal odds, such as whether a
+roulette ball lands in a red pocket.^[18 out of 38 in a double-zero
+wheel.]  They may also represent counts, such as the number of views
+of a social media item or the number of points scored by a team in a
+competition.  Random variables can also represent continuous
+quantities, such as the location from which a shot is taken in a
+sporting event or the angle at which a spinner lands after being spun.
+
+Random variables can also be multivariate, such as the result of five
+cards drawn from a deck of cards without replacement, or the heights
+of the students in next year's introductory statistics class.  They
+may also be compound---a sequence of random variables can be used to
+represent the distance traveled during the year for each employee of a
+company and a random variable can also be used to represent the total
+distance traveled by each employee.
