@@ -1,0 +1,43 @@
+# Philosophical Prelude: What is Probability? {-}
+
+John Stuart Mill laid out a fundamentally relativistic program for
+understanding the nature of probability statements,^[Mill, John
+Stuart.  1882.  *A System of Logic: Raciocinative and Inductive*.
+Eighth edition. Harper & Brothers, Publishers, New York. Part III,
+Chapter 18.]
+
+> We must remember that the probability of an event is not a quality
+of the event itself, but a mere name for the degree of ground which
+we, or some one else, have for expecting it. $\ldots$ Every event is
+in itself certain, not probable; if we knew all, we should either know
+positively that it will happen, or positively that it will not. But
+its probability to us means the degree of expectation of its
+occurrence, which we are warranted in entertaining by our present
+evidence.
+
+Our estimate of the probability of an event fundamentally depends on
+how much we know.  For example, if you ask me now to forecast the
+weather on a random day in Edinburgh next year, I'll forecast 52%
+because it rains on average 191 days per year in Edinburgh.^[World
+Weather and Climate (2018) [Edinburgh
+rainfall](https://weather-and-climate.com/average-monthly-Rainy-days,Edinburgh-uk,Scotland).]
+If I know the day is in December, I'll make an estimate of 65%
+conditioned on knowing that the day is in December and it rains on
+average 20 days in December.  Continuing to add information, if it's
+December 14 and I have up-to-date radar and I have to estimate whether
+it's going to rain on December 15, then the number might be anything,
+depending on the current meteorological conditions.
+
+Fundamentally, probability is a relative measure of uncertainty
+conditioned on available information.  In other words, probability
+involves statements about an agent's or collection of agents'
+knowledge of the world, not about the world directly.^[In
+philosophical terms, the nature of probability is *epistemic* rather
+than *ontological*.]  This allows us to believe the world is
+deterministic,^[We may consistently side with Einstein in believing
+God does not play dice.] while still reasoning probabilistically based
+on available evidence.
+
+Probability theory merely provides a mathematically consistent
+approach to quantifying uncertainty and performing inductive
+inference.

@@ -1,0 +1,8 @@
+delete_merged_file: FALSE
+new_session: FALSE
+before_chapter_script: "before-chapter.R"
+rmd_files: [
+  "index.Rmd",
+  "philosophical-prelude.Rmd",
+  "random-variables.Rmd"
+]
