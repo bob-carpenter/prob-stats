@@ -218,11 +218,12 @@ realizations of exactly the same random variable, which represents a
 single coin flip.
 
 The fundamental method of computing event probabilities will not
-change as we move through this book.  We simply simulate a bunch of
+change as we move through this book.  We simply simulate a sequence of
 values and return the proportion in which the event occurs as our
 estimate.
 
-For example, let's simulate 10 values of $Y$ again.
+For example, let's simulate 10 values of $Y$ again and record the
+proportion of the simulated values that are 1.
 
 ```{r}
 M <- 10
@@ -280,15 +281,19 @@ values being estimated.
 
 
 
+
+
+
 ## Law of large numbers
 
 Visualization in the form of simple plots goes a long way toward
 understanding concepts in statistics and probability.  A traditional
 way to plot what happens as the number of simulation draws $M$
 increases is to keep a running tally of the estimate as each draw is
-made and plot the estimated event probability for each $m \in
-1:M$.^[See, for example, the quite wonderful little book, Bulmer,
-M.G., 1965. *Principles of Statistics*. Oliver and Boyd, Edinburgh.]
+made and plot the estimated event probability $\mbox{Pr}[Y = 1]$ for
+each $m \in 1:M$.^[See, for example, the quite wonderful little book,
+Bulmer, M.G., 1965. *Principles of Statistics*. Oliver and Boyd,
+Edinburgh.]
 
 ```{r echo=FALSE, out.width="80%", fig.cap="Monte Carlo estimate of probability that a coin lands head as a function of the number of simulation draws.  The line at 0.5 marks the true probability."}
 set.seed(0)
@@ -339,7 +344,6 @@ plot <- ggplot(df, aes(x = M, y = hat_E_Y)) +
   ggtheme_tufte()
 plot
 ```
-
 
 Plotting the progression of multiple simulations demonstrates the
 trend in errors.
@@ -410,77 +414,165 @@ pr_Y_eq_1_plot <- ggplot(df2, aes(x = M, y = hat_E_Y, group=r)) +
 pr_Y_eq_1_plot
 ```
 
+The *law of large numbers*^[Which technically comes in several forms.]
+says roughly that as the number of simulated values grows, the average
+will converge to the expected value.  In this case, our estimate of
+$\mbox{Pr}[Y = 1]$ can be seen to converge to the true value of 0.5 as
+the number of simulations increases.
+
+
+## Simulation notation
+
+We will use parenthesized superscripts to pick out the elements of a sequence of simulations.  For example, 
+
+$$
+y^{(1)}, y^{(2)}, \ldots, y^{(M)}
+$$
+
+will be used for $M$ simulations of a single random variable
+$Y$.^[Each $y^{(m)}$ is a possible realization of $Y$, which is why
+they are written using lowercase.]  It's important to keep in mind
+that this is $M$ simulations of a single random variable, not a single
+simulation of $M$ different random variables.
+
+Before we get going, we'll need to introduce *indicator function*
+notation.  For example, we write
+
+$$
+\mathrm{I}[y^{(m)} = 1]
+=
+\begin{cases}
+1 & \mbox{if} \ y^{(m)} = 1
+\\[4pt]
+0 & \mbox{otherwise}
+\end{cases}
+$$
+
+The indicator function maps a condition, such as $y^{(m)} = 1$ into
+the value 1 if the condition is true and 0 if it is false.^[Square
+bracket notation is used for functions when the argument is itself a
+function.  For example, we write $\mbox{Pr}[Y > 0]$ because $Y$ is a
+random variable, which is modeled as a function.  We also write
+$\mathrm{I}[x^2 + y^2 = 1]$ because the standard bound variables $x$
+and $y$ are functions from contexts defining variable values.
+
+Now we can write out the formula for our estimate of $\mbox{Pr}[Y =
+1]$ after $M$ draws,
+
+$$
+\begin{array}{rcl}
+\mbox{Pr}[Y = 1]
+& \approx &
+\frac{\displaystyle \mathrm{I}[y^{(1)} = 1]
+      \ + \ \mathrm{I}[y^{(2)} = 1]
+      \ + \ \cdots
+      \ + \ \mathrm{I}[y^{(M)} = 1]}
+     {\displaystyle M}
+\end{array}
+$$
+
+That is, our estimate is the proportion of the simulated values which
+take on the value 1.  It quickly becomes tedious to write out
+sequences, so we will use standard summation notation, where we write
+
+$$
+\mathrm{I}\!\left[y^{(1)} = 1]
+      + \mathrm{I}[y^{(2)} = 1]
+      + \cdots
+      + \mathrm{I}[y^{(M)} = 1\right]
+\ = \
+\sum_{m=1}^M \mathrm{I}[y^{(m)} = 1]
+$$
+      
+Thus we can write our simulation-based estimate of the probability
+that a fair coin flip lands heads as
+
+$$
+\mbox{Pr}[Y = 1]
+\approx
+\frac{1}{M}
+\,
+\sum_{m=1}^M \mathrm{I}[y^{(m)} = 1]
+$$
+
+The form $\frac{1}{M} \sum_{m=1}^M$ will recur repeatedly in
+simulation --- it just says to average over values indexed by $m \in
+1:M$.
 
 
 ## Central limit theorem
 
+The law of large numbers tells us that with more simulations, our
+estimates become more and more accurate.  But they do not tell us how
+quickly we can expect that convergence to proceed.  The *central limit
+theorem* provides the convergence rate.
+
+First, we have to be careful about what we're defining.  First, we
+define the *error* for an estimate as the difference from the true
+value,
+
+$$
+\left( \frac{1}{M} \sum_{m=1} \mathrm{I}[y^{(m)} = 1] \right) - 0.5
+$$
+
+The *absolute error* is just the absolute value of this,
+
+$$
+\left( \frac{1}{M} \sum_{m=1} \mathrm{I}[y^{(m)} = 1] \right) - 0.5
+$$
 
 
+```{r echo=FALSE, message=FALSE, warning=FALSE, out.width="80%", fig.cap="Same plot as before, but with result mapped to absolute error.  The red line indicates the average absolute error across the draws"} 
+set.seed(1234)
+M_max <- 1e6
+J <- 100
+I <- 47
+N <- I * J
+df2 <- data.frame(r = rep(NA, N), M = rep(NA, N), err_hat_E_Y = rep(NA, N))
+pos <- 1
+for (j in 1:J) {
+  y_sim <- rbinom(M_max, 1, 0.5)
+  for (i in 4:60) {
+    M <- max(100, min(M_max, (10^(1/10))^i))
+    err_hat_E_Y = abs(mean(y_sim[1:M]) - 0.5)
+    df2[pos, ] <- list(r = j, M = M, err_hat_E_Y = err_hat_E_Y);
+    pos <- pos + 1;
+  }
+}
 
-
-## More stuff
-
-
-
-Random variables can represent unequal odds, such as whether a
-roulette ball lands in a red pocket.^[18 out of 38 in a double-zero
-wheel.]  They may also represent counts, such as the number of views
-of a social media item or the number of points scored by a team in a
-competition.  Random variables can also represent continuous
-quantities, such as the location from which a shot is taken in a
-sporting event or the angle at which a spinner lands after being spun.
-
-Random variables can also be multivariate, such as the result of five
-cards drawn from a deck of cards without replacement, or the heights
-of the students in next year's introductory statistics class.  They
-may also be compound---a sequence of random variables can be used to
-represent the distance traveled during the year for each employee of a
-company and a random variable can also be used to represent the total
-distance traveled by each employee.
-
-
-
-
-*Simulation and random variables.* The program could be expanded with
-a loop to write ten outputs.
-
-```
-repeat 10 times:
-  print uniform_01_rng() ' '
-```
-
-Such a program might produce the following output.
-
-```{r}
-for (n in 1:10) { cat(rbinom(1, 1, 0.5)); cat(' ') }
-```
-
-Such a program might represent either
-
-1. ten different simulations of the same random variable $Y$, say
-$y^{(1)}, \ldots, y^{(10)}$, with parenthetical superscripts indexing
-the simulation, or
-
-1.  a single simulation of ten different random variables,
-$Y_1, \ldots, Y_{10}$, say $y_1, \ldots, y_{10}$.
-
-The first situation corresponds to simulating ten different ways the
-world might be, whereas the second corresponds to simulating a single
-way the world might be.  Multiple simulations of the way the world
-might be form the building block of computational statistical
-inference, and will be the focus of much of this book.
-
-Running the program five times, we get the following behavior.
-
-```{r}
-for (n in 1:10) { cat(rbinom(1, 1, 0.5)); cat(' ') }
-for (n in 1:10) { cat(rbinom(1, 1, 0.5)); cat(' ') }
-for (n in 1:10) { cat(rbinom(1, 1, 0.5)); cat(' ') }
-for (n in 1:10) { cat(rbinom(1, 1, 0.5)); cat(' ') }
-for (n in 1:10) { cat(rbinom(1, 1, 0.5)); cat(' ') }
+abs_err_plot <- ggplot(df2, aes(x = M, y = err_hat_E_Y, group=r)) +
+    geom_hline(yintercept = 0.5, color = "red") +
+    geom_line(alpha=0.15) +
+    scale_x_log10(breaks=10^(4:6), limits=c(1e4, 1e6),
+                  labels=c("10,000", "100,000", "1,000,000")) +
+    scale_y_continuous(limits = c(0, 0.015),
+                       breaks = c(0, 0.05, 0.01), 
+                       labels = c("0.00", "0.05", "0.01")) +
+    xlab("simulation draws") + 
+    ylab("absolute error") +
+    ggtheme_tufte()
+abs_err_plot
 ```
 
-Considered as five simulations of ten random variables, $Y_1,
-\ldots, Y_{10}$, these simulations would be indexed $y_1^{(1)}, \ldots,
-y_{10}^{(1)}$ on the first row up through $y_1^{(5)}, \ldots,
-y_{10}^{(5)}$ on the last row.
+```{r echo=FALSE, message=FALSE, warning=FALSE, out.width="80%", fig.cap="Same plot as before, but on the log scale."}
+fudge <- 1e-5
+x = 0.5 * (1:100)
+log_abs_err_plot <- ggplot(df2, aes(x = M, y = err_hat_E_Y + fudge, group=r)) +
+    geom_abline(slope = -0.5,
+                intercept = 0.005,
+                color = "red") +
+    geom_line(alpha=0.15) +
+    scale_x_log10(limits=c(1e4, 1e6),
+                  breaks=10^(4:6), 
+                  labels=c("10,000", "100,000", "1,000,000")) +
+    scale_y_log10(limits = c(0.8e-4, 2e-2),
+                  breaks = c(0.0001, 0.001, 0.01),
+		  labels = c("0.0001", "0.001", "0.01" )) +
+    xlab("simulation draws") + 
+    ylab("log absolute error + 1e-4") +
+    ggtheme_tufte()
+log_abs_err_plot
+```
+
+
+
