@@ -25,7 +25,7 @@ covering the same material in that it
 * takes an unapologetically Bayesian approach to modeling and inference;
 * is fully reproducible with open-source code, figures, and text.
 
-*Licensing*: &nbsp; This book is distributed under the <small>[CC
-BY-ND 4.0](https://creativecommons.org/licenses/by-nd/4.0/)</small>
-license.  The accompanying code is distributed under the <small>[BSD
-3-clause](https://opensource.org/licenses/BSD-3-Clause)</small> license.
+*Licensing*: &nbsp; This book is distributed under the [<small>CC
+BY-ND 4.0</small>](https://creativecommons.org/licenses/by-nd/4.0/)
+license.  The accompanying code is distributed under the [<small>BSD
+3</small>-clause](https://opensource.org/licenses/BSD-3-Clause) license.

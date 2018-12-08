@@ -50,8 +50,9 @@ $$
 \mbox{Pr}[Y = 1 \ \mbox{or} \ Y = 0] = 1.
 $$
 
-In these cases, events can be conjoined (with "and") or disjoined
-(with "or");  they can also be negated.  For example,
+In these cases, events are conjoined (with "and") and disjoined (with
+"or").  These operations apply in general to events, as does negation.
+As an example of negation, 
 
 $$
 \mbox{Pr}[Y \neq 1] = 0.5.
@@ -62,8 +63,8 @@ $$
 
 Even though the coin flip will have a specific outcome in the real
 world, we consider alternative ways the world could have been.  Thus
-even if the coin lands heads ($Y = 1$), we entertain the possibility
-that it could've landed tails ($Y = 0$).  Such counterfactual
+even if the coin lands heads $(Y = 1)$, we entertain the possibility
+that it could've landed tails $(Y = 0)$.  Such counterfactual
 reasoning is the key to understanding probability theory and applied
 statistical inference.
 
@@ -105,31 +106,20 @@ For the time being, we will assume we have a primitive pseudorandom
 number generator `uniform_01_rng()`, which behaves roughly like it has
 a 50% chance of returning 1 and a 50% chance of returning 0.^[The name
 arises because random variables in which every possible outcome is
-equally likely are said to be *uniform*.]  That is, our pseudorandom
-number generator behaves as if
-
-$$
-\mathtt{uniform\_01\_rng}()
-=
-\begin{cases}
-0 & \mathrm{with \ a} \ 50\% \ \mathrm{chance}
-\\
-1 & \mathrm{with \ a} \ 50\% \ \mathrm{chance}
-\end{cases}
-$$
+equally likely are said to be *uniform*.] 
 
 Suppose we want to simulate our random variable $Y$.  We can do so by
 calling `uniform_01_rng` and noting the answer.
 
-Throughout this book, we will provide computer programs in the form of
-pseudocode, which is not a particular programming language, but should
-be precise enough to be coded in a concrete programming language of
-the reader's choice.^[The actual programs for this book are coded in R
-and available from the source repository for this book.]
+
 
 A simple program to generate a realization of a random coin flip,
 assign it to an integer variable `y`, and print the result could be
-coded as follows.
+coded as follows.^[Computer programs are presented using a consistent
+pseudocode, which provides a sketch of a program that should be
+precise enough to be coded in a concrete programming language.  R
+implementations of the pseudocode generate the results and are
+available in the source code repository for this book.]
 
 ```
 int y = uniform_01_rng()
@@ -165,7 +155,7 @@ printf("y = %d", rbinom(1, 1, 0.5))
 printf("y = %d", rbinom(1, 1, 0.5))
 ```
 When we say it might print these things, we mean the results will
-depend on the pseudorandom number generator `uniform_01_rng()`.  
+depend on the state of the pseudorandom number generator.
 
 ## Seeding a simulation
 
@@ -207,19 +197,247 @@ for (n in 1:10) { cat(rbinom(1, 1, 0.5)); cat(' ') }
 ```
 
 Resetting the seed in the second case causes exactly the same ten
-pseudorandom numbers to be generated a second time.
+pseudorandom numbers to be generated a second time.  Every
+well-written pseudorandom number generator and piece of simulation
+code should allow the seed to be set manually to ensure reproduciblity
+of results.^[Replicability of results with different seeds is a
+desirable, but stricter condition.]
 
 
-Now when we run twice, we get the same sequence of draws
-from the pseudorandom number generators.
+## Using simulation to estimate event probabilities
+
+We know that $\mbox{Pr}[Y = 1]$ is 0.5 because it represents the flip
+of a fair coin.  Simulation based methods allow us to estimate event
+probabilities straightforwardly if we can generate random realizations
+of the random variables involved in the event definitions.
+
+For example, we know we can generate multiple simulations of flipping
+the same coin.  That is, we're not simulating the result of flipping
+the same coin ten different times, but simulating ten different
+realizations of exactly the same random variable, which represents a
+single coin flip.
+
+The fundamental method of computing event probabilities will not
+change as we move through this book.  We simply simulate a bunch of
+values and return the proportion in which the event occurs as our
+estimate.
+
+For example, let's simulate 10 values of $Y$ again.
+
+```{r}
+M <- 10
+y_sim <- rbinom(M, 1, 0.5);
+for (n in 1:M) { cat(y_sim[n]); cat(' '); }
+cat('estimated Pr[Y = 1] = ', sum(y_sim) / M)
+```
+Let's try that a few more times.
+
+```{r}
+for (k in 1:10) {
+  y_sim <- rbinom(M, 1, 0.5);
+  for (n in 1:M) { cat(y_sim[n]); cat(' '); }
+  cat(' ')
+  cat('estimated Pr[Y = 1] = ', sum(y_sim) / M, '\n')
+}
+```
+
+The estimates are close, but not very exact.  What if we use 100
+simulations?  
+
+```{r}
+M <- 100
+y_sim <- rbinom(M, 1, 0.5);
+for (n in 1:M) { cat(y_sim[n]); cat(' '); }
+cat('estimated Pr[Y = 1] = ', sum(y_sim) / M)
+```
+
+That's closer than most of the estimates with only ten draws.  Let's
+try that a few more times without bothering to print all 100 simulated
+values,
+
+```{r}
+for (k in 1:10) {
+  M <- 100
+  y_sim <- rbinom(M, 1, 0.5);
+  cat('estimated Pr[Y = 1] = ', sum(y_sim) / M, '\n')
+}  
+```
+
+What happens if we let $M = 10,000$ simulations?
+
+```{r}
+for (k in 1:10) {
+  M <- 10000
+  y_sim <- rbinom(M, 1, 0.5);
+  cat('estimated Pr[Y = 1] = ', sum(y_sim) / M, '\n')
+}  
+```
+
+Now the estimates are very close to the true probability being
+estimated (0.5).  This raises the questions of how many simulation
+draws we need in order to be confident our estimates are close to the
+values being estimated.
 
 
 
-Every well-written simulation should allow the seed to be set
-manually.
+## Law of large numbers
+
+Visualization in the form of simple plots goes a long way toward
+understanding concepts in statistics and probability.  A traditional
+way to plot what happens as the number of simulation draws $M$
+increases is to keep a running tally of the estimate as each draw is
+made and plot the estimated event probability for each $m \in
+1:M$.^[See, for example, the quite wonderful little book, Bulmer,
+M.G., 1965. *Principles of Statistics*. Oliver and Boyd, Edinburgh.]
+
+```{r echo=FALSE, out.width="80%", fig.cap="Monte Carlo estimate of probability that a coin lands head as a function of the number of simulation draws.  The line at 0.5 marks the true probability."}
+set.seed(0)
+library(ggplot2)
+M <- 1e5
+Ms <- c()
+y_sim <- rbinom(M, 1, 0.5)
+hat_E_Y <- c()
+Ms <- c()
+for (i in 0:50) {
+  Ms[i + 1] <- min(M, (10^(1/10))^i)
+  hat_E_Y[i + 1] <- mean(y_sim[0:Ms[i + 1]])
+}
+df <- data.frame(M = Ms, hat_E_Y)
+plot <- ggplot(df, aes(x = M, y = hat_E_Y)) +
+  geom_hline(yintercept = 0.5, color = "red") +
+  geom_line() +
+  geom_point() +
+  scale_x_log10(breaks=10^(0:5), limits=c(1, 100000),
+                labels=c("1", "10", "100", "1,000", "10,000", "100,000")) +
+  scale_y_continuous(limits = c(0, 1),
+                     breaks = c(0, 0.25, 0.5, 0.75, 1.0)) +
+  xlab("simulation draws") + 
+  ylab("estimated Pr[Y = 1]") +
+  ggtheme_tufte()
+plot
+```
+
+The $x$-axis is plotted on the log scale in order to provide room for
+the early draws.  With a log scale axis, each factor gets the same
+width rather than each multiple.  That is, the interval $(10, 100)$ is
+plotted with the same width as the intervals $(1, 10)$ and $(100,\,
+1\,000)$.  Plotting on a linear scale, the interval $(1, 10\,000)$
+would take only a tenth of the width of the $x$-axis, with nine tenths
+being given over to $(10\,000,\, 100\,000)$.
+
+```{r echo=FALSE, out.width = "80%", fig.cap="Same plot as the previous one, but with the $x$-axis on the linear scale, rather than the log scale."}
+plot <- ggplot(df, aes(x = M, y = hat_E_Y)) +
+  geom_hline(yintercept = 0.5, color = "red") +
+  geom_line() +
+  geom_point() +
+  scale_x_continuous(breaks=c(1, 50000, 100000), limits=c(1, 100000),
+                     labels=c("1", "50,000", "100,000")) +
+  scale_y_continuous(limits = c(0, 1),
+                     breaks = c(0, 0.25, 0.5, 0.75, 1.0)) +
+  xlab("simulation draws") + 
+  ylab("estimated Pr[Y = 1]") +
+  ggtheme_tufte()
+plot
+```
 
 
-## Seeding random number generators.
+Plotting the progression of multiple simulations demonstrates the
+trend in errors.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, out.width="80%", fig.cap="One hundred replicates of the previous plot overlaid (starting from one hundred tosss).  Each line is the sequence of estimates of the probability that a fair coin toss lands head as a function of the number of simulation draws.  The line at 0.5 marks the true probability which is being estimated. The overall reduction in estimation noise with increasing numbers of draws is illustrated by the decreasing band around the true value."}
+library(ggplot2)
+set.seed(0)
+M_max <- 1e4
+J <- 100
+I <- 47
+N <- I * J
+df2 <- data.frame(r = rep(NA, N), M = rep(NA, N), hat_E_Y = rep(NA, N))
+pos <- 1
+for (j in 1:J) {
+  y_sim <- rbinom(M_max, 1, 0.5)
+  for (i in 4:50) {
+    M <- max(100, min(M_max, (10^(1/10))^i))
+    hat_E_Y = mean(y_sim[1:M])
+    df2[pos, ] <- list(r = j, M = M, hat_E_Y = hat_E_Y);
+    pos <- pos + 1;
+  }
+}
+
+pr_Y_eq_1_plot <- ggplot(df2, aes(x = M, y = hat_E_Y, group=r)) +
+    geom_hline(yintercept = 0.5, color = "red") +
+    geom_line(alpha=0.15) +
+    scale_x_log10(breaks=10^(2:4), limits=c(100, 10000),
+                  labels=c("100", "1,000", "10,000")) +
+    scale_y_continuous(limits = c(0.375, 0.625),
+                       breaks = c(0.4, 0.5, 0.6), 
+                       labels = c(0.4, 0.5, 0.6)) +
+    xlab("simulation draws") + 
+    ylab("estimated Pr[Y = 1]") +
+    ggtheme_tufte()
+pr_Y_eq_1_plot
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, out.width="80%", fig.cap="Same plot as before, but continuing the $x$-axis from ten thousand to a million simulation draws.  The $y$-axis is only a tenth as wide, ranging between 0.49 and 0.51 rather than 0.4 and 0.6.  This shows that convergence to the true value is scale free."}
+library(ggplot2)
+set.seed(0)
+M_max <- 1e6
+J <- 100
+I <- 47
+N <- I * J
+df2 <- data.frame(r = rep(NA, N), M = rep(NA, N), hat_E_Y = rep(NA, N))
+pos <- 1
+for (j in 1:J) {
+  y_sim <- rbinom(M_max, 1, 0.5)
+  for (i in 4:60) {
+    M <- max(100, min(M_max, (10^(1/10))^i))
+    hat_E_Y = mean(y_sim[1:M])
+    df2[pos, ] <- list(r = j, M = M, hat_E_Y = hat_E_Y);
+    pos <- pos + 1;
+  }
+}
+
+pr_Y_eq_1_plot <- ggplot(df2, aes(x = M, y = hat_E_Y, group=r)) +
+    geom_hline(yintercept = 0.5, color = "red") +
+    geom_line(alpha=0.15) +
+    scale_x_log10(breaks=10^(4:6), limits=c(1e4, 1e6),
+                  labels=c("10,000", "100,000", "1,000,000")) +
+    scale_y_continuous(limits = c(0.485, 0.515),
+                       breaks = c(0.49, 0.5, 0.51), 
+                       labels = c(0.49, 0.5, 0.51)) +
+    xlab("simulation draws") + 
+    ylab("estimated Pr[Y = 1]") +
+    ggtheme_tufte()
+pr_Y_eq_1_plot
+```
+
+
+
+## Central limit theorem
+
+
+
+
+
+## More stuff
+
+
+
+Random variables can represent unequal odds, such as whether a
+roulette ball lands in a red pocket.^[18 out of 38 in a double-zero
+wheel.]  They may also represent counts, such as the number of views
+of a social media item or the number of points scored by a team in a
+competition.  Random variables can also represent continuous
+quantities, such as the location from which a shot is taken in a
+sporting event or the angle at which a spinner lands after being spun.
+
+Random variables can also be multivariate, such as the result of five
+cards drawn from a deck of cards without replacement, or the heights
+of the students in next year's introductory statistics class.  They
+may also be compound---a sequence of random variables can be used to
+represent the distance traveled during the year for each employee of a
+company and a random variable can also be used to represent the total
+distance traveled by each employee.
+
 
 
 
@@ -266,28 +484,3 @@ Considered as five simulations of ten random variables, $Y_1,
 \ldots, Y_{10}$, these simulations would be indexed $y_1^{(1)}, \ldots,
 y_{10}^{(1)}$ on the first row up through $y_1^{(5)}, \ldots,
 y_{10}^{(5)}$ on the last row.
-
-
-
-
-
-
-## More stuff
-
-
-
-Random variables can represent unequal odds, such as whether a
-roulette ball lands in a red pocket.^[18 out of 38 in a double-zero
-wheel.]  They may also represent counts, such as the number of views
-of a social media item or the number of points scored by a team in a
-competition.  Random variables can also represent continuous
-quantities, such as the location from which a shot is taken in a
-sporting event or the angle at which a spinner lands after being spun.
-
-Random variables can also be multivariate, such as the result of five
-cards drawn from a deck of cards without replacement, or the heights
-of the students in next year's introductory statistics class.  They
-may also be compound---a sequence of random variables can be used to
-represent the distance traveled during the year for each employee of a
-company and a random variable can also be used to represent the total
-distance traveled by each employee.

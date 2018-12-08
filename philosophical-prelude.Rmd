@@ -1,43 +1,49 @@
 # Philosophical Prelude: What is Probability? {-}
 
-John Stuart Mill laid out a fundamentally relativistic program for
-understanding the nature of probability statements,^[Mill, John
+The fundamental nature of probability as used in applied statistical
+inference was described succintly by John Stuart Mill as part of his
+larger program of characterizing inductive reasoning,^[Mill, John
 Stuart.  1882.  *A System of Logic: Raciocinative and Inductive*.
 Eighth edition. Harper & Brothers, Publishers, New York. Part III,
 Chapter 18.]
 
 > We must remember that the probability of an event is not a quality
 of the event itself, but a mere name for the degree of ground which
-we, or some one else, have for expecting it. $\ldots$ Every event is
+we, or some one else, have for expecting it. <br /> $\ldots$ Every event is
 in itself certain, not probable; if we knew all, we should either know
 positively that it will happen, or positively that it will not. But
 its probability to us means the degree of expectation of its
 occurrence, which we are warranted in entertaining by our present
 evidence.
 
-Our estimate of the probability of an event fundamentally depends on
-how much we know.  For example, if you ask me now to forecast the
-weather on a random day in Edinburgh next year, I'll forecast 52%
-because it rains on average 191 days per year in Edinburgh.^[World
-Weather and Climate (2018) [Edinburgh
+Mill is saying that our estimate of the probability of an event
+fundamentally depends on how much we know.  For example, if you ask me
+now to forecast the weather on a random day in Edinburgh next year,
+I'll forecast 52% because it rains on average 191 days per year in
+Edinburgh.^[World Weather and Climate (2018) [Edinburgh
 rainfall](https://weather-and-climate.com/average-monthly-Rainy-days,Edinburgh-uk,Scotland).]
 If I know the day is in December, I'll make an estimate of 65%
-conditioned on knowing that the day is in December and it rains on
-average 20 days in December.  Continuing to add information, if it's
-December 14 and I have up-to-date radar and I have to estimate whether
-it's going to rain on December 15, then the number might be anything,
-depending on the current meteorological conditions.
+conditioned on knowing that it rains on average 20 days in December.
+Continuing to add information, if it's December 7 and I have
+up-to-date radar, then my estimate of the chance of rain on December 8
+or December 9 might be anything, depending on the current
+meteorological conditions.^[The current forecast from
+[weather.com](https://weather.com/weather/today/l/55.95,-3.19) as of
+11:30 pm December 7, 2018 is a 60% chance of rain on December 8 and
+a 10% chance of rain on December 9.]
 
-Fundamentally, probability is a relative measure of uncertainty
-conditioned on available information.  In other words, probability
-involves statements about an agent's or collection of agents'
-knowledge of the world, not about the world directly.^[In
-philosophical terms, the nature of probability is *epistemic* rather
-than *ontological*.]  This allows us to believe the world is
-deterministic,^[We may consistently side with Einstein in believing
-God does not play dice.] while still reasoning probabilistically based
-on available evidence.
+Putting Mill's view in more modern terms, probability is a relative
+measure of uncertainty conditioned on available information.  In other
+words, probability involves statements about an agent's or collection
+of agents' knowledge of the world, not about the world directly.^[In
+philosophical terms, the nature of probability is *epistemic* (based
+on knowledge) rather than *ontological* (based on metaphysics) or
+*deontic* (based on belief).]  This allows us to believe the world is
+deterministic, while still reasoning probabilistically based on
+available evidence.^[This provides us the wiggle room to side with
+Einstein in believing that nature does not play dice, while still
+allowing us to build probabilisic models of our knowledge of nature.]
 
-Probability theory merely provides a mathematically consistent
-approach to quantifying uncertainty and performing inductive
-inference.
+Probability theory merely provides a mathematically and logically
+consistent approach to quantifying uncertainty and performing
+inductive inference.
