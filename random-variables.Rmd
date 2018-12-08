@@ -515,10 +515,15 @@ $$
 \left( \frac{1}{M} \sum_{m=1} \mathrm{I}[y^{(m)} = 1] \right) - 0.5
 $$
 
-The *absolute error* is just the absolute value of this,
+The *absolute error* is just the absolute value^[In general, the
+absolute value function applied to a real number $x$ is written as
+$|x|$ and defined to be $x$ if $x$ is non-negative and $-x$ if $x$ is
+negative.] of this,
 
 $$
+\left| \,
 \left( \frac{1}{M} \sum_{m=1} \mathrm{I}[y^{(m)} = 1] \right) - 0.5
+\, \right|
 $$
 
 
