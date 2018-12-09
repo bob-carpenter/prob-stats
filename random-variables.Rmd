@@ -224,7 +224,51 @@ values and return the proportion in which the event occurs as our
 estimate.
 
 For example, let's simulate 10 values of $Y$ again and record the
-proportion of the simulated values that are 1.
+proportion of the simulated values that are 1.  That is, we count the
+number of time the event occurs in that the simulated value $y^{(m)}$
+is equal to 1.
+
+```
+occur = 0
+for (m in 1:M)
+  y[m] = uniform_01_rng()
+  occur += occur + (y[m] == 1)
+estimate = occur / M
+print `estimated Pr[Y = 1] = ' estimate
+```
+
+The equality operator is written as `==`, as in the condition `y[m] ==
+1` to distinguish it from the assignment statement `y[m] = 1`, which
+sets the value of `y[m]` to 1. The condition expression `y[m] == 1`
+evaluates to 1 if the condition is true and 0 otherwise.
+
+If we let `uniform_01_rng(M)` be the result of generating `M`
+pseudorandom coin flip results, the program can be shortened to
+
+```
+y <- uniform_01_rng(M)
+occur = sum(y == 1)
+estimate = occur / M
+```
+
+A condition such as `y == 1` on a sequence returns a sequence of the
+same length with value 1 in positions where the condition is true. For
+instance, if
+
+```
+y = (2, 1, 4, 2, 2, 1)
+```
+then
+```
+y == 2
+```
+evaluates to
+```(
+1, 0, 0, 1, 1, 0).
+```
+
+Thus `sum(y == 1)` is the number of positions in the sequence `y`
+which have the value 1.
 
 ```{r}
 M <- 10
