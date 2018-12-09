@@ -1,0 +1,60 @@
+# Multiple Random Variables and Probability Functions
+
+## Multiple random variables
+
+Random variables do not exist in isolation.  We started with a single
+random variable $Y$ representing the result of a single, specific coin
+flip.  Suppose we fairly flip the coin three times?  Then we can have
+random variables $Y_1, Y_2, Y_3$ representing the results of
+each of the flips.  We can assume each flip is independent in that it
+doesn't depend on the result of other flips.  Each of these variables
+$Y_n$ for $n \in 1:3$ has $\mbox{Pr}[Y_n = 1] = 0.5$ and
+$\mbox{Pr}[Y_n = 0] = 0.5$.
+
+We can combine multiple random variables using arithmetic operations.
+We have already seen comparison operators in writing the event $Y =
+1$.  If $Y_1, \ldots, Y_{10}$ are random variables representing ten
+coin flips, then we can define their sum as
+
+$$
+Z = Y_1 + Y_2 + Y_3
+$$
+
+We can simulate values of $Z$ by simulating values of $Y_1, Y_2, Y_3$ and
+adding them.
+
+```
+y1 = uniform_01_rng()
+y2 = uniform_01_rng()
+y3 = uniform_01_rng()
+z = y1 + y2 + y3
+print 'z = ' z
+```
+
+We prefer to write code with loops and use operations on collections,
+such as summation.
+
+```
+for (n in 1:3)
+  y[n] = uniform_01_rng()
+z = sum(y)
+print 'z = ' z
+```
+
+Running this program a few times we get
+
+```{r}
+set.seed(1234)
+sim_z <- function() {
+  y = rbinom(3, 1, 0.5)
+  z = sum(y)
+  printf('z = %d\n', z)
+}
+for (k in 1:5) sim_z()
+```
+
+We can use simulation to evaluate the probability of an outcome that
+combines multiple random variables.  For example, to evaluate
+$\mbox{Pr}[Z = 0]$, we run the simulation many times and count the
+proportion of results that are zero.
+

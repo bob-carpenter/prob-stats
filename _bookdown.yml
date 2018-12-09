@@ -4,5 +4,6 @@ before_chapter_script: "before-chapter.R"
 rmd_files: [
   "index.Rmd",
   "philosophical-prelude.Rmd",
-  "random-variables.Rmd"
+  "random-variables.Rmd",
+  "multivariate-random-variables.Rmd"
 ]
