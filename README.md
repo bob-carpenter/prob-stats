@@ -7,7 +7,9 @@ book.
 * *Prerequisite*:  `pandoc` and `pandoc-citeproc` must be installed on
   the operating system and available on the `PATH`.
 
-## Building the HTML
+## Building the Book
+
+### Building the HTML
 
 
 From either the shell script or R commands, HTML output will be generated in directory `_book`, with top-level page
@@ -37,7 +39,7 @@ $ bookdown::render('index.Rmd')
 Rendering with just `index.Rmd` as an argument defers the style to the `index.Rmd` yaml header.
 
 
-## Building the PDF
+### Building the PDF
 
 *Pre-requisite:* Building the pdf requires `pdflatex` to be installed
   on the operating system and available on the `PATH`.
@@ -71,7 +73,7 @@ $ bookdown::render('index.Rmd', 'tufte_book')
 In this case, we specified the `tufte-book` format in the call to
 `render`, which will override the default specification in `index.Rmd`.
 
-## Note on RStudio
+### Note on RStudio
 
 If you try to build using the `knit` button in RStudio from the
 `index.Rmd` file, you will get the default HTML output because that is
