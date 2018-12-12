@@ -60,8 +60,6 @@ $ ./build-pdf.sh
 
 #### Building PDF from R
 
-#### Building HTML from R
-
 Load the bookdown library, set the working directory to the directory for the repo, then render the book.
 
 ```
