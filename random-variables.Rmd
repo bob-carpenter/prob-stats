@@ -232,7 +232,7 @@ is equal to 1.
 occur = 0
 for (m in 1:M)
   y[m] = uniform_01_rng()
-  occur += occur + (y[m] == 1)
+  occur = occur + (y[m] == 1)
 estimate = occur / M
 print `estimated Pr[Y = 1] = ' estimate
 ```
@@ -263,12 +263,13 @@ then
 y == 2
 ```
 evaluates to
-```(
-1, 0, 0, 1, 1, 0).
+```
+(1, 0, 0, 1, 1, 0).
 ```
 
 Thus `sum(y == 1)` is the number of positions in the sequence `y`
-which have the value 1.
+which have the value 1.  Running the program provides the following
+estimate based on ten simulation draws. 
 
 ```{r}
 M <- 10
@@ -297,7 +298,7 @@ for (n in 1:M) { cat(y_sim[n]); cat(' '); }
 cat('estimated Pr[Y = 1] = ', sum(y_sim) / M)
 ```
 
-That's closer than most of the estimates with only ten draws.  Let's
+That's closer than most of the estimates based on ten simulation draws.  Let's
 try that a few more times without bothering to print all 100 simulated
 values,
 
@@ -320,9 +321,9 @@ for (k in 1:10) {
 ```
 
 Now the estimates are very close to the true probability being
-estimated (0.5).  This raises the questions of how many simulation
-draws we need in order to be confident our estimates are close to the
-values being estimated.
+estimated (i.e., 0.5, because the flip is fair). This raises the
+questions of how many simulation draws we need in order to be
+confident our estimates are close to the values being estimated.
 
 
 
@@ -340,7 +341,26 @@ each $m \in 1:M$.^[See, for example, the quite wonderful little book,
 Bulmer, M.G., 1965. *Principles of Statistics*. Oliver and Boyd,
 Edinburgh.]
 
-```{r echo=FALSE, out.width="80%", fig.cap="Monte Carlo estimate of probability that a coin lands head as a function of the number of simulation draws.  The line at 0.5 marks the true probability."}
+To calculate such a running tally of the estimate at each online, we can do this:
+
+```
+occur = 0
+for (m in 1:M)
+  y[m] = uniform_01_rng(M)
+  occur = occur + (y[m] == 1)
+  estimate[m] = occur / m
+```
+
+Recall that the expression `(y[m] == 1)` evaluates to 1 if the
+condition holds and 0 otherwise. The result of running the program is
+that `estimate[m]` will hold the estimate $\mbox{Pr}[Y = 1]$ after $m$
+simulations.  We can then plot the estimates as a function
+of the number of draws using a line plot to display the trend.
+
+
+```{r echo=FALSE, out.width="80%", fig.cap="Monte Carlo estimate of
+probability that a coin lands head as a function of the number of
+simulation draws.  The line at 0.5 marks the true probability being estimated."}
 set.seed(0)
 library(ggplot2)
 M <- 1e5
@@ -637,53 +657,90 @@ log_abs_err_plot
 ```
 
 The red and blue lines show the linear relationship between the log of
-the number of simulation draws and the log absolute error.  The slope
-of these two lines is $-\frac{1}{2}$.  If we let $\epsilon$ be the
-absolute error and $M$ the number of simulation draws, we see the
-linear relationhip 
+the number of simulation draws and the log absolute error. The slope
+of these two lines is $-\frac{1}{2}$. 
+
+If we let $\epsilon_M$ be the absolute error after $M$ simulation
+draws, the linear relationhip plotted in the figures have the
+form
 
 $$
-\log \epsilon = -1/2 * (\log M) + \mbox{const}
+\log \epsilon_M = -\frac{1}{2} \, \log M + \mbox{const}.
 $$
 
-Going back to the linear scale requires exponentiating both sides of
-the equation and reducing, 
+When writing "const" in a mathematical expression, the presumption is
+that it refers to a constant that does not depend on the free
+variables of interest (here, $M$, the number of simulation draws).
+Ignoring constants lets us focus on the order of the dependency.  The
+red line and blue line have the same slope, but different constants.  
+
+Seeing how this plays out on the linear scale requires exponentiating
+both sides of the equation and reducing,
 
 $$
 \begin{array}{rcl}
-\exp(\log \epsilon)
+\exp(\log \epsilon_M)
 & = &
-\exp( -\frac{1}{2} \times \log M + \mbox{const} )
+\exp( -\frac{1}{2} \, \log M + \mbox{const} )
 \\[6pt]
 %
-\epsilon
+\epsilon_M
 & = &
-\exp( -\frac{1}{2} \times \log M )
+\exp( -\frac{1}{2} \, \log M )
 \times
 \exp(\mbox{const})
 %
 \\[6pt]
-\epsilon
+\epsilon_M
 & = & 
 \exp( \log M )^{-\frac{1}{2}}
 \times
 \exp(\mbox{const})
 \\[6pt]
-\epsilon
+\epsilon_M
 & = &
-\mbox{const} \times M^{-\frac{1}{2}}
+\exp(\mbox{const}) \times M^{-\frac{1}{2}}
 \end{array}
 $$
 
 Dropping the constant, this relationship between the expected absolute
-error $\epsilon$ and the number of simulation draws $M$ may be
-succintly summarized as
+error $\epsilon_M$ after $M$ simulation draws may be succintly
+summarized using proportionality notation,^[In general, we write $$f(x)
+\propto g(x)$$ if there is a positive constant $c$ that does not depend
+on $x$ such that $$f(x) = c \times g(x).$$ For example, $$3x^2 \propto
+9x^2,$$ with $c = \frac{1}{3}$.]
 
 $$
-\epsilon
+\displaystyle
+\epsilon_M
 \ \propto \
 \frac{\displaystyle 1}{\displaystyle \sqrt{M}}.
 $$
 
-This is the main component of the *central limit theorem*, which
-governs the accuracy of almost all simulation-based estimates.
+This is a fundamental result in statistics derived from the 
+*central limit theorem*. The central limit theorem governs the
+accuracy of almost all simulation-based estimates. We will return to a
+proper formulation when we have the scaffolding in place to deal with
+the pesky constant term.
+
+In practice, what does this mean? It means that if we want to get an
+extra decimal place of accuracy in our estimates, we need one hundred
+(100) times as many draws. For example, the plot shows error rates
+bounded by roughly 0.01 with $10\,000$ draws, yielding estimates that
+are very likely to be within $(0.49, 0.51).$ To reduce that likely
+error bound to 0.001, that is, ensuring estimates are very likely in
+$(0.0499, 0.501),$ requires 100 times as many draws (i.e., a whopping
+$1\,000\,000$ draws).^[For some perspective, $10\,000$ is the number
+of at bats in an entire twenty-year career for a baseball player,
+the number of field goal attempts in an entire career of most basketball
+players, and the size of a very large disease study or meta-analysis in
+epidemiology.]
+
+Usually, one hundred draws will provide a good enough estimate of most
+quantities of interest in applied statistics. The variability of the
+estimate based on a single draw depends on the variability of the
+quantity being estimated. One hundred draws reduces the expected
+estimation bound to one tenth of the variability of a single draw.
+Reducing that variability to one hundredth of the variability of a
+single draw would require ten thousand draws. In most applications,
+the extra estimation accuracy is not worth the extra computation.
