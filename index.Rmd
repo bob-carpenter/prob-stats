@@ -1,31 +1,49 @@
 ---
-title: 'Probability and Statistics:<br />a simulation-based introduction'
+title: 'Probability <br /> and Statistics'
+subtitle: 'A simulation-based introduction'
+author: 'Bob Carpenter'
+date: '2018'
 output:
   bookdown::tufte_html_book:
     split_by: chapter
     toc_depth: 1
 ---
 
-# About this Book {-}
+# Preface {-}
 
-This book provides a short, accessible introduction to applied
-probabilistic modeling and statistical inference, with the intention
-of training practitioners to draw sound inferences from noisy
-measurements.^[Application areas include the physical, biological and
-social sciences, engineering, business and finance, education,
-government, and sport---anywhere there is data from which we want to
-draw conclusions or make decisions.]  It differs from other books
-covering the same material in that it
+This book provides a short, accessible introduction to *applied*
+probabilistic modeling and statistical inference.^[Application areas
+include the physical, biological and social sciences, engineering,
+business and finance, education, government, and sport---anywhere
+there is data from which we want to draw conclusions or make
+decisions.]
+
+
+## Goal {-}
+
+After reading this book, you should have a solid grasp of how to draw
+sound inferences from noisy measurements and how to make reasoned
+decisions in the face of uncertainty.
+
+
+## Approach {-}
+
+This book differs from other books covering similar material in that
+it
 
 * is short, top-down, and example-driven;
 * assumes only introductory-level mathematics and
- computation;^[Specifically, some familiarity with integral calculus
- and exposure to basic programming concepts.]
+ computation;^[Specifically, this book assumes some familiarity
+ with algebra, integral calculus, and exposure to basic programming
+ concepts.]
 * develops probability theory and statistical inference through simulation;
 * takes an unapologetically Bayesian approach to modeling and inference;
 * is fully reproducible with open-source code, figures, and text.
 
-*Licensing*: &nbsp; This book is distributed under the [<small>CC
-BY-ND 4.0</small>](https://creativecommons.org/licenses/by-nd/4.0/)
-license.  The accompanying code is distributed under the [<small>BSD
-3</small>-clause](https://opensource.org/licenses/BSD-3-Clause) license.
+## Licensing {-}
+
+The text of this book is distributed under the [<small>CC BY-ND
+4.0</small>](https://creativecommons.org/licenses/by-nd/4.0/) license.
+The accompanying code is distributed under the [<small>BSD
+3</small>-clause](https://opensource.org/licenses/BSD-3-Clause)
+license.

@@ -357,10 +357,8 @@ that `estimate[m]` will hold the estimate $\mbox{Pr}[Y = 1]$ after $m$
 simulations.  We can then plot the estimates as a function
 of the number of draws using a line plot to display the trend.
 
+```{r echo=FALSE, out.width="80%", fig.cap="Monte Carlo estimate of probability that a coin lands head as a function of the number of simulation draws.  The line at 0.5 marks the true probability being estimated."}
 
-```{r echo=FALSE, out.width="80%", fig.cap="Monte Carlo estimate of
-probability that a coin lands head as a function of the number of
-simulation draws.  The line at 0.5 marks the true probability being estimated."}
 set.seed(0)
 library(ggplot2)
 M <- 1e5
@@ -550,7 +548,7 @@ $$
 $$
       
 Thus we can write our simulation-based estimate of the probability
-that a fair coin flip lands heads as
+that a fair coin flip lands heads as^[In general, the way to estimate an event probability $\phi(Y)$ where $\phi$ defines some condition, given simulations $y^{(1)}, \ldots, y^{(M)}$ of $Y$, is as $$\mbox{Pr}[\phi(Y)] = \frac{1}{M} \sum_{m = 1}^M \mathrm{I}[\phi(y^{(m)})].$$]
 
 $$
 \mbox{Pr}[Y = 1]
@@ -628,9 +626,9 @@ Plotting both the number of simulations and the absolute error on the
 log scale reveals the rate at which the error decreases with more
 draws.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, out.width="80%", fig.cap="The log of the absolute error.  With both axes on the log scale, the slope of the relationship between the number of draws and estimation error is revealed. The central limit theorem predicts for each $M$ that 68% of the estimates will be below the blue line and 95% below the red line."}
+```{r echo=FALSE, message=FALSE, warning=FALSE, out.width="80%", fig.cap="The log of the absolute error. With both axes on the log scale, the slope of the relationship between the number of draws and estimation error is revealed. The central limit theorem predicts for each $M$ that $68\\%$ percent of the estimates will be below the blue line and $95\\%$ percent below the red line."}
 fudge <- 1e-5
-x = 0.5 * (1:100)
+x <- 0.5 * (1:100)
 log_abs_err_plot <- ggplot(df2, aes(x = M, y = err_hat_E_Y + fudge, group=r)) +
    geom_line(data = data.frame(x = c(1e4, 1e6),
                                y = 2 * c(.5 / sqrt(1e4), .5 / sqrt(1e6))),
@@ -640,9 +638,6 @@ log_abs_err_plot <- ggplot(df2, aes(x = M, y = err_hat_E_Y + fudge, group=r)) +
                                y = c(.5 / sqrt(1e4), .5 / sqrt(1e6))),
              aes(x = x, y = y, group = NA),			       
              color = "blue") +	     
-#  geom_abline(slope = -0.5,
-#              intercept = 0.005,
-#              color = "red") +
     geom_line(alpha=0.15) +
     scale_x_log10(limits=c(1e4, 1e6),
                   breaks=10^(4:6), 

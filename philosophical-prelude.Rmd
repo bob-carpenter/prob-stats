@@ -1,4 +1,4 @@
-# Philosophical Prelude: What is Probability? {-}
+# What is Probability? {-}
 
 The fundamental nature of probability as used in applied statistical
 inference was described succintly by John Stuart Mill as part of his
