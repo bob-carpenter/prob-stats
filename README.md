@@ -71,4 +71,8 @@ $ bookdown::render('index.Rmd', 'tufte_book')
 In this case, we specified the `tufte-book` format in the call to
 `render`, which will override the default specification in `index.Rmd`.
 
+## Note on RStudio
 
+If you try to build using the `knit` button in RStudio from the
+`index.Rmd` file, you will get the default HTML output because that is
+what is specified in the `YAML` header at the top of `index.Rmd`.
