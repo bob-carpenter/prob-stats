@@ -1,13 +1,11 @@
 # *Probability and Statistics: a simulation-based introduction*  
 A reproducible, open-access book (BSD-3 code, CC-BY ND 4.0 text).
 
-This README explains how to build the HTML and pdf outputs for the
-book.
+
+## Building the Book
 
 * *Prerequisite*:  `pandoc` and `pandoc-citeproc` must be installed on
   the operating system and available on the `PATH`.
-
-## Building the Book
 
 ### Building the HTML
 
