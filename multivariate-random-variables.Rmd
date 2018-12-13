@@ -31,8 +31,9 @@ z = y1 + y2 + y3
 print 'z = ' z
 ```
 
-We prefer to write code with loops and use operations on collections,
-such as summation.
+It is easier and less error prone to collapse similar values into
+arrays and operate on the arrays collectively, or with loops if
+necessary.
 
 ```
 for (n in 1:3)
@@ -55,6 +56,335 @@ for (k in 1:5) sim_z()
 
 We can use simulation to evaluate the probability of an outcome that
 combines multiple random variables.  For example, to evaluate
-$\mbox{Pr}[Z = 0]$, we run the simulation many times and count the
-proportion of results that are zero.
+$\mbox{Pr}[Z = 2]$, we run the simulation many times and count the
+proportion of results that are two.^[The sum is calculated
+using notation `sum(y[m, ])`, which is defined to be
+```
+sum(y[m, ]) = y[m, 1] + ... + y[m, N]
+```
+where `N` is the number of entries in row `m` of the variable `y`.]
+
+```
+for (m in 1:M)
+  for (n in 1:3)
+    y[m, n] = uniform_01_rng()
+  z[m] = sum(y[m, ])
+Pr_is_two = sum(z == 2) / M
+```
+
+As in our other probability estimates, we simulate the variable of
+interest $Z$ a total of $M$ times, yielding $z^{(1)}, \ldots,
+z^{(m)}$.  Here, that requires simulating $y_1^{(m)}, y_2^{(m)},
+y_3^{(m)}$ and adding them for each $z^{(m)}$. We then just count the
+number of times `Z` is simulated to be equal to 2 and divide by the
+number of simulations.
+
+Letting $M = 100\,000$, and running five times, we get
+
+```{r}
+set.seed(1234)
+for (k in 1:5) {
+  M <- 100000
+  is_two <- 0
+  for (m in 1:M)
+    is_two <- is_two + (rbinom(1, 3, 0.5) == 2)
+  printf("Pr[Z == 2] = %4.3f\n", sum(is_two) / M)
+}
+```
+
+Nailing down that final digit is going to require one hundred times as
+many iterations (i.e, $M = 10\,000\,000$ iterations).  Let's see what
+that looks like.
+
+```{r}
+M <- 10000000
+for (k in 1:5)
+  printf("Pr[Z == 2] = %4.3f\n", sum(rbinom(M, 3, 0.5) == 2) / M)
+```
+
+We can do the same for the other numbers, to get a complete picture of
+taking the probability of each number of heads in separate coin flips.
+
+```{r}
+M <- 10000000
+for (z in 0:3)
+  printf("Pr[Z == %d] = %4.3f\n",
+         z,
+	 sum(rbinom(M, 3, 0.5) == z) / M)
+```
+
+What if we flip four coins instead of three?
+
+```{r}
+M <- 10000000
+for (z in 0:4)
+  printf("Pr[Z == %d] = %4.3f\n",
+         z,
+	 sum(rbinom(M, 4, 0.5) == z) / M)
+```
+
+## Discrete random variables
+
+So far, we have only considered random numbers that take a finite
+number of integer values.  A random variable that only takes values in
+the integers, i.e., values in
+
+$$
+\mathbb{Z} = \ldots -2, -1, 0, 1, 2, \ldots
+$$
+
+is said to be a *discrete random variable.*^[In general, any countable
+set of numerical values could be used as values of a discrete random
+variable.  A set of values is *countable* if each of its members can
+be assigned a unique counting number in $\mathbb{N} = 0, 1, 2,
+\ldots$.  The integers $\mathbb{Z}$ can be mapped to natural numbers
+$\mathbb{N}$ by interleaving, $$\begin{array}{rcl}\mathbb{Z} & &
+\mathbb{N} \\ \hline 0 & \mapsto & 0 \\
+-1 & \mapsto & 1 \\ 1 & \mapsto & 2 \\ -2 & \mapsto &3 \\ 2 & \mapsto
+& 4 \\ & \vdots & \end{array}$$]
+
+## Probability mass functions
+
+It's going to be convenient to have a function that maps each possible
+outcome in a variable to its probability.  In general, this will be
+possible if and only if the variable is discrete, as defined in the
+previous section.
+
+For example, if we reconsider $Z = Y_1 + \cdots Y_4$, the number of
+heads in four separate coin flips, we can define a function^[We
+implicitly assume that functions return zero for arguments not listed.]
+
+$$
+\begin{array}{rclll}
+p_Z(0) & = & 1/16 & & \mathrm{TTTT}
+\\
+p_Z(1) & = & 4/16 & & \mathrm{HTTT, THTT, TTHT, TTTH}
+\\
+p_Z(2) & = & 6/16 & & \mathrm{HHTT, HTHT, HTTH, THHT, THTH, TTTH}
+\\
+p_Z(3) & = & 4/16 & & \mathrm{HHHT, HHTH, HTHH, THHH}
+\\
+p_Z(4) & = & 1/16 & & \mathrm{HHHH}
+\end{array}
+$$
+
+There are sixteen possible outcomes of flipping four coins.  Because
+the flips are separate and fair, each possible outcome is equally
+likely.  The sequences corresponding to each count of heads (i.e.,
+value of $Z$) are recorded in the rightmost columns.  The
+probabilities are derived by dividing the number of ways a value for
+$Z$ can arise by the number of possible outcomes.
+
+This function $p_Z$ was constructed to map a value $u$ for $Z$ to the
+event probability that $Z = u$,^[Conventionally, this is written as
+$$p_Z(z) = \mbox{Pr}[Z = z],$$ but that can be confusing with upper
+case $Z$ denoting a random variable and lower case $z$ denoting an
+ordinary variable.]
+
+$$
+p_Z(u) = \mbox{Pr}[Z = u].
+$$
+
+A function defined as above is said to be the *probability mass
+function* of the random variable $Z$.  Every discrete random variable has
+a unique probability mass function.
+
+Probablity mass functions represent probabilities of a discrete set of
+outcomes.  The sum of all such probabilities must be one because at
+least one of the outcomes must occur.^[More formally, if $Y$ is a
+discrete random variable, then $$\sum_{u \in Y} \, p_Y(u) = 1,$$ where $u
+\in Y$ is meant to indicate the summation is over all possible values
+of $Y$.  We are going to start writing this with the standard
+overloading of lower and upper case $Y$ as $$\sum_{y \in Y} \, p_Y(y) = 1.$$]
+
+With large numbers of counts based on simulation, we can more readily
+apprehend what is going on with a plot.  Discrete simulations are
+typically plotted using bar plots, where the outcomes are arrayed on
+the $x$ axis with a vertical bar over each one whose height is
+proportional to the frequency of that outcome.
+
+```{r fig.cap="Plot of $M = 100\\,000$ simulations of the probability mass function of a random variable defined as the number of heads in ten specific coin flips."}
+
+set.seed(1234)
+M <- 100000
+u <- rbinom(M, 10, 0.5)
+x <- 0:10
+y <- rep(NA, 11)
+for (n in 0:10)
+  y[n + 1] <- sum(u == n)
+bar_plot <-
+  ggplot(data.frame(Z = x, count = y), aes(x = Z, y = count)) +
+  geom_bar(stat = "identity", colour = "black", fill="#F8F8F0") +
+  scale_y_continuous(breaks = c(0, 10000, 20000, 30000), labels =
+  c(0, 10000, 20000, 30000)) +
+  scale_x_continuous(breaks = c(0, 2, 4, 6, 8, 10),
+                     labels = c(0, 2, 4, 6, 8, 10)) +
+  ggtheme_tufte()
+bar_plot
+```
+
+The actual frequencies are not relevant, only the relative sizes.
+A simple probability estimate from simulation provides a probability
+for each outcome proportional to its height.^[And proportional to its
+area because the bars are of equal width.]
+
+This plot can easily be repeated to see what happens as the number of
+bins grows.
+
+```{r out.width='80%', fig.cap="Plot of $M = 1\\,000\\,000$ simulations of a variable $Z$ representing the number of heads in $N$ coin flips.  Each plot represents a different $N$.  Because the bars are the same width and the $x$ axes are scaled to the same range in all plots, the total length of all bars laid end to end is the same in each plot;  similarly, the total area of the bars in each plot is the same."}
+
+set.seed(1234)
+df <- data.frame()
+for (N in c(5, 10, 15, 20, 25, 30)) {
+  M <- 1000000
+  u <- rbinom(M, N, 0.5)
+  x <- 0:N
+  y <- rep(NA, N + 1)
+  for (n in 0:N)
+    y[n + 1] <- sum(u == n)
+  df <- rbind(df, list(N = rep(N, N + 1), Z = x, count = y))
+}
+bar_plot <-
+  ggplot(df, aes(x = Z, y = count)) +
+  geom_bar(stat = "identity", colour = "black", fill = "#F8F8F0") +
+  facet_wrap("N", labeller = labeller(N = label_both)) +
+  scale_x_continuous(breaks = c(0, 10, 20, 30), labels = c(0, 10, 20, 30)) + 
+  scale_y_continuous(breaks = c(), labels = c()) +
+  ggtheme_tufte() +
+  theme(panel.spacing.x = unit(4, "lines")) +
+  theme(panel.spacing.y = unit(2, "lines"))
+bar_plot
+```
+
+## Infinite discrete random variables
+
+Consider an experiment in which a coin is tossed until a heads appears
+Let the random variable $U$ be the number of tosses that came up tails
+before the first head comes up.  The legal sequences are H (0 tails),
+TH (1 tails), TTH (2 tails), and so on.  There is no upper limit to
+how many tails may appear before the first heads.
+
+Here's some code to create $M$ simulations of the variable $U$.^[This
+code uses a while loop, which repeats until its condition becomes
+false and just compares the output of the random number generator
+directly rather than assigning to an intermediate value.  We have also
+introduced the increment operator `+=`, which adds the value of the
+right hand side to the variable on the left hand side.]
+
+```
+for (m in 1:M)
+  u[m] = 0
+  while (uniform_01_rng() == 0)
+    u[m] += 1
+```
+
+Let's see what we get with $M = 50$ simulations of $U$.
+
+```{r}
+sim_u <- function() {
+  u <- 0
+  while (rbinom(1, 1, 0.5) == 0)
+    u <- u + 1
+  u
+}
+set.seed(1234)
+for (m1 in 1:5) {
+  for (m2 in 1:10)
+    printf("%4d", sim_u())
+  printf("\n")
+}  
+```
+
+It's very hard to discern a pattern here.  There are a lot of zero
+values, but also some extremely high values.   For cases like these,
+we can use a bar plot to plot the values.
+
+```{r fig.cap="Frequency of outcomes in $10\\,000$ simulation draws of $U$, the number of tails seen before a head in a coin-tossing experiment."}
+set.seed(1234)
+M <- 10000
+u <- rep(NA, M)
+for (m in 1:M)
+  u[m] <- sim_u()
+x <- 0:max(u)
+y <- rep(NA, max(u) + 1)
+for (n in 0:max(u))
+  y[n + 1] <- sum(u == n)
+bar_plot <-
+  ggplot(data.frame(U = x, count = y), aes(x = U, y = count)) +
+  geom_bar(stat = "identity", colour = "black", fill = "#F8F8F0") +
+  scale_x_continuous(breaks = c(0:12), labels = c(0:12)) +
+  scale_y_continuous(breaks = c(1000, 2000, 3000, 4000, 5000),
+                     labels = c(1000, 2000, 3000, 4000, 5000)) +
+  ggtheme_tufte()
+bar_plot
+```
+
+The $x$-axis represents the value of $U$ and the $y$-axis the number
+of times that value arose in the simulation.^[Despite $U$ having
+infinitely many possible values, it will only take on finitely many of
+them in a finite sample.]  Each additional tails result seems to cut
+the probability of occurrence in half result seems to have about half
+the probability of the previous one.  This is what we should expect
+because each coin toss brings a 50% probability of a tails
+result.  This exponential decay^[Exponential decay means each
+additional outcome is only a fraction as likely as the previous one.]
+in the counts with the number of tails thrown is more obvious when
+plotted on the log scale.
+
+```{r fig.cap="Frequency of outcomes in $10\\,000$ simulation draws of $U$, the number of tails seen before a head in a coin-tossing experiment, this time with the outcome count on the log scale to illustrate the exponentially decreasing probabilities of each successive number of tails."}
+
+set.seed(1234)
+M <- 10000
+u <- rep(NA, M)
+for (m in 1:M)
+  u[m] <- sim_u()
+x <- 0:max(u)
+y <- rep(NA, max(u) + 1)
+for (n in 0:max(u))
+  y[n + 1] <- sum(u == n)
+log_bar_plot <-
+  ggplot(data.frame(U = x, count = y), aes(U, count)) +
+  geom_bar(stat = "identity", colour = "black", fill = "#F8F8F0") +
+  scale_x_continuous(breaks = c(0:12), labels = c(0:12)) +
+  scale_y_log10(breaks = c(8, 40, 200, 1000, 5000),
+                labels = c(8, 40, 200, 1000, 5000)) +
+  ggtheme_tufte()
+log_bar_plot
+```
+
+There is a 50% probability that the first toss is heads, yielding a
+sequence of zero tails, and $U = 0$.  Each successive number of tails
+is half as likely as the previous, because another tail will have to
+be thrown, which has a 50% probability.^[In symbols,
+$$
+\mbox{Pr}[U = n + 1]
+\ = \
+\frac{1}{2} \mbox{Pr}[U = n].
+$$
+]
+
+Thus the overall probability mass function for $U$ is^[An elementary
+result of calculus is that $$\sum_{n \in \mathbb{N}}
+\frac{1}{2^{n + 1}} \ = \ \frac{1}{2} + \frac{1}{4} + \frac{1}{8} +
+\frac{1}{16} + \cdots \ = \ 1.$$]
+
+$$
+\begin{array}{rclcl}
+p_U(0) & = & \frac{1}{2} & = & \frac{1}{2}
+\\
+p_U(1) & = &  \frac{1}{2} \times \frac{1}{2} & = & \frac{1}{4}
+\\
+p_U(2) & = & \frac{1}{2} \times \frac{1}{2} \times \frac{1}{2} & = & \frac{1}{8}
+\\
+& \vdots &
+\\
+p_U(u) & = & \underbrace{\frac{1}{2} \times
+                         \cdots \times \frac{1}{2}}_{u + 1 \ \mathrm{times}}
+& = &
+\left( \frac{1}{2} \right)^{u + 1}
+\\
+& \vdots &
+\end{array}
+$$
+
 
