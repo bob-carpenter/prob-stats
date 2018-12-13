@@ -108,7 +108,7 @@ M <- 10000000
 for (z in 0:3)
   printf("Pr[Z == %d] = %4.3f\n",
          z,
-	 sum(rbinom(M, 3, 0.5) == z) / M)
+         sum(rbinom(M, 3, 0.5) == z) / M)
 ```
 
 What if we flip four coins instead of three?
@@ -118,7 +118,7 @@ M <- 10000000
 for (z in 0:4)
   printf("Pr[Z == %d] = %4.3f\n",
          z,
-	 sum(rbinom(M, 4, 0.5) == z) / M)
+         sum(rbinom(M, 4, 0.5) == z) / M)
 ```
 
 ## Discrete random variables
@@ -253,6 +253,214 @@ bar_plot <-
   theme(panel.spacing.y = unit(2, "lines"))
 bar_plot
 ```
+
+## Dice
+
+Let $Y$ be a random variable representing a fair throw of a six-sided
+die. We can describe this variable easily through it's probability
+mass function, which is uniform (i.e., assigns each possible outcome
+the same probability).
+
+$$
+p_Y(y) \ = \
+\begin{cases}
+\frac{1}{6} & \mbox{if} \ y \in 1:6
+\\[4pt]
+0 & \mbox{otherwise}
+\end{cases}
+$$
+
+Games like *Monopoly* use a pair of six-sided dice and consider the sum of the results. That is, $Y_1$ and $Y_2$ are fair six-sided die rolls and $Z = Y_1 + Y_2$ is the result. Games like *Dungeons \& Dragons* use a trio of six-sided dice and consider the sum of the results. In that scenario, $Y_1, Y_2, Y_3$ are the results of fair six-sided die rolls and $Z = Y_1 + Y_2 + Y_3$. Dungeons and Dragons also uses four six-sided die of which the best 3 are summed to produce a result. Let's simulate some of these two approaches dice and see what the results look like based on $M = 100\,000$ simulations.^[The simulations are identical to before, only using `1:6` in the range of uniform variables.]
+
+```{r fig.cap="Estimated $p_Y(y)$ for case of $Y$ being the sum of three six-sided dice (3d6) or the sum of the highest three of four six-sided dice (3 of 4d6)."}
+
+M <- 100000
+three_d6 <- sample(6, size = M, replace=TRUE) +
+            sample(6, size = M, replace=TRUE) +
+            sample(6, size = M, replace=TRUE)
+three_of_4d6 <- rep(NA, M)
+for (m in 1:M)
+  three_of_4d6[m] <- sum(sort(sample(6, size = 4, replace=TRUE))[2:4])
+
+tot_3d6 <- rep(NA, 16)
+tot_3_of_4d6 <- rep(NA, 16)
+for (n in 3:18) {
+  tot_3d6[n-2] = sum(three_d6 == n)
+  tot_3_of_4d6[n-2] = sum(three_of_4d6 == n)
+}
+
+att_dice_df <- data.frame(probability = c(tot_3d6 / M, tot_3_of_4d6 / M),
+                          roll = c(3:18, 3:18),
+                          dice = c(rep("3d6", 16), rep("3 of 4d6", 16)))
+att_dice_plot <-
+  ggplot(att_dice_df, aes(x = roll, y = probability)) +
+  geom_bar(stat = "identity", colour = "black", fill = "#F8F8F0") +
+  facet_wrap("dice", labeller = labeller(dice = label_both)) +
+  scale_x_continuous(name = "y",
+                     breaks = c(3, 6, 9, 12, 15, 18),
+                     labels = c(3, 6, 9, 12, 15, 18)) +
+  scale_y_continuous(name = expression(paste("estimated ", p[Y](y)))) +
+  ggtheme_tufte() +
+  theme(panel.spacing = unit(2, "lines"))
+att_dice_plot
+```
+
+Dungeons and Dragons also uses 20-sided dice.^[In physical games, an
+icosahedral die is used. The icosahedron is a regular polyhedron with
+20 equilateral triangular faces, giving it the largest number of faces
+among the five Platonic solids.] The fifth edition of the game
+introduced the notion of *advantage*, where two 20-sided dice are
+rolled and the higher result retained, as well as *disadvantage*,
+which retains the lower result of the two dice. Here's a simulation
+using $M = 100\,000$. The counts are converted to estimated
+probabilities on the vertical axis in the usual way by dividing by
+$M$.
+
+```{r fig.cap="Estimated $p_Y(y)$ for case of $Y$ being a single twenty-sided die (d20), the higher two twenty-sided die rolls (max 2d20), and the lower of two 20-sided die rolls (min 2d20)."}
+
+M <- 100000
+d20 <- sample(20, size = M, replace=TRUE)
+max_2d20 <- rep(NA, M)
+min_2d20 <- rep(NA, M)
+for (m in 1:M) {
+  max_2d20[m] <- max(sample(20, size = 2, replace=TRUE))
+  min_2d20[m] <- min(sample(20, size = 2, replace=TRUE))
+}
+
+tot_d20 <- rep(NA, 20)
+tot_max_2d20 <- rep(NA, 20)
+tot_min_2d20 <- rep(NA, 20)
+
+for (n in 1:20) {
+  tot_d20[n] = sum(d20 == n)
+  tot_max_2d20[n] = sum(max_2d20 == n)
+  tot_min_2d20[n] = sum(min_2d20 == n)
+}
+
+att_d20_df <- data.frame(probability = c(tot_d20 / M,
+                                         tot_max_2d20 / M,
+                                         tot_min_2d20 / M),
+                          roll = c(1:20, 1:20, 1:20),
+                          dice = c(rep("1d20", 20),
+                                   rep("max 2d20", 20),
+                                   rep("min 2d20", 20)))
+
+att_d20_plot <-
+  ggplot(att_d20_df, aes(x = roll, y = probability)) +
+  geom_bar(stat = "identity", colour = "black", fill = "#F8F8F0") +
+  facet_wrap("dice", labeller = labeller(dice = label_both)) +
+  scale_x_continuous(name = "y",
+                     breaks = c(1, 5, 10, 15, 20),
+                     labels = c(1, 5, 10, 15, 20)) +
+  scale_y_continuous(name = expression(paste("estimated ", p[Y](y)))) +
+  ggtheme_tufte() +
+  theme(panel.spacing = unit(2, "lines"))
+
+att_d20_plot
+```
+
+
+
+The most likely roll is a 20 when taking the best of two rolls and the
+most likely roll is 1 when taking the worst of two rolls.^[The chance
+for a 20 when taking the best of two 20-sided die rolls is $1 -
+\left(\frac{19}{20}\right)^2 \approx 0.098$; the chance of rolling 1
+is $\left(\frac{1}{20}\right)^2 = 0.0025$. The probabilities are
+reversed when taking the worst of two 20-sided die rolls.] The min and
+max plots are mirror images of each other as is to be expected by the
+consecutive nature of the numbers and the min/max operations.
+
+## Cumulative distribution functions
+
+In Dungeons \& Dragons, the players are often concerned with
+probabilities of rolling higher than a given number (or equivalently,
+rolling lower than a given number. For example, they may need to roll
+a 15 to sneak by an orc. Such probabilities are conventionally given
+in the form of cumulative distribution functions. If $Y$ is a random
+variable, its *cumulative distribution function* $F_Y$ is defined by
+
+$$
+F_Y(y) = \mbox{Pr}[Y \leq y].
+$$
+
+The event probability on the right is calculated the same way as
+always in a simulation, by counting the number of simulated values in
+which the condition holds and dividing by the number of simulations.
+
+We can plot the cumulative distribution function for the straight
+twenty-sided die roll and the rolls with advantage (best of two rolls)
+or disadvantage (worst of two rolls).  Here's the result using the
+same simulations as in the last plot, with $M = 100\,000$.
+
+```{r fig.cap="Cumulative distribution function for three variables corresponding to rolling a single 20-sided die, or rolling two 20-sided dice and taking the best or worst result."}
+cum_d20 <- cumsum(tot_d20)
+cum_max_2d20 <- cumsum(tot_max_2d20)
+cum_min_2d20 <- cumsum(tot_min_2d20)
+
+cum_d20_df <- data.frame(probability = c(cum_d20 / M,
+                                         cum_max_2d20 / M,
+                                         cum_min_2d20 / M),
+                          roll = c(1:20, 1:20, 1:20),
+                          dice = c(rep("1d20", 20),
+                                   rep("max 2d20", 20),
+                                   rep("min 2d20", 20)))
+
+cum_d20_plot <-
+  ggplot(cum_d20_df, aes(x = roll, y = probability)) +
+  geom_point() +
+  facet_wrap("dice", labeller = labeller(dice = label_both)) +
+  scale_x_continuous(name = "y",
+                     breaks = c(1, 5, 10, 15, 20),
+                     labels = c(1, 5, 10, 15, 20)) +
+  scale_y_continuous(name = expression(paste("estimated ", F[Y](y)))) +
+  ggtheme_tufte() +
+  theme(panel.spacing = unit(2, "lines"))
+cum_d20_plot
+```
+
+The plot is rendered as a line plot, though this isn't quite sensible
+for discrete distributions---the intermediate values are not real.
+It's easy to see that there's a 50% chance of rolling 5 or lower in a
+single die throw; with the best of 2 it's more like a 20% chance and
+with the worst of 2, it's more like a 75% chance.
+
+Usually in Dungeons \& Dragons, players care about rolling more than a
+given number, not less, or they'd have to be subtracting all the time.
+This is where the complementary cumulative distribution function comes
+in.  For a random variable $Y$, the *complementary cumulative
+distribution function* is
+
+$$
+F^{\complement}_Y(y) \ = \ 1 - F_Y(y) \ = \ \mbox{Pr}[Y > y].
+$$
+
+It's easier to see with a plot how it relates to the usual cumulative
+distribution function.
+
+```{r, fig.cap = "Complementary cumulative distributions for a single 20-sided die, the best of two dice, and the worst of two dice."}
+ccum_d20_df <- data.frame(probability = c(1 - cum_d20 / M,
+                                          1 - cum_max_2d20 / M,
+                                          1 - cum_min_2d20 / M),
+                          roll = c(1:20, 1:20, 1:20),
+                          dice = c(rep("1d20", 20),
+                                   rep("max 2d20", 20),
+                                   rep("min 2d20", 20)))
+
+ccum_d20_plot <-
+  ggplot(ccum_d20_df, aes(x = roll, y = probability)) +
+  geom_point() +
+  facet_wrap("dice", labeller = labeller(dice = label_both)) +
+  scale_x_continuous(name = "y",
+                     breaks = c(1, 5, 10, 15, 20),
+                     labels = c(1, 5, 10, 15, 20)) +
+  scale_y_continuous(name = expression(paste("estimated ",
+                                             F[Y]^"C", "(y)"))) +
+  ggtheme_tufte() +
+  theme(panel.spacing = unit(2, "lines"))
+ccum_d20_plot
+```
+
+
 
 ## Infinite discrete random variables
 

@@ -1,4 +1,5 @@
 ---
+knit: 'bookdown::render_book("index.Rmd", "tufte_html_book")'
 title: 'Probability <br /> and Statistics'
 subtitle: 'A simulation-based introduction'
 author: 'Bob Carpenter'
@@ -7,6 +8,13 @@ output:
   bookdown::tufte_html_book:
     split_by: chapter
     toc_depth: 1
+  bookdown::tufte_book:
+    latex_engine: "pdflatex"
+    includes:
+      in_header: header.tex
+    documentclass: book
+    classoption: oneside, openany
+fontsize: 10pt
 ---
 
 # Preface {-}
