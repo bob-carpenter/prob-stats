@@ -55,14 +55,12 @@ for (k in 1:5) sim_z()
 ```
 
 We can use simulation to evaluate the probability of an outcome that
-combines multiple random variables.  For example, to evaluate
+combines multiple random variables. For example, to evaluate
 $\mbox{Pr}[Z = 2]$, we run the simulation many times and count the
-proportion of results that are two.^[The sum is calculated
-using notation `sum(y[m, ])`, which is defined to be
-```
-sum(y[m, ]) = y[m, 1] + ... + y[m, N]
-```
-where `N` is the number of entries in row `m` of the variable `y`.]
+proportion of results that are two.^[The sum is calculated using
+notation `sum(y[m, ])`, which is defined to be `sum(y[m, ]) = y[m, 1]
++ ... + y[m, N],` where `N` is the number of entries in row `m` of the
+variable `y`.]
 
 ```
 for (m in 1:M)
@@ -248,7 +246,7 @@ bar_plot <-
   ggplot(df, aes(x = Z, y = count)) +
   geom_bar(stat = "identity", colour = "black", fill = "#F8F8F0") +
   facet_wrap("N", labeller = labeller(N = label_both)) +
-  scale_x_continuous(breaks = c(0, 10, 20, 30), labels = c(0, 10, 20, 30)) + 
+  scale_x_continuous(breaks = c(0, 10, 20, 30), labels = c(0, 10, 20, 30)) +
   scale_y_continuous(breaks = c(), labels = c()) +
   ggtheme_tufte() +
   theme(panel.spacing.x = unit(4, "lines")) +
@@ -292,7 +290,7 @@ for (m1 in 1:5) {
   for (m2 in 1:10)
     printf("%4d", sim_u())
   printf("\n")
-}  
+}
 ```
 
 It's very hard to discern a pattern here.  There are a lot of zero
@@ -388,3 +386,76 @@ p_U(u) & = & \underbrace{\frac{1}{2} \times
 $$
 
 
+## The Chevalier de Méré's challenge
+
+Antoine Gombaud, the Chevalier de Méré, challenged Blaise Pascal and
+Pierre de Fermat to calculate the probability of at least one
+double-six occuring in 24 fair throws of a pair of six-sided dice. We
+can evaluate this by simulation directly.^[Working out the example
+analytically, there is a $\frac{35}{36}$ chance of *not* throwing
+double six with two six-sided dice, and so $\left( \frac{35}{36}
+\right)^{24}$ is the probability of *not* throwing at least one double
+six in 24 throws, and so $$1 - \left( \frac{35}{36} \right)^{24}
+\approx 0.491$$ is the probability of throwing at least one double-six
+in 24 fair throws of a pair of six-sided dice.]
+
+To represent the problem in probabilistic notation, we introduce a
+random variable $Y_{1, k} \in 1:6$ and $Y_{2, k} \in 1:6$ for each of
+the two dice in each of the $k \in 1:24$ throws. Define the outcome of
+the game as the random variable
+
+$$
+Z \ = \
+\begin{cases}
+1 \ \ \mbox{if there is a} \ k \ \mbox{such that} \ Y_{1,k} = Y_{2,k} = 6,
+\ \mbox{and}
+\\[4pt]
+0 \ \ \mbox{otherwise}
+\end{cases}
+$$
+
+That is, $Z = 1$ if there is at least one double-six in the 24 throws.
+The Chevalier de Méré was inquiring about the the value of the event
+probability $\mbox{Pr}[Z = 1]$, i.e., the chance of winning by
+throwing at least one double six in 24 fair throws of a pair of dice.
+
+We will introduce variables for the full range of simulated random
+variable values and simulation indexes in the following program.^[The
+simulation indexes use parentheses rather than the traditional
+brackets and come first so that, e.g., the simulated value `y(m)` will
+consist of a $2 \times 24$ collection of values, matching the size of
+$Y$.]
+
+```
+for (m in 1:M)
+  for (k in 1:24)
+    y(m)[1, k] = uniform_rng(1:6)
+    y(m)[2, k] = uniform_rng(1:6)
+    z(m)[k] = y(m)[1, k] + y(m)[2, k]
+  success(m) = (sum(z(m) == 12) > 0)
+print 'Pr[double-six in 24 throws] = ' sum(success) / M
+```
+
+Let's run that for $M = 100\,000$ simulations a few times and see
+what the estimated event probabilities look like.
+
+```{r}
+set.seed(1234)
+M <- 1e5
+for (k in 1:5) {
+  successes = 0
+  for (m in 1:M) {
+    z <- sample(6, size = 24, replace = TRUE) +
+         sample(6, size = 24, replace = TRUE)
+    if (sum(z == 12) > 0) successes <- successes + 1
+  }
+  printf('Pr[double-six in 24 throws] = %4.3f\n', successes / M)
+}
+```
+
+This shows the result to be around 0.49. The Chevalier de Méré
+should not bet that he'll roll at least one pair of sixes in 24
+throws! To nail down the last digit, we could use $10\,000\,000$
+simulations rather than $100\,000$. As shown in the previous note,
+calculating the result analytically yields 0.491 to three decimal
+places, which is in agreement with the simulation-based estimates.
