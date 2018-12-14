@@ -1,6 +1,9 @@
 ---
 knit: 'bookdown::render_book("index.Rmd", "tufte_html_book")'
-title: 'Probability <br /> and Statistics'
+title: |
+  | Probability
+  | and Statistics
+      
 subtitle: 'A simulation-based introduction'
 author: 'Bob Carpenter'
 date: '2018'

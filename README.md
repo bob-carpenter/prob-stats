@@ -65,11 +65,12 @@ Load the bookdown library, set the working directory to the directory for the re
 ```
 $ library(bookdown)
 $ setwd('prob-stats')
-$ bookdown::render('index.Rmd', 'tufte_book')
+$ bookdown::render_book('index.Rmd', 'tufte_book2')
 ```
 
-In this case, we specified the `tufte-book` format in the call to
-`render`, which will override the default specification in `index.Rmd`.
+In this case, we specified the `tufte_book2` format in the call to
+`render`, which will override the default specification in
+`index.Rmd`.  The PDF file will be in file `_book/_main.pdf`.
 
 ### Note on RStudio
 

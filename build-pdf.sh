@@ -1,3 +1,3 @@
 #!/bin/sh
 
-Rscript -e "bookdown::render_book('index.Rmd', 'tufte_book')"
+Rscript -e "bookdown::render_book('index.Rmd', output_format='tufte::tufte_book')"
