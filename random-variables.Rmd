@@ -201,7 +201,7 @@ for (n in 1:10) { cat(rbinom(1, 1, 0.5)); cat(' ') }
 Resetting the seed in the second case causes exactly the same ten
 pseudorandom numbers to be generated a second time.  Every
 well-written pseudorandom number generator and piece of simulation
-code should allow the seed to be set manually to ensure reproduciblity
+code should allow the seed to be set manually to ensure reproducibility
 of results.^[Replicability of results with different seeds is a
 desirable, but stricter condition.]
 
@@ -411,7 +411,7 @@ plot
 Plotting the progression of multiple simulations demonstrates the
 trend in errors.
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, out.width="80%", fig.cap="One hundred replicates of the previous plot overlaid (starting from one hundred tosss).  Each line is the sequence of estimates of the probability that a fair coin toss lands head as a function of the number of simulation draws.  The line at 0.5 marks the true probability which is being estimated. The overall reduction in estimation noise with increasing numbers of draws is illustrated by the decreasing band around the true value."}
+```{r echo=FALSE, message=FALSE, warning=FALSE, out.width="80%", fig.cap="One hundred replicates of the previous plot overlaid (starting from one hundred tosses).  Each line is the sequence of estimates of the probability that a fair coin toss lands head as a function of the number of simulation draws.  The line at 0.5 marks the true probability which is being estimated. The overall reduction in estimation noise with increasing numbers of draws is illustrated by the decreasing band around the true value."}
 library(ggplot2)
 set.seed(0)
 M_max <- 1e4
@@ -517,7 +517,7 @@ bracket notation is used for functions when the argument is itself a
 function.  For example, we write $\mbox{Pr}[Y > 0]$ because $Y$ is a
 random variable, which is modeled as a function.  We also write
 $\mathrm{I}[x^2 + y^2 = 1]$ because the standard bound variables $x$
-and $y$ are functions from contexts defining variable values.
+and $y$ are functions from contexts defining variable values.]
 
 Now we can write out the formula for our estimate of $\mbox{Pr}[Y =
 1]$ after $M$ draws,
@@ -656,7 +656,7 @@ the number of simulation draws and the log absolute error. The slope
 of these two lines is $-\frac{1}{2}$. 
 
 If we let $\epsilon_M$ be the absolute error after $M$ simulation
-draws, the linear relationhip plotted in the figures have the
+draws, the linear relationship plotted in the figures have the
 form
 
 $$
@@ -699,7 +699,7 @@ $$
 $$
 
 Dropping the constant, this relationship between the expected absolute
-error $\epsilon_M$ after $M$ simulation draws may be succintly
+error $\epsilon_M$ after $M$ simulation draws may be succinctly
 summarized using proportionality notation,^[In general, we write $$f(x)
 \propto g(x)$$ if there is a positive constant $c$ that does not depend
 on $x$ such that $$f(x) = c \times g(x).$$ For example, $$3x^2 \propto
