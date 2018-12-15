@@ -1,0 +1,75 @@
+# Joint, Marginal, and Conditional Distributions
+
+## Diagnostic Accuracy
+
+Consider a patient who may or may not have a disease, represented by
+the variable $Z$.  Suppose there is a medical diagnostic test (e.g.,
+an exam by a doctor, a mammogram, a blood test, etc.) such that if $Z
+= 1$ (the subject carries the disease), then the test result is $Y =
+1$ (the subject tests positive) with a $\theta$ probability and $Y =
+0$ with probability $1 - \theta$.  On the other hand if $Z = 0$ (the
+subject does not have the disease), then $Y = 0$ (the subject tests
+negative) with a probability of $\phi$ and $Y = 1$ with probability $1
+- \phi$.  Most diagnostic tests are such that $\theta \neq \phi$.
+
+Now let's consider the case of a mammogram test for breast cancer, and
+suppose $\theta = 0.77$ and $\phi = 0.91$.^[Ohuchi, N., Suzuki, A.,
+Sobue, T., Kawai, M., Yamamoto, S., Zheng, Y.F., Shiono, Y.N., Saito,
+H., Kuriyama, S., Tohno, E. and Endo, T., 2016. Sensitivity and
+specificity of mammography and adjunctive ultrasonography to screen
+for breast cancer in the Japan Strategic Anti-cancer Randomized Trial
+(J-START): a randomised controlled trial. *The Lancet*, 387(10016),
+pp.341--348.]  Prevalence in the population of 40--44 year olds is
+roughly 0.12% (125 in $100\,000$).^[American Cancer Society.  2017.
+[Breast Cancer Facts & Figures 2017--2018](https://www.cancer.org/content/dam/cancer-org/research/cancer-facts-and-statistics/breast-cancer-facts-and-figures/breast-cancer-facts-and-figures-2017-2018.pdf).]
+
+Now we have two random variables, $Y$ and $Z$.  We can use simulation
+to fill out a table of probability estimates for all possible
+combinations of $Y$ and $Z$.
+
+```
+count[0:1, 0:1] = 0
+for (m in 1:M) {
+  y = bernoulli_rng(0.0012)
+  z = bernoulli_rng(y == 1 ? 0.77 : 1 - 0.91)
+  count[y, z] += 1
+}
+print 'Pr[Y = 0, Z = 0] = ' count[0, 0] / M
+...
+```
+
+Let's see what we get with $M = 1\,000\,000$.
+
+```{r}
+M <- 1e6
+count <- array(rep(0, 4), c(2, 2))
+for (m in 1:M) {
+  y <- rbinom(1, 1, 0.0012);
+  if (y == 1) z <- rbinom(1, 1, 0.77)
+  if (y == 0) z <- rbinom(1, 1, 1 - 0.91)
+  count[y + 1, z + 1] <- count[y + 1, z + 1] + 1
+}
+for (i in 1:2)
+  for (j in 1:2)
+    printf('Pr[Y = %d, Z = %d] = %5.4f\n',
+           i - 1, j - 1, count[i, j] / M)
+```
+
+$$
+\begin{array}{rcll}
+p_{Z, Y}(0, 0) & = & (1 - 0.0012) \times 0.91 & = & 0.9089
+\\
+p_{Z, Y}(0, 1) & = & (1 - 0.0012) \times (1 - 0.91) & = & 0.0899
+\\
+p_{Z, Y}(1, 0) & = & 0.0012 \times (1 - 0.77) & = & 0.0003
+\\
+p_{Z, Y}(1, 1) & = & 0.0012 \times 0.77 & = & 0.0009
+\end{array}
+$$
+
+
+Suppose we have a sequence of random variables $Y_1, \ldots, Y_N$
+representing results at a slot machine.  If there is a 1% chance of
+winning in any given pull, what is the chance of winning twice in ten
+pulls.  What is the chance of winning twice in ten pulls given that
+you win at least once?

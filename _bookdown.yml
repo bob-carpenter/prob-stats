@@ -5,5 +5,7 @@ rmd_files: [
   "index.Rmd",
   "philosophical-prelude.Rmd",
   "random-variables.Rmd",
-  "multivariate-random-variables.Rmd"
+  "multivariate-random-variables.Rmd",
+  "expectations.Rmd",
+  "joint.Rmd"
 ]

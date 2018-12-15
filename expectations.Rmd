@@ -1,0 +1,98 @@
+# Expectations and Variance
+
+Almost all quantities of interest in statistics, ranging from
+parameter estimates to event probabilities and forecasts can be
+expressed as expectations of random variables.  Expectation ties
+directly to simulation because expectations are computed as averages
+of samples of those random variables.
+
+Variance is a measure of the variation of a random variable.  It's
+also defined as an expectation.  Curiously, it is on the quadratic
+scale---it's defined in terms of squared differences from expected
+values.  This chapter will show why this is the natural measure of
+variation and how it relates to expectations.
+
+## Expectation
+
+Suppose we have a discrete random variable $Y$.  Its *expectation* is
+defined as its average value, which is a weighted average of its
+values, where the weights are the probabilities.
+
+$$
+\mathbb{E}\!\left[ Y \right]
+\ = \
+\sum_{y \in Y} \, y \times p_Y(y).
+$$
+
+The notation $y \in Y$ is meant to indicate the summation is over all
+possible values $y$ that the random variable $Y$ may take on.
+
+For example, if $Y$ is the result of a fair coin flip, then
+
+$$
+\mathbb{E}\left[ Y \right]
+\ = \
+0 \times \frac{1}{2} + 1 \times \frac{1}{2}
+\ = \
+\frac{1}{2}.
+$$
+
+Now suppose $Y$ is the result of a fair six-sided die roll.  The
+expected value of $Y$ is
+
+$$
+\mathbb{E} \left[ Y \right]
+\ = \
+1 \times \frac{1}{6}
++ 2 \times \frac{1}{6}
++ \cdots
++ 6 \times \frac{1}{6}
+\ = \
+\frac{21}{6}
+\ = \
+3.5.
+$$
+
+Now suppose $U$ is the result of a fair twenty-sided die roll.  Using
+the same formula as above, the expectation works out to
+$\frac{210}{20} = 10.5$.^[In general, the expectation of a die roll is
+half the number of faces plus 0.5, because $$\sum_{n=1}^N n \times
+\frac{1}{N} \ = \ \frac{1}{N} \sum_{n=1}^N n \ = \ \frac{1}{N}\frac{N \times (N +
+1)}{2} \ = \frac{N + 1}{2}.$$]
+
+## Computing expectations with simulation
+
+We have been computing expectations all along for event
+probabilities.  Expectations are the natural calculation for
+simulations, because
+
+$$
+\mathbb{E}\left[ Y \right]
+\ = \
+\lim_{M \rightarrow \infty} \frac{1}{M} \sum_{m = 1}^M y^{(m)},
+$$
+
+where the $y^{(m)}$ are individual simulations of $Y$.
+
+For any finite $M$, we get an estimate of the expectation defined as
+
+$$
+\mathbb{E}\left[ Y \right]
+\ = \
+\frac{1}{M} \sum_{m = 1}^M y^{(m)}.
+$$
+
+
+## Event probabilities as expectations of indicator functions
+
+What we were doing in computing event probabilities was computing the
+expectation of an indicator function.  For example,
+
+$$
+\newcommand{prob}[1]{\mathrm{Pr}\!\left[ #1 \right]}
+\prob{Y = 1}
+\ = \
+\mathbb{E}\left[\mathrm{I}\left[Y = 1\right]\right]
+\ \approx \
+\frac{1}{M} \sum_{m = 1}^M \, \mathrm{I}\!\left[y^{(m)} = 1\right].
+$$

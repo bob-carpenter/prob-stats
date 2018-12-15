@@ -52,7 +52,7 @@ $$
 
 In these cases, events are conjoined (with "and") and disjoined (with
 "or").  These operations apply in general to events, as does negation.
-As an example of negation, 
+As an example of negation,
 
 $$
 \mbox{Pr}[Y \neq 1] = 0.5.
@@ -103,12 +103,12 @@ number generators*.  Pseudorandom number generators, if they are well
 coded, produce deterministic streams of output that appear to be
 random.^[There is a large literature on pseudorandom number generators
 and tests for measurable differences from truly random streams.]
-  
+
 For the time being, we will assume we have a primitive pseudorandom
 number generator `uniform_01_rng()`, which behaves roughly like it has
 a 50% chance of returning 1 and a 50% chance of returning 0.^[The name
 arises because random variables in which every possible outcome is
-equally likely are said to be *uniform*.] 
+equally likely are said to be *uniform*.]
 
 Suppose we want to simulate our random variable $Y$.  We can do so by
 calling `uniform_01_rng` and noting the answer.
@@ -269,7 +269,7 @@ evaluates to
 
 Thus `sum(y == 1)` is the number of positions in the sequence `y`
 which have the value 1.  Running the program provides the following
-estimate based on ten simulation draws. 
+estimate based on ten simulation draws.
 
 ```{r}
 M <- 10
@@ -289,7 +289,7 @@ for (k in 1:10) {
 ```
 
 The estimates are close, but not very exact.  What if we use 100
-simulations?  
+simulations?
 
 ```{r}
 M <- 100
@@ -307,7 +307,7 @@ for (k in 1:10) {
   M <- 100
   y_sim <- rbinom(M, 1, 0.5);
   cat('estimated Pr[Y = 1] = ', sum(y_sim) / M, '\n')
-}  
+}
 ```
 
 What happens if we let $M = 10,000$ simulations?
@@ -317,7 +317,7 @@ for (k in 1:10) {
   M <- 10000
   y_sim <- rbinom(M, 1, 0.5);
   cat('estimated Pr[Y = 1] = ', sum(y_sim) / M, '\n')
-}  
+}
 ```
 
 Now the estimates are very close to the true probability being
@@ -379,7 +379,7 @@ plot <- ggplot(df, aes(x = M, y = hat_E_Y)) +
                 labels=c("1", "10", "100", "1,000", "10,000", "100,000")) +
   scale_y_continuous(limits = c(0, 1),
                      breaks = c(0, 0.25, 0.5, 0.75, 1.0)) +
-  xlab("simulation draws") + 
+  xlab("simulation draws") +
   ylab("estimated Pr[Y = 1]") +
   ggtheme_tufte()
 plot
@@ -402,7 +402,7 @@ plot <- ggplot(df, aes(x = M, y = hat_E_Y)) +
                      labels=c("1", "50,000", "100,000")) +
   scale_y_continuous(limits = c(0, 1),
                      breaks = c(0, 0.25, 0.5, 0.75, 1.0)) +
-  xlab("simulation draws") + 
+  xlab("simulation draws") +
   ylab("estimated Pr[Y = 1]") +
   ggtheme_tufte()
 plot
@@ -436,9 +436,9 @@ pr_Y_eq_1_plot <- ggplot(df2, aes(x = M, y = hat_E_Y, group=r)) +
     scale_x_log10(breaks=10^(2:4), limits=c(100, 10000),
                   labels=c("100", "1,000", "10,000")) +
     scale_y_continuous(limits = c(0.375, 0.625),
-                       breaks = c(0.4, 0.5, 0.6), 
+                       breaks = c(0.4, 0.5, 0.6),
                        labels = c(0.4, 0.5, 0.6)) +
-    xlab("simulation draws") + 
+    xlab("simulation draws") +
     ylab("estimated Pr[Y = 1]") +
     ggtheme_tufte()
 pr_Y_eq_1_plot
@@ -469,24 +469,29 @@ pr_Y_eq_1_plot <- ggplot(df2, aes(x = M, y = hat_E_Y, group=r)) +
     scale_x_log10(breaks=10^(4:6), limits=c(1e4, 1e6),
                   labels=c("10,000", "100,000", "1,000,000")) +
     scale_y_continuous(limits = c(0.485, 0.515),
-                       breaks = c(0.49, 0.5, 0.51), 
+                       breaks = c(0.49, 0.5, 0.51),
                        labels = c(0.49, 0.5, 0.51)) +
-    xlab("simulation draws") + 
+    xlab("simulation draws") +
     ylab("estimated Pr[Y = 1]") +
     ggtheme_tufte()
 pr_Y_eq_1_plot
 ```
 
-The *law of large numbers*^[Which technically comes in several forms.]
-says roughly that as the number of simulated values grows, the average
-will converge to the expected value.  In this case, our estimate of
-$\mbox{Pr}[Y = 1]$ can be seen to converge to the true value of 0.5 as
-the number of simulations increases.
+The *law of large numbers*^[Which technically comes in a strong and
+weak form.] says roughly that as the number of simulated values grows,
+the average will converge to the expected value.  In this case, our
+estimate of $\mbox{Pr}[Y = 1]$ can be seen to converge to the true
+value of 0.5 as the number of simulations $M$ increases.
+Because the quantities involved are probabilistic, the exact specification is a
+little more subtle than the $\epsilon$-$\delta$ proofs in calculus.
+
+
+
 
 
 ## Simulation notation
 
-We will use parenthesized superscripts to pick out the elements of a sequence of simulations.  For example, 
+We will use parenthesized superscripts to pick out the elements of a sequence of simulations.  For example,
 
 $$
 y^{(1)}, y^{(2)}, \ldots, y^{(M)}
@@ -546,7 +551,7 @@ $$
 \ = \
 \sum_{m=1}^M \mathrm{I}[y^{(m)} = 1]
 $$
-      
+
 Thus we can write our simulation-based estimate of the probability
 that a fair coin flip lands heads as^[In general, the way to estimate an event probability $\phi(Y)$ where $\phi$ defines some condition, given simulations $y^{(1)}, \ldots, y^{(M)}$ of $Y$, is as $$\mbox{Pr}[\phi(Y)] = \frac{1}{M} \sum_{m = 1}^M \mathrm{I}[\phi(y^{(m)})].$$]
 
@@ -560,7 +565,7 @@ $$
 
 The form $\frac{1}{M} \sum_{m=1}^M$ will recur repeatedly in
 simulation --- it just says to average over values indexed by $m \in
-1:M$.
+1:M$.^[We are finally in a position to state the *strong law of large numbers* as the event probability of a limit, $$\mbox{Pr}\!\left\lbrack \lim_{M \rightarrow \infty} \frac{1}{M} \sum_{m = 1}^M \mathrm{I}\!\left\lbrack y^{(m)} = 1 \right\rbrack \ = \ 0.5 \right\rbrack,$$  where each $y^{(m)}$ is a separate fair coin toss. ]
 
 
 ## Central limit theorem
@@ -614,9 +619,9 @@ abs_err_plot <- ggplot(df2, aes(x = M, y = err_hat_E_Y, group=r)) +
     scale_x_log10(breaks=10^(4:6), limits=c(1e4, 1e6),
                   labels=c("10,000", "100,000", "1,000,000")) +
     scale_y_continuous(limits = c(0, 0.015),
-                       breaks = c(0, 0.05, 0.01), 
+                       breaks = c(0, 0.05, 0.01),
                        labels = c("0.00", "0.05", "0.01")) +
-    xlab("simulation draws") + 
+    xlab("simulation draws") +
     ylab("absolute error") +
     ggtheme_tufte()
 abs_err_plot
@@ -632,20 +637,20 @@ x <- 0.5 * (1:100)
 log_abs_err_plot <- ggplot(df2, aes(x = M, y = err_hat_E_Y + fudge, group=r)) +
    geom_line(data = data.frame(x = c(1e4, 1e6),
                                y = 2 * c(.5 / sqrt(1e4), .5 / sqrt(1e6))),
-             aes(x = x, y = y, group = NA),			       
+             aes(x = x, y = y, group = NA),
              color = "red") +
    geom_line(data = data.frame(x = c(1e4, 1e6),
                                y = c(.5 / sqrt(1e4), .5 / sqrt(1e6))),
-             aes(x = x, y = y, group = NA),			       
-             color = "blue") +	     
+             aes(x = x, y = y, group = NA),
+             color = "blue") +
     geom_line(alpha=0.15) +
     scale_x_log10(limits=c(1e4, 1e6),
-                  breaks=10^(4:6), 
+                  breaks=10^(4:6),
                   labels=c("10,000", "100,000", "1,000,000")) +
     scale_y_log10(limits = c(0.8e-4, 2e-2),
                   breaks = c(0.0001, 0.001, 0.01),
                   labels = c("0.0001", "0.001", "0.01" )) +
-    xlab("simulation draws") + 
+    xlab("simulation draws") +
     ylab("log absolute error + 1e-4") +
     ggtheme_tufte()
 log_abs_err_plot
@@ -653,7 +658,7 @@ log_abs_err_plot
 
 The red and blue lines show the linear relationship between the log of
 the number of simulation draws and the log absolute error. The slope
-of these two lines is $-\frac{1}{2}$. 
+of these two lines is $-\frac{1}{2}$.
 
 If we let $\epsilon_M$ be the absolute error after $M$ simulation
 draws, the linear relationship plotted in the figures have the
@@ -667,7 +672,7 @@ When writing "const" in a mathematical expression, the presumption is
 that it refers to a constant that does not depend on the free
 variables of interest (here, $M$, the number of simulation draws).
 Ignoring constants lets us focus on the order of the dependency.  The
-red line and blue line have the same slope, but different constants.  
+red line and blue line have the same slope, but different constants.
 
 Seeing how this plays out on the linear scale requires exponentiating
 both sides of the equation and reducing,
@@ -687,7 +692,7 @@ $$
 %
 \\[6pt]
 \epsilon_M
-& = & 
+& = &
 \exp( \log M )^{-\frac{1}{2}}
 \times
 \exp(\mbox{const})
@@ -712,7 +717,7 @@ $$
 \frac{\displaystyle 1}{\displaystyle \sqrt{M}}.
 $$
 
-This is a fundamental result in statistics derived from the 
+This is a fundamental result in statistics derived from the
 *central limit theorem*. The central limit theorem governs the
 accuracy of almost all simulation-based estimates. We will return to a
 proper formulation when we have the scaffolding in place to deal with

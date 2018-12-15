@@ -1,10 +1,7 @@
 ---
 knit: 'bookdown::render_book("index.Rmd", "tufte_html_book")'
-title: |
-  | Probability
-  | and Statistics
-      
-subtitle: 'A simulation-based introduction'
+title: 'Probability and Statistics'
+subtitle: 'a simulation-based introduction'
 author: 'Bob Carpenter'
 date: '2018'
 output:
@@ -17,6 +14,8 @@ output:
       in_header: header.tex
     documentclass: book
     classoption: oneside, openany
+    toc:
+      collapse: subsection
 fontsize: 10pt
 ---
 
@@ -58,3 +57,7 @@ The text of this book is distributed under the [<small>CC BY-ND
 The accompanying code is distributed under the [<small>BSD
 3</small>-clause](https://opensource.org/licenses/BSD-3-Clause)
 license.
+
+## Acknowledgements {-}
+
+Thanks to Mitzi Morris for proofreading.
