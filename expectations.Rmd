@@ -92,9 +92,8 @@ For example,^[The expectation is implicitly the expectation of
 a new random variable defined as $Z = \mathrm{I}[Y = 1].$]
 
 $$
-\newcommand{prob}[1]{\mathrm{Pr}\!\left[ #1 \right]}
 \begin{array}{rcl}
-\prob{Y = 1}
+\mathrm{Prob}\!\left[ Y = 1 \right]
 & = &
 \mathbb{E}\left[\mathrm{I}\left[Y = 1\right]\right]
 \\[6pt]
