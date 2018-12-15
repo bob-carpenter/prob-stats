@@ -12,11 +12,9 @@ output:
     latex_engine: "pdflatex"
     includes:
       in_header: header.tex
-    documentclass: book
-    classoption: oneside, openany
     toc:
-      collapse: subsection
-fontsize: 10pt
+      collapse: section
+    fontsize: 11pt
 ---
 
 # Preface {-}
