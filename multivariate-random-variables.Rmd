@@ -596,16 +596,20 @@ $$
 
 ## The Chevalier de Méré's challenge
 
-Antoine Gombaud, the Chevalier de Méré, challenged Blaise Pascal and
-Pierre de Fermat to calculate the probability of at least one
-double-six occuring in 24 fair throws of a pair of six-sided dice. We
-can evaluate this by simulation directly.^[Working out the example
-analytically, there is a $\frac{35}{36}$ chance of *not* throwing
-double six with two six-sided dice, and so $\left( \frac{35}{36}
-\right)^{24}$ is the probability of *not* throwing at least one double
-six in 24 throws, and so $$1 - \left( \frac{35}{36} \right)^{24}
-\approx 0.491$$ is the probability of throwing at least one double-six
-in 24 fair throws of a pair of six-sided dice.]
+Antoine Gombaud, the Chevalier de Méré, challenged Blaise Pascal to
+explain how it was possible that thre probability of throwing at least
+one six in four throws of a single six-sided die is slightly greater
+than $\frac{1}{2}$, whereas the probability of throwing two sixes in
+24 throws of a pair of six-sided die was slightly less than
+$\frac{1}{2}$.^[Smith, D. A., 1929.  *A Source Book on
+Mathematics*. McGraw-Hill, New York; cited in Bulmer, 1967, p. 26.]
+We can evaluate these claims by simulation directly.^[Working out the
+example analytically, there is a $\frac{35}{36}$ chance of *not*
+throwing double six with two six-sided dice, and so $\left(
+\frac{35}{36} \right)^{24}$ is the probability of *not* throwing at
+least one double six in 24 throws, and so $$1 - \left( \frac{35}{36}
+\right)^{24} \approx 0.491$$ is the probability of throwing at least
+one double-six in 24 fair throws of a pair of six-sided dice.]
 
 To represent the problem in probabilistic notation, we introduce a
 random variable $Y_{1, k} \in 1:6$ and $Y_{2, k} \in 1:6$ for each of
@@ -667,3 +671,195 @@ throws! To nail down the last digit, we could use $10\,000\,000$
 simulations rather than $100\,000$. As shown in the previous note,
 calculating the result analytically yields 0.491 to three decimal
 places, which is in agreement with the simulation-based estimates.
+
+
+## Sampling without replacement
+
+Drawing from a deck of cards is typically done without replacement.
+Once a card is drawn, it may not be drawn again.  A traditional deck
+of playing cards consists of 52 cards, each marked with a value
+
+$$
+2, 3, \ldots, 10, \mathrm{J}, \mathrm{Q}, \mathrm{K}, \mathrm{A}
+$$
+
+and a suit from
+
+$$
+\clubsuit, \, \diamondsuit, \ \heartsuit, \ \spadesuit
+$$
+
+The lettered values are called jack, queen, king, and ace, and the
+suits are called clubs, diamonds, hearts, and spades.  Traditionally
+the diamonds and hearts are colored red and the clubs and spades
+colored black (here they are indicated by unfilled vs.\ filled
+shading).
+
+A hand of cards consists of some number of cards drawn from a deck.
+When cards are drawn from a deck, they are not replaced.  This is
+called sampling without replacement.  Thus a hand of cards can contain
+at most 52 cards, because after 52 cards are drawn, there are none
+left.^[In some games, multiple decks are often used.]  Drawing without
+replacement also affects probabilities of particular hands.
+
+For example, drawing two cards from a fresh deck, the chance of
+getting two aces is not $\left(\frac{4}{52}\right)^2$, but rather
+$\left(\frac{4}{52} \times \frac{3}{51}\right) \approx 0.0045.$ The
+chance of drawing an ace on the first draw is $\frac{4}{52}$ because
+there are 4 aces among the 52 cards and each card is assumed to be
+equally likely to be drawn from any deck.  But after the first ace is
+drawn, there are only 51 cards remaining, and among those, only 3
+aces.  So the chance of the second card being an ace is only
+$\frac{3}{51}$.
+
+We can verify that with a quick simulation.
+
+```
+total = 0
+for (m in 1:M)
+  y <- draw_cards(2)
+  if (is_ace(y[1]) && is_ace(y[2]))
+    total += 1
+print 'Pr[draw 2 aces] = ' total / M
+```
+
+Let's run that with $M = 10\,000$, a few
+
+```{r}
+set.seed(1234)
+M <- 1e4
+for (k in 1:8) {
+  total <- 0
+  for (m in 1:M)
+    total <- total + (sum(sample(52, size = 2) >= 49) == 2)
+  printf('Pr[draw 2 aces] = %5.4f\n',  total / M)
+}
+```
+
+Curiously, we are now not getting a single digit of accuracy, even
+with $10\,000$ draws.  What happened?
+
+A fundamental problem with accuracy of simulation-based estimates is
+that rare events are hard to estimate with random draws.  If the event
+of drawing two aces only has a 0.45% chance (roughly 1 in 200) of
+occurring, we need a lot of simulation events to see it often enough
+to get a good estimate of even that first digit.  With $10\,000$
+draws, the number of two-ace draws we expect to see is about 50 if
+they occur at roughly a 1 in 200 hands rate.  We know from prior
+experience that estimating a number with only 50 draws is not going to
+be very accurate.  So what we need to do is increase the number of
+draws.  Let's run that again with $M = 1\,000\,000$ draws.
+
+```{r}
+set.seed(1234)
+M <- 1e6
+for (k in 1:4) {
+  total <- 0
+  for (m in 1:M)
+    total <- total + (sum(sample(52, size = 2) >= 49) == 2)
+  printf('Pr[draw 2 aces] = %5.4f\n',  total / M)
+}
+```
+
+Now with an expected $5\,000$ occurrences of a two-ace hand, we have a
+much better handle on the relative accuracy, having nailed down at
+least the first digit and gotten close with the second digit.
+
+
+## Error versus relative error
+
+Suppose we have an estimate $\hat{y}$ for a quantity $y$.  One natural
+way to measure the accuracy of the estimate is to consider its
+*error*,
+
+$$
+\mathrm{err} = \hat{y} - y.
+$$
+
+If the estimate is too high, the error will be positive, and if the
+estimate is too low, the error will be negative.  The problem with
+this standard notion of error arises when the estimand $y$ is very
+small or very large.
+
+Now consider an estimand of $y = 0.01$ and an estimate of $\hat{y} =
+0.015$.  The error is just $y - \hat{y}$ = 0.005$, which looks small.
+But compared to the magnitude of $y$, which is only 0.01, the error
+is relatively large.
+
+The *relative error* of an estimate $\hat{y}$ of a quantity $y$ can
+be defined relative to the scale of the estimand as
+
+$$
+\mathrm{rel\_err} = \frac{\hat{y} - y}{\left| \, y \, \right|}.
+$$
+
+This delivers results that are scaled in units of of $y$.  The
+relative error for our estimate $\hat{y} = 0.015$ for an estimand $y =
+0.01$ has relative error of
+
+
+$$
+\frac{0.015 - 0.01}{\left| 0.01 \right|} = 0.5.
+$$
+
+That's a 50% relative error, which now looks quite large compared to
+the 0.005 error.^[An estimate of $\hat{y} = 0.015$ has an error of
+$-0.005$ and a relative error of $-0.5$, or 50% too low.]
+
+If the sign of error doesn't matter, errors are often reported as
+absolute values, i.e., as *absolute error* and *absolute relative
+error*.
+
+The central limit theorem provides guarantees only about the error;
+to calculate its implications for relative error, the true value of
+the estimand must be known.
+
+## Odds of a Yarborough
+
+If an event has a probability of $p$, the *odds* of it happening are
+given by the function
+
+$$
+\mathrm{odds}(p) = \frac{p}{1 - p}.
+$$
+
+For example, if there is a 25% chance of an event happening, the odds
+of it not happening are $(1 - 25\%) = 75\%$.  The *odds* of an event
+happening are defined as the ratio of happening to not happening, or
+in this case, $\frac{0.25}{1 - 0.25} = \frac{1}{3}$.  In other words,
+it's three times as probable that the event does not occur than it
+occurs.  Odds are written as $1:3$ and pronounced "one to three"
+rather than being written as $\frac{1}{3}$ and pronounced "one in
+three".^[When reporting odds, it is common to report the odds as
+"three to one *against*" an event with a 25% probability.]
+
+The Earl of Yarborough reputedly^[Bulmer, 1967, p. 26.] laid a
+thousand to one odds against drawing a 13-card whist hand that
+contained no card higher than a 9.  There is a total of 32 cards that
+are 9 or lower (and hence 20 cards 10 or higher). We can use the same
+argument to calculate the Earl's odds of drawing his eponymous hand
+at
+
+$$
+\begin{array}{rcl}
+\mbox{Pr}\left[\mbox{draw a Yarborough}\right]
+& = & \frac{32}{52} \times \frac{31}{51} \times \cdots \times \frac{20}{40}
+\\[6pt]
+& = & \prod_{n = 0}^{12} \frac{32 - n}{52 - n}
+\\[6pt]
+& \approx & 0.00055
+\end{array}
+$$
+
+The $n$ in the second line represents the number of cards drawn
+previously. The true odds are roughly one in 2000, or rounded to the
+nearest integer
+
+$$
+1:1817 \approx \frac{0.00055}{1 - 0.00055}
+$$
+
+Rounded to the nearest integer, the odds are 1817:1 against, so the
+Earl should expect to profit from his bet.^[Modulo the fact that one
+rare event might ruin him---these market-making schemes require a
+large bankroll and many repetitions to avoid ruin.]
