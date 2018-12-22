@@ -505,3 +505,84 @@ p_{Y \mid Z}(y \mid z)
 \frac{\displaystyle p_{Z \mid Y}(z \mid y) \times p_{Y}(y)}
      {\displaystyle \sum_{y' \ \in \ 1:K} p_{Z \mid Y}(z \mid y') \times p_Y(y')}.
 $$
+
+
+
+## Fermat and the problem of points
+
+Blaise Pascal and Pierre de Fermat studied the problem of how to
+divide the pot^[The *pot* is the total amount bet by both players.] of
+a game of chance that was interrupted before it was finished.  As a
+simple example, Pascal and Fermat considered a game in which each turn
+a fair coin was flipped, and the first player would score a win a
+point if the result was heads and the second player if the result was
+tails.  The first player to score ten points wins the game.
+
+Now suppose a game is interrupted after 15 flips, at a point where the
+first player has 8 points and the second player only 7.  What is the
+probability of the first player winning the match were it to continue?
+
+We can put that into probability notation by letting $Y_n$ be the
+number of points for the first player after $n$ turns.
+
+$Y_{n, 1}$ be the
+number of heads for player 1 after $n$ flips, $Y_{n, 2}$ be the same
+for player 2.  Let $Z$ be a binary random variable taking value 1 if
+the first player wins and 0 if the other player wins.  Fermat managed
+to evaluate a formula like Fermat evaluated $\mbox{Pr}[Z = 1 | Y_{n,
+1} = 8, Y_{n, 2} = 7]$ by enumerating the possible game continuations
+and adding up the probabilities of the ones in which the first player
+wins.
+
+We can solve Fermat and Pascal's problem by simulation.  As usual, our
+estimate is just the proportion of the simulations in which the first
+player wins.  The value of `pts` must be given as input---that is the
+starting point for simulating the completion of the game, assuming
+neither player yet has ten points.^[For illustrative purposes only!
+In robust code, validation should produce diagnostic error messages
+for invalid inputs.]
+
+```
+for (m in 1:M)
+  while (pts[1] < 10 & pts[2] < 10)
+    toss = uniform_01_rng()
+    if (toss == 1) pts[1] += 1
+    else pts[2] += 1
+    if (pts[1] == 10) win[m] = 1
+    else if (pts[2] == 10) win[m] = 0
+print 'est. Pr[player 1 wins] = ' sum(win) / M
+```
+
+If the while-loop terminates because one player has ten points, then
+`wins[m]` must have been set in the previous value of the loop.^[In
+general, programs should be double-checked (ideally by a third party)
+to make sure *invariants* like this one (i.e., `win[m]` is always set)
+actually hold.  Test code goes a long way to ensuring robustness.]
+
+Let's run that a few times with $M = 100\,000$, starting with the
+`pts` set to `(8, 7)`, to simulate Fermat and Pascal's problem.
+
+```{r}
+set.seed(1234)
+for (k in 1:5) {
+  M <- 100000
+  game_wins <- 0
+  for (m in 1:M) {
+    wins <- c(8, 7)
+    while (wins[1] < 10 && wins[2] < 10) {
+      toss <- rbinom(1, 1, 0.5)
+      winner <- ifelse(toss, 1, 2)
+      wins[winner] <- wins[winner] + 1
+      if (wins[1] == 10)
+        game_wins <- game_wins + 1
+    }
+  }
+  printf('est. Pr[player 1 wins] = %4.3f\n', game_wins / M)
+}
+```
+
+This is very much in line with the result Fermat derived by brute
+force, namely $\frac{11}{16} \approx 0.688$.^[There are at most four
+more turns required, which have a total of $2^4 = 16$ possible
+outcomes, HHHH, HHHT, HHTH, $\ldots,$ TTTH, TTTT, of which 11 produce
+wins for the first player.]
