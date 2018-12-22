@@ -190,10 +190,10 @@ a unique probability mass function.
 Probablity mass functions represent probabilities of a discrete set of
 outcomes.  The sum of all such probabilities must be one because at
 least one of the outcomes must occur.^[More formally, if $Y$ is a
-discrete random variable, then $$\sum_{u \in Y} \, p_Y(u) = 1,$$ where $u
-\in Y$ is meant to indicate the summation is over all possible values
-of $Y$.  We are going to start writing this with the standard
-overloading of lower and upper case $Y$ as $$\sum_{y \in Y} \, p_Y(y) = 1.$$]
+discrete random variable, then $$\sum_u \, p_Y(u) = 1,$$ where the
+summation variable $u$ ranges over all possible values of $Y$.  We are
+going to start writing this with the standard overloading of lower and
+upper case $Y$ as $$\sum_y \, p_Y(y) = 1.$$]
 
 With large numbers of counts based on simulation, we can more readily
 apprehend what is going on with a plot.  Discrete simulations are
@@ -369,6 +369,75 @@ is $\left(\frac{1}{20}\right)^2 = 0.0025$. The probabilities are
 reversed when taking the worst of two 20-sided die rolls.] The min and
 max plots are mirror images of each other as is to be expected by the
 consecutive nature of the numbers and the min/max operations.
+
+## Spinners and the Bernoulli distribution
+
+Some games, such as *All Star Baseball*, come with spinners rather
+than dice.  The beauty of spinners is that they can be divided into
+two areas, one with a 27% chance of occurring in a fair spin and one
+with a 73% chance of occurring.^[27% is roughly the chance of a hit in
+an at bat.]  Now suppose we have a random variable $Y$ representing
+the result of a fair spin.  Its probability mass function is
+
+$$
+p_Y(y)
+\ = \
+\begin{cases}
+0.27 & \mbox{if} \ \ y = 1
+\\
+0.73 & \mbox{if} \ \ y = 0
+\end{cases}
+$$
+
+To simplify our notation, we are going to start defining useful
+functions that can be used as probability mass functions.  Our first
+example is the so-called Bernoulli^[Named after Jacob Bernoulli
+(1654--1705), one of several prominent mathematicians in the family.]
+distribution.  We define it as a function with somewhat peculiar
+notation,
+
+$$
+\mathsf{Bernoulli}(y \mid \theta)
+\ = \
+\begin{cases}
+\theta & \mbox{if} \ \ y = 1
+\\
+1 - \theta & \mbox{if} \ \ y = 0
+\end{cases}
+$$
+
+The vertical bar ($\mid$) separates the *variate* argument $y$, which
+we think of as an outcome, from the *parameter* argument $\theta \in
+[0, 1]$, which determines the probability of the outcome.  In this
+case, the variate $y$ is discrete, and can take on only the values
+zero and one, so we write $y \in 0:1$.  The parameter $\theta$, on the
+other hand, is continuous and can take on any value between zero and
+one (inclusive of endpoints), so we write $y \in [0, 1]$.^[Interval
+notation $[0, 1]$ is used for the set of values $x$ such that $0 \leq
+x \leq 1$.  Parentheses are used for exclusive endpoints, so that $(0,
+1)$ is taken to be the set of $x$ such that $0 < x < 1$.]
+
+This notation allows us to simplify our baseball example.  Going back
+to our example random variable $Y$ which had a 27% chance of being 1
+and a 73% chance of being 0, we can write
+
+$$
+p_Y(y) = \mathsf{Bernoulli}(y \mid 0.27).
+$$
+
+To simplify notation even further, we will say that a random variable
+$U$ has a Bernoulli distribution and write
+
+$$
+U \sim \mathsf{Bernoulli}(\theta)
+$$
+
+to indicate that the probability mass function of $U$ is
+
+$$
+p_U(u) = \mathsf{Bernoulli}(u \mid \theta).
+$$
+
 
 ## Cumulative distribution functions
 

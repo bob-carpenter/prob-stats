@@ -1,75 +1,507 @@
 # Joint, Marginal, and Conditional Distributions
 
-## Diagnostic Accuracy
 
-Consider a patient who may or may not have a disease, represented by
-the variable $Z$.  Suppose there is a medical diagnostic test (e.g.,
-an exam by a doctor, a mammogram, a blood test, etc.) such that if $Z
-= 1$ (the subject carries the disease), then the test result is $Y =
-1$ (the subject tests positive) with a $\theta$ probability and $Y =
-0$ with probability $1 - \theta$.  On the other hand if $Z = 0$ (the
-subject does not have the disease), then $Y = 0$ (the subject tests
-negative) with a probability of $\phi$ and $Y = 1$ with probability $1
-- \phi$.  Most diagnostic tests are such that $\theta \neq \phi$.
+## Diagnostic accuracy
 
-Now let's consider the case of a mammogram test for breast cancer, and
-suppose $\theta = 0.77$ and $\phi = 0.91$.^[Ohuchi, N., Suzuki, A.,
-Sobue, T., Kawai, M., Yamamoto, S., Zheng, Y.F., Shiono, Y.N., Saito,
-H., Kuriyama, S., Tohno, E. and Endo, T., 2016. Sensitivity and
-specificity of mammography and adjunctive ultrasonography to screen
-for breast cancer in the Japan Strategic Anti-cancer Randomized Trial
-(J-START): a randomised controlled trial. *The Lancet*, 387(10016),
-pp.341--348.]  Prevalence in the population of 40--44 year olds is
-roughly 0.12% (125 in $100\,000$).^[American Cancer Society.  2017.
-[Breast Cancer Facts & Figures 2017--2018](https://www.cancer.org/content/dam/cancer-org/research/cancer-facts-and-statistics/breast-cancer-facts-and-figures/breast-cancer-facts-and-figures-2017-2018.pdf).]
+What if I told you that you just tested positive on a diagnostic test
+with 95% accuracy, but that there's only a 16% chance that you have
+the disease in question?  This running example will explain how this
+can happen.^[The example diagnostic accuracies and disease prevalences
+we will use for simulation are not unrealistic---this kind of thing
+happens all the time in practice, which is why there are often
+batteries of follow-up tests after preliminary positive test results.]
 
-Now we have two random variables, $Y$ and $Z$.  We can use simulation
-to fill out a table of probability estimates for all possible
-combinations of $Y$ and $Z$.
+Suppose the random variable $Z \in 0:1$ represents whether a
+particular subject has a specific disease.^[$Z = 1$ if the subject has
+the disease and $Z = 0$ if not.]  Now suppose there is a diagnostic
+test for whether a subject has the disease.  Further suppose the
+random variabel $Y \in 0:1$ represents the result of applying the test
+to the same subject.^[$Y = 1$ if the test result is positive and $Y =
+0$ if it's negative.]
 
-```
-count[0:1, 0:1] = 0
-for (m in 1:M) {
-  y = bernoulli_rng(0.0012)
-  z = bernoulli_rng(y == 1 ? 0.77 : 1 - 0.91)
-  count[y, z] += 1
-}
-print 'Pr[Y = 0, Z = 0] = ' count[0, 0] / M
-...
-```
+Now suppose the test is 95% accurate in the sense that
 
-Let's see what we get with $M = 1\,000\,000$.
+* if the test is administered to a subject with the disease (i.e., $Z
+  = 1$), there's a 95% chance the test result will be positive (i.e.,
+  $Y = 1$), and
+* if the test is administered to a subject without the disease (i.e.,
+  $Z = 0$), there's a 95% chance the test result will be negative
+  (i.e., $Y = 0)$.
 
-```{r}
-M <- 1e6
-count <- array(rep(0, 4), c(2, 2))
-for (m in 1:M) {
-  y <- rbinom(1, 1, 0.0012);
-  if (y == 1) z <- rbinom(1, 1, 0.77)
-  if (y == 0) z <- rbinom(1, 1, 1 - 0.91)
-  count[y + 1, z + 1] <- count[y + 1, z + 1] + 1
-}
-for (i in 1:2)
-  for (j in 1:2)
-    printf('Pr[Y = %d, Z = %d] = %5.4f\n',
-           i - 1, j - 1, count[i, j] / M)
-```
+We're going to pause the example while we introduce the probability
+notation required to talk about it more precisely.
+
+## Conditional probability
+
+Conditional probability notation expresses the diagnostic test's
+accuracy for people have the disease ($Z = 1$) as
 
 $$
-\begin{array}{rclcl}
-p_{Z, Y}(0, 0) & = & (1 - 0.0012) \times 0.91 & = & 0.9089
+\mbox{Pr}[Y = 1 \mid Z = 1] = 0.95
+$$
+
+and for people who don't have the disease ($Z = 0$) as
+
+$$
+\mbox{Pr}[Y = 0 \mid Z = 0] = 0.95.
+$$
+
+We read $\mbox{Pr}[\mathrm{A} \mid \mathrm{B}]$ as the *conditional probability* of
+event $\mathrm{A}$ given that we know event $\mathrm{B}$ occurred.  Knowing that event
+$\mathrm{B}$ occurs often gives us information about the probability of $\mathrm{A}$
+occurring.
+
+The conditional probability function $\mbox{Pr}[\, \cdot \mid
+\mathrm{B}]$ behaves just like the unconditional probability function
+$\mbox{Pr}[\, \cdot \,]$.  That is, it satisfies all of the laws of
+probability we have introduced for event probabilities.  The
+difference is in the semantics---conditional probabilities are
+restricted to selecting a way the world can be that is consistent with
+the event $\mathrm{B}$ occurring.^[Formally, an event $\mathrm{B}$ is
+modeled as a set of ways the world can be, i.e., a subset $\mathrm{B}
+\subseteq \Omega$ of the sample space $\Omega$.  The conditional
+probability function $\mbox{Pr}[\, \cdot \mid \mathrm{B}]$ can be
+interpreted as an ordinary probability distribution with sample space
+$\mathrm{B}$ instead of the original $\Omega$.]
+
+For example, the sum of exclusive and exhaustive probabilities must be
+one, and thus the diagnostic error probabilities are one minus the
+correct diagnosis probabilities,
+
+$$
+\mbox{Pr}[Y = 0 \mid Z = 1] = 0.05
+$$
+
+and
+
+$$
+\mbox{Pr}[Y = 1 \mid Z = 0] = 0.05.
+$$
+
+
+
+
+## Joint probability
+
+Joint probability notation expresses the probability of multiple
+events happening.  For instance, $\mbox{Pr}[Y = 1, Z = 1]$ is the
+probability of both events, $Y = 1$ and $Z = 1$, occurring.
+
+In general, if $\mathrm{A}$ and $\mathrm{B}$ are events,^[We use
+capital roman letters for event variables to distinguish them from
+random variables for which we use capital italic letters.] we write
+$\mbox{Pr}[\mathrm{A}, \mathrm{B}]$ for the event of both $\mathrm{A}$
+and $\mathrm{B}$ occurring.  Because joint probability is defined in
+terms of conjunction ("and" in English), the definition is symmetric,
+$$\mbox{Pr}[\mathrm{A}, \mathrm{B}] = \mbox{Pr}[\mathrm{B},
+\mathrm{A}].$$
+
+In the context of a joint probability $\mbox{Pr}[\mathrm{A}, \mathrm{B}]$, the single
+event $\mbox{Pr}[\mathrm{A}]$ is called a *marginal probability*.^[Because of
+symmetry, $\mbox{Pr}[\mathrm{B}]$ is also a marginal probability.]
+
+Joint probability is defined relative to conditional and marginal
+probabilities by
+
+$$
+\mbox{Pr}[\mathrm{A}, \mathrm{B}]
+\ = \
+\mbox{Pr}[\mathrm{A} \mid \mathrm{B}] \times \mbox{Pr}[\mathrm{B}].
+$$
+
+In words, the probability of events $\mathrm{A}$ and $\mathrm{B}$ occurring is the same
+as the probability of event $\mathrm{B}$ occurring times the probabilty of $\mathrm{A}$
+occurring given that $\mathrm{B}$ occurs.
+
+The relation between joint and conditional probability involves simple
+multiplication, which may be rearranged by dividing both sides by
+$\mbox{Pr}[\mathrm{B}]$ to yield
+
+$$
+\mbox{Pr}[\mathrm{A} \mid \mathrm{B}]
+\ = \
+\frac{\displaystyle \mbox{Pr}[\mathrm{A}, \mathrm{B}]}
+     {\displaystyle \mbox{Pr}[\mathrm{B}]}.
+$$
+
+Theoretically, it is simplest to take joint probability as the
+primitive so that this becomes the definition of conditional
+probability.  In practice, all that matters is the relation between
+conditional and joint probability.
+
+## Dividing by zero: not-a-number or infinity
+
+Conditional probabilities are not well defined in the situation where
+$\mbox{Pr}[B] = 0$.  In such a situation, $\mbox{Pr}[\mathrm{A},
+\mathrm{B}] = 0$, because $B$ has probability zero.
+
+In practice, if we try to evaluate such a condition using standard
+computer floating-point arithmetic, we wind up dividing zero by zero.
+
+```
+Pr_A_and_B = 0.0
+Pr_B = 0.0
+Pr_A_given_B = Pr_A_and_B / Pr_B
+print 'Pr[A | B] = ' Pr_A_given_B
+```
+
+Running that, we get
+
+```{r}
+Pr_A_and_B <- 0.0
+Pr_B <- 0.0
+Pr_A_given_B <- Pr_A_and_B / Pr_B
+printf('Pr[A | B] = %3.3f\n', Pr_A_given_B)
+```
+
+The value `NaN` indicates what is known as the *not-a-number*
+value.^[There are technically two types of not-a-number values in the
+IEEE 754 standard, of which we will only consider the non-signaling
+version.]  This is a special floating-point value that is different
+from all other values and used to indicate a domain error on an
+operation.  Other examples that will return not-a-number values
+include `log(-1)`.
+
+If we instead divide a positive or negative number by zero,
+
+```
+print '1.0 / 0.0 = ' 1.0 / 0.0
+print '-3.2 / 0.0 = ' -3.2 / 0.0
+```
+
+we get
+
+```{r}
+printf("1.0 / 0.0 = %f\n", 1.0 / 0.0)
+printf("-3.2 / 0.0 = %f\n", -3.2 / 0.0)
+```
+
+These values denote positive infinity ($\infty$) and negative infinity
+($-\infty$), respectively.  Like not-a-number, these are special
+reserved floating-point values with the expected interactions with
+other numbers.^[For example, adding a finite number and an infinity
+yields the infinity and subtracting two infinities produces a
+not-a-number value.  For details, see [754-2008---IEEE standard for floating-point
+arithmetic](https://ieeexplore.ieee.org/document/4610935).]
+
+## Simulating the diagnostic example
+
+What we don't know so far in the running example is what the
+probability is of a subject having the disease or not.  This
+probability, known as the *prevalence* of the disease, is often the
+main quantity of interest in an epidemiological study.
+
+Let's suppose in our case that 1% of the population has the disease in
+question.  That is, we assume
+
+$$
+\mbox{Pr}[Z = 1] = 0.01
+$$
+
+Now we have enough information to run a simulation of all
+of the joint probabilities.  We just follow the marginal and
+conditional probabilities.  First, we generate $Z$, whether or not the
+subject has the disease, then we generate $Y$, the result of the test,
+conditional on the disease status $Z$.
+
+```
+for (m in 1:M)
+  z[m] = bernoulli_rng(0.01)
+  if (z[m] == 1)
+    y[m] = bernoulli_rng(0.95)
+  else
+    y[m] = bernoulli_rng(0.05)
+print 'estimated Pr[Y = 1] = ' sum(y) / M
+print 'estimated Pr[Z = 1] = ' sum(z) / M
+```
+
+What is nice is that we can compute marginals directly---it is just as
+easy to compute the marginal of $Y$, the test report, as it is to
+compute the marginal of $Z$, the disease status.  Let's run that with
+$M = 100\,000$ and see what we get.
+
+```{r}
+set.seed(1234)
+M <- 100000
+z <- rbinom(M, 1, 0.01)
+y <- rbinom(M, 1, ifelse(z == 1, 0.95, 0.05))
+printf('estimated Pr[Y = 1] = %4.3f\n', sum(y) / M)
+printf('estimated Pr[Z = 1] = %4.3f\n', sum(z) / M)
+```
+
+We know that the marginal $\mbox{Pr}[Z = 1]$ is 0.01, so the estimate is
+close to the true value for $Z$;  we'll see below that it's also close
+to the true value of $\mbox{Pr}[Y = 1]$.
+
+We can also use the simulated values to estimate conditional
+probabilities.  To estimate, we just follow the formula for the
+conditional distribution,
+
+$$
+\mbox{Pr}[A \mid B]
+\ = \
+\frac{\displaystyle \mbox{Pr}[A, B]}
+     {\displaystyle \mbox{Pr}[B]}.
+$$
+
+Specifically, we count the number of draws in which both A and B
+occur, then divide by the number of draws in which the event B occurs.
+
+```
+for (m in 1:M)
+  z[m] = bernoulli_rng(0.01)
+  if (z[m] == 1)
+    y[m] = bernoulli_rng(0.95)
+  else
+    y[m] = bernoulli_rng(0.05)
+  y1z1[m] = (y[m] == 1 & z[m] == 1)
+  y1z0[m] = (y[m] == 1 & z[m] == 0)
+
+print 'estimated Pr[Y = 1 | Z = 1] = ' sum(y1z1) / sum(z == 1)
+print 'estimated Pr[Y = 1 | Z = 0] = ' sum(y1z0) / sum(z == 0)
+```
+
+We set the indicator variable `y1z1[m]` to 1 if $Y = 1$ and $Z = 1$ in
+the $m$-th simulation; `y1z0` behaves similarly.  The operator `&` is
+used for conjuncton (logical and) in the usual way.^[The logical and
+operation is often written as `&&`  in programming languages to
+distinguish it from bitwise and, which is conventionally written `&`.]
+
+Recall that `z == 0`
+is an array where entry $m$ is 1 if the condition holds, here $z^{(m)}
+= 0$.
+
+The resulting etsimates with $M = 100\,000$ draws are pretty close to
+the true values,
+
+```{r}
+printf('estimated Pr[Y = 1 | Z = 1] = %4.3f\n', sum(y * z) / sum(z))
+printf('estimated Pr[Y = 1 | Z = 0] = %4.3f\n', sum(y * (1 - z)) / sum(1 - z))
+```
+
+The true values were stipulated as part of the example to be
+$\mbox{Pr}[Y = 1 \mid Z = 1] = 0.95$ and $\mbox{Pr}[Y = 1 \mid Z = 0]
+= 0.05$.  Not surprisingly, knowing the value of $Z$ (the disease
+status) provides quite a bit of information about the value of $Y$
+(the diagnostic test result).
+
+Now let's do the same thing the other way around,and look at the
+probability of having the disease based on the test result, i.e.,
+$\mbox{Pr}[Z = 1 \mid Y = 1]$ and $\mbox{Pr}[Z = 1 \mid Y = 0]$.^[The
+program is just like the last one.]
+
+```{r}
+printf('estimated Pr[Z = 1 | Y = 1] = %4.3f\n', sum(y * z) / sum(y))
+printf('estimated Pr[Z = 1 | Y = 0] = %4.3f\n', sum(z * (1 - y)) / sum(1 - y))
+```
+
+Did we make a mistake in coding up our simulation?  We estimated
+$\mbox{Pr}[Z = 1 \mid Y = 1]$ at around 16%, which says that if the
+subject has a positive test result ($Y = 1$), there is only a 16%
+chance they have the disease ($Z = 1$).  How can that be when the test
+is 95% accurate and simulated as such?
+
+The answer hinges on the prevalence of the disease.  We assumed only
+1% of the population suffered from the disease, so that 99% of the
+people being tested were disease free.  Among the disease free ($Z =
+0$) that are tested, 5% of them have false positives ($Y = 1$).
+That's a lot of patients, around 5% times 99%, which is nearly 5% of
+the population.  On the other hand, among the 1% of the population
+with the disease, almost all of them test positive.  This means
+roughly five times as many disease-free subjects test positive for the
+disease as disease-carrying subjects test positive.
+
+
+## Analyzing the diagnostic example
+
+The same thing can be done with algebra as we did in the previous
+section with simulations.^[Computationally, precomputed algebra is a
+big win over simulations in terms of both compute time and accuracy.
+It may not be a win when the derivations get tricky and human time is
+taken into consideration.]  Now we can evaluate joint probabilities,
+e.g.,
+
+$$
+\begin{array}{rcl}
+\mbox{Pr}[Y = 1, Z = 1]
+& = & \mbox{Pr}[Y = 1 \mid Z = 1] \times \mbox{Pr}[Z = 1]
+\\[4pt]
+& = & 0.95 \times 0.01
 \\
-p_{Z, Y}(0, 1) & = & (1 - 0.0012) \times (1 - 0.91) & = & 0.0899
-\\
-p_{Z, Y}(1, 0) & = & 0.0012 \times (1 - 0.77) & = & 0.0003
-\\
-p_{Z, Y}(1, 1) & = & 0.0012 \times 0.77 & = & 0.0009
+& = & 0.0095.
 \end{array}
 $$
 
+Similarly, we can work out the probability the remaining probabilities
+in the same way, for example, the probability of a subject having the
+disase and getting a negative test result,
 
-Suppose we have a sequence of random variables $Y_1, \ldots, Y_N$
-representing results at a slot machine.  If there is a 1% chance of
-winning in any given pull, what is the chance of winning twice in ten
-pulls.  What is the chance of winning twice in ten pulls given that
-you win at least once?
+$$
+\begin{array}{rcl}
+\mbox{Pr}[Y = 0, Z = 1]
+& = & \mbox{Pr}[Y = 0 \mid Z = 1] \times \mbox{Pr}[Z = 1]
+\\[4pt]
+& = & 0.05 \times 0.01
+\\
+& = & 0.0005.
+\end{array}
+$$
+
+Doing the same thing for the disease-free patients completes a
+four-by-four table of probabilities,
+
+$$
+\begin{array}{|r|r|r|}
+\hline
+\mbox{Probability} & Y = 1  & Y = 0
+\\ \hline
+Z = 1 & 0.0095 & 0.0005
+\\ \hline
+Z = 0 & 0.0450 & 0.8500
+\\ \hline
+\end{array}
+$$
+
+For example, the top-left entry records the fact that $\mbox{Pr}[Y =
+1, Z = 1] = 0.0095.$ The next entry to the right indicates that
+$\mbox{Pr}[Y = 0, Z = 1] = 0.0005.$
+
+The marginal probabilities (e.g., $\mbox{Pr}[Y = 1]$) can be computed
+by summing the probabilities of all alternatives that lead to $Y = 1$,
+here $Z = 1$ and $Z = 0$
+
+$$
+\mbox{Pr}[Y = 1]
+\ = \
+\mbox{Pr}[Y = 1, Z = 1]
++ \mbox{Pr}[Y = 1, Z = 0]
+$$
+
+We can extend our two-by-two table by writing the sums in what
+would've been the margins of the original table above.
+
+$$
+\begin{array}{|r|r|r|r|}
+\hline
+\mbox{Probability} & Y = 1  & Y = 0 & Y = 1 \ \mbox{or} \ Y = 0
+\\ \hline
+Z = 1 & 0.0095 & 0.0005 & \mathit{0.0100}
+\\ \hline
+Z = 0 & 0.0450 & 0.8500 & \mathit{0.9900}
+\\ \hline
+Z = 1 \ \mbox{or} \ Z = 0 & \mathit{0.0545} & \mathit{0.8505}
+& \mathbf{1.0000}
+\\ \hline
+\end{array}
+$$
+
+For example, that $\mbox{Pr}[Z = 1] = 0.01$ can be read off the top of
+the right margin column---it is the sum of the two table entries in
+the top row, $\mbox{Pr}[Z = 1, Y = 1]$ and $\mbox{Pr}[Z = 1, Y = 0]$.
+
+In the same way, $\mbox{Pr}[Y = 0] = 0.8505$ can be read off the right
+of the bottom margin row, being the sum of the entries in the right
+column, $\mbox{Pr}[Z = 1, Y = 0]$ and $\mbox{Pr}[Z = 0, Y = 0]$.
+
+The extra headings define the table so that
+each entry is the probability of the event on the top row and on the
+left column.  This is why it makes sense to record the grand sum of
+1.00 in the bottom right of the table.
+
+
+## Joint and conditional distribution notation
+
+Recall that the probability mass function $p_Y(y)$ for a discrete
+random variable $Y$ is defined by
+
+$$
+p_Y(y) = \mbox{Pr}[Y = y].
+$$
+
+As before, capital $Y$ is the random variable, $y$ is a potential
+value for $Y$, and $Y = y$ is the event that the random variable $Y$
+takes on value $y$.
+
+The *joint probability mass function* for two discrete random variables
+$Y$ and $Z$ is defined by the joint probability,
+
+$$
+p_{Y,Z}(y, z) = \mbox{Pr}[Y = y, Z = z].$
+$$
+
+The notation follows the previous notation with $Y, Z$ indicating that
+the first argument is the value of $Y$ and the second that of $Z$.
+
+
+Similarly, the conditional probablity mass function is defined by
+
+$$
+p_{Y \mid Z}(y \mid z) = \mbox{Pr}[Y = y \mid Z = z].
+$$
+
+The notation again follows that of the conditional probability
+function through which the conditional probability mass function is
+defined.
+
+
+## Bayes's Rule
+
+Bayes's rule relates the conditional probability $\mbox{Pr}[\mathrm{A} \mid \mathrm{B}]$
+for events $\mathrm{A}$ and $\mathrm{B}$ to the inverse conditional probability
+$\mbox{Pr}[\mathrm{A} \mid \mathrm{B}]$ and the marginal probability $\mbox{Pr}[\mathrm{B}]$.
+The rule requires a partition of the event $\mathrm{A}$ into events $\mathrm{A}_1,
+\ldots, \mathrm{A}_K$, which are mutually exclusive and exhaust $\mathrm{A}$.  That is,
+
+$$
+\mbox{Pr}[\mathrm{A}_k, \mathrm{A}_{k'}] = 0
+\ \ \mbox{if} \ \ k \neq k',
+$$
+
+and
+
+$$
+\begin{array}{rcl}
+\mbox{Pr}[\mathrm{A}]
+& = & \mbox{Pr}[\mathrm{A}_1] + \cdots + \mbox{Pr}[\mathrm{A}_K].
+\\[3pt]
+& = & \sum_{k \in 1:K} \mbox{Pr}[\mathrm{A}_k].
+\end{array}
+$$
+
+The basic rule of probability used to derive each line is noted to the
+right.
+
+$$
+\begin{array}{rcll}
+\mbox{Pr}[\mathrm{A} \mid \mathrm{B}]
+& = &
+\frac{\displaystyle \mbox{Pr}[\mathrm{A}, \mathrm{B}]}
+     {\displaystyle \mbox{Pr}[\mathrm{B}]}
+& \ \ \ \ \mbox{[conditional definition]}
+\\[6pt]
+& = &
+\frac{\displaystyle \mbox{Pr}[\mathrm{B} \mid \mathrm{A}] \times \mbox{Pr}[\mathrm{A}]}
+     {\displaystyle \mbox{Pr}[\mathrm{B}]}
+& \ \ \ \ \mbox{[joint definition]}
+\\[6pt]
+& = &
+\frac{\displaystyle \mbox{Pr}[\mathrm{B} \mid \mathrm{A}] \times \mbox{Pr}[\mathrm{A}]}
+     {\displaystyle \sum_{k \in 1:K} \displaystyle \mbox{Pr}[\mathrm{B}, \mathrm{A}_k]}
+& \ \ \ \ \mbox{[marginalization]}
+\\[6pt]
+& = &
+\frac{\displaystyle \mbox{Pr}[\mathrm{B} \mid \mathrm{A}] \times \mbox{Pr}[\mathrm{A}]}
+     {\displaystyle \sum_{k \in 1:K} \mbox{Pr}[\mathrm{B} \mid \mathrm{A}_k] \times \mbox{Pr}[\mathrm{A}_k]}.
+& \ \ \ \ \mbox{[joint definition]}
+\end{array}
+$$
+
+Letting $\mathrm{A}$ be the event $Y = y$ and letting $\mathrm{B}$ be the event $Z = z$,
+Bayes's rule can be expressed using probability mass functions as
+
+$$
+p_{Y \mid Z}(y \mid z)
+\ = \
+\frac{\displaystyle p_{Z \mid Y}(z \mid y) \times p_{Y}(y)}
+     {\displaystyle \sum_{y' \ \in \ 1:K} p_{Z \mid Y}(z \mid y') \times p_Y(y')}.
+$$
