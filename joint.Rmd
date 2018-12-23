@@ -215,10 +215,13 @@ print 'estimated Pr[Y = 1] = ' sum(y) / M
 print 'estimated Pr[Z = 1] = ' sum(z) / M
 ```
 
-What is nice is that we can compute marginals directly---it is just as
-easy to compute the marginal of $Y$, the test report, as it is to
-compute the marginal of $Z$, the disease status.  Let's run that with
-$M = 100\,000$ and see what we get.
+The program computes the marginals for $Y$ and $Z$ directly.  This is
+straightforward because both $Y$ and $Z$ are simulated in every
+iteration (as `y[m]` and `z[m]` in the code).  Marginalization using
+simulation requires no work whatsoever.^[Marginalization can be
+tedious, impractical, or impossible to carry out analytically.]
+
+Let's run that with $M = 100\,000$ and see what we get.
 
 ```{r}
 set.seed(1234)
