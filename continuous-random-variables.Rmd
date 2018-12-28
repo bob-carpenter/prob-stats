@@ -400,7 +400,7 @@ histogram as the number of draws increases and the width of bins
 shrinks.  Letting the number of simulations grow from $10$ to
 $1\,000\,000$, we see the limiting behavior of the histograms.
 
-```{r fig.width = 8, out.width="100%", fig.cap='Histograms of $M$ simulated draws of $\\Theta \\sim \\mbox{uniform}(0, 1)$ transformed to the log odds scale by $\\Phi = \\mbox{logit}(\\Theta).$ The limiting behavior is shown in the bell-shaped curve in the lower right based on $1\\,000\\,000$ draws.'}
+```{r out.width="100%", fig.cap='Histograms of $M$ simulated draws of $\\Theta \\sim \\mbox{uniform}(0, 1)$ transformed to the log odds scale by $\\Phi = \\mbox{logit}(\\Theta).$ The limiting behavior is shown in the bell-shaped curve in the lower right based on $1\\,000\\,000$ draws.'}
 set.seed(1234)
 df_log_odds_growth <- data.frame()
 for (log10M in 1:6) {
@@ -459,7 +459,7 @@ variable.  Let's see what that limiting function looks like with $M =
 1\,000\,000$ draws.
 
 
-```{r fig.width= 10, out.width="100%", fig.cap='Histogram of $M = 1\\,000\\,000$ simulations of $\\Theta \\sim \\mbox{uniform}(0,1)$ transformed to $\\Phi = \\mbox{logit}(\\Theta)$. The black line connects the tops of the histogram bins.  In the limit, as the number of draws and bins approach infinity, the connecting line approaches the probability density function for the variable being simulated.'}
+```{r out.width="100%", fig.cap='Histogram of $M = 1\\,000\\,000$ simulations of $\\Theta \\sim \\mbox{uniform}(0,1)$ transformed to $\\Phi = \\mbox{logit}(\\Theta)$. The black line connects the tops of the histogram bins.  In the limit, as the number of draws and bins approach infinity, the connecting line approaches the probability density function for the variable being simulated.'}
 
 set.seed(1234)
 M <- 1e6
@@ -482,6 +482,9 @@ density_limit_plot <-
         axis.ticks.y = element_blank())
 density_limit_plot
 ```
+
+
+## A detour through calculus
 
 We have seen that the probability of a variable falling in an interval
 is estimated by proportion of the overall histogram area falls in the
@@ -506,14 +509,22 @@ $$
 To make our lives easier and avoid writing the proportional-to symbol
 ($\propto$) everywhere, we will make the conventional assumption that
 our density functions like $p_Y$ are *normalized*.  This means that
-the overall area under their curve is one,
+the total area under their curve is one,
 
 $$
-\int_{-\infty}^{infty} p_Y(y) \mathrm{d}y \ = \ 1.
+\int_{-\infty}^{\infty} p_Y(y) \, \mathrm{d}y \ = \ 1.
 $$
 
-With this assumption in place, we now have equality and can define
-closed interval probabilities by definite integrals as
+Because they are based on the limits of histograms, which are counts,
+we will also meet the standard requirement placed on density functions
+that they be positive, so that for all $y \in \mathbb{R}$,
+
+$$
+p_Y(y) \geq 0.
+$$
+
+With these assumptions in place, we now define interval probabilities
+using definite integration over density functions,
 
 $$
 \mbox{Pr}[a \leq Y \leq b]
@@ -528,3 +539,210 @@ $$
 \ = \
 \int_{-\infty}^b \ p_Y(y) \, \mathrm{d}y.
 $$
+
+This reveals the relation between the cumulative distribution function
+$F_Y) = \mbox{Pr}[Y \leq b]$ and the probability density function $p_Y$
+
+$$
+F_Y(b) \ = \ \int_{-\infty}^b \ p_Y(y) \, \mathrm{d}y.
+$$
+
+Working the other way around, it reveals that the probability density
+function is just the derivative of the cumulative distribution
+function,
+
+$$
+p_Y(b) = \frac{\mathrm{d}}{\mathrm{d}y} F_Y(y) \Bigg|_{y = b}.
+$$
+
+Thus the units of a probability density function are change in
+cumulative probability, not probability.  Density functions must be
+integrated to get back to units of probability.
+
+
+## The uniform density function
+
+We've already seen the histograms for variables $\Theta \sim
+\mbox{uniform}(0, 1)$ distributed uniformly from zero to one. With an
+increasing numbers of draws, the histograms flatten out. With more
+draws the histograms will level out even more until the density
+becomes a straight line. This means that the probability density
+function of a uniformly distributed random variable is
+constant.^[Another way to reach the same conclusion is by calculus. We
+worked out from first principles that the cumulative distribution
+function is linear if uniformity means equal probability of landing in
+any interval of the same size. The derivative of a linear function is
+constant, so the density for a uniform distribution must be constant.]
+ That is, if $\Theta \sim \mbox{uniform}(a, b)$, then
+ $p_{\Theta}(\theta) = c$ for some constant $c$. Let's see what that
+looks like so the solution for $c$ becomes evident.
+
+```{r}
+uniform_pdf_df <- data.frame(y = c(0, 1), p_y = c(1, 1))
+uniform_pdf_plot <-
+  ggplot(uniform_pdf_df, aes(x = y, y = p_y)) +
+  geom_line(size = 0.5, color = '#333333') +
+  geom_point(size = 1.5, color = '#333333') +
+  scale_x_continuous(breaks = c(0, 1), labels = c("a", "b")) +
+  scale_y_continuous(lim = c(0, 1), breaks = c(0, 1),
+                     labels = c("0", "c")) +
+  xlab(expression(theta)) +
+  ylab(expression(paste(p[Theta], "(", theta, "|a,b)"))) +
+  geom_segment(aes(x = 0, y = 0, xend = 0, yend = 1), linetype = 'dotted') +
+  geom_segment(aes(x = 1, y = 0, xend = 1, yend = 1), linetype = 'dotted') +
+  geom_segment(aes(x = 0, y = 0, xend = 1, yend = 0), linetype = 'dotted') +
+  geom_segment(aes(x = -0.25, y = 0, xend = 0, yend = 0)) +
+  geom_segment(aes(x = 1, y = 0, xend = 1.25, yend = 0)) +
+  geom_point(aes(x = 0, y = 0), size = 1.5, shape = 21, fill = '#ffffe6') +
+  geom_point(aes(x = 1, y = 0), size = 1.5, shape = 21, fill = '#ffffe6') +
+  ggtheme_tufte()
+uniform_pdf_plot
+```
+
+The plot shows the area from $a$ to $b$ under $c$ to be $(b - a)
+\times c$. Given that we require the area to be one, that is, $(b - a)
+\times c = 1$, we can work out $c$ by dividing both sides by $b - a$,
+
+$$
+c  = \frac{\displaystyle{1}}{\displaystyle b - a}.
+$$
+
+Putting this into density notation, if $\Theta \sim \mbox{uniform}(a,
+b)$, then
+
+$$
+p_{\Theta}(\theta) = \mbox{uniform}(\theta \mid a, b),
+$$
+
+where we have now worked out that
+
+$$
+\mbox{uniform}(\theta \mid a, b) = \frac{1}{b - a}.
+$$
+
+That is, the density does not depend on $y$---it is constant and the
+same for every possible value of $\theta$.^[For convenience, we can
+assume the impossible values of $\theta$ have density zero.]
+
+
+## Back to simulation
+
+The traditional bottleneck to performing statistics beyond the data
+collection was wrangling integral calculus to provide analytic results
+or approximations for a given applied problem. Today, very general
+numerical solvers absolve us of the heavy lifting of calculus and
+replace it with wrangling computer code for simulations.  This lets us
+solve much harder problems directly.
+
+Let's actually solve the integral we mentioned in the last section,
+namely the probabilty that a log odds variable will land between -2
+and 2.
+
+```
+success = 0
+for (m in 1:M)
+  Phi[m] = logit(uniform_rng(0, 1))
+  if (-2 < Phi[m] & Phi[m] < 2)
+    success += 1
+print 'Pr[-2 < Phi < 2] = ' success / M
+```
+
+Let's run that for $M = 100\,000$ simulation draws and see what we get,
+
+```{r}
+set.seed(1234)
+M <- 1e5
+Phi = logit(runif(M, 0, 1))
+success <- 0
+for (m in 1:M)
+  if (-2 < Phi[m] && Phi[m] < 2) success <- success + 1
+printf('Pr[-2 < Phi < 2] = %3.2f\n', success / M)
+```
+
+What is perhaps more remarkable than not requiring calculus is that we
+don't even require the formula for the density functin $p_{\Phi}$---we
+only need to be able to simulate random instantiations of the random
+variable in question.
+
+## Jacobians and changes of variables
+
+When we moved from a random variable $\Theta \sim \mbox{uniform}(0,
+1)$ to a variable $\Phi = \mbox{logit}(\Theta)$, we made a
+class *change of variables*. That means we can use calculus to compute
+the probability density function.  But let's do it in full generality.
+
+We'll start by assuming we have a random variable $X$ with a known
+density function $p_X(x)$. Assume further we have a smooth and
+invertible function $f$ and define a new random variable $Y = f(X)$.
+The density of $Y$ is then given by the rather daunting formula
+
+$$
+p_Y(y)
+\ = \
+p_X(f^{-1}(y))
+\, \times \,
+\left|
+\,
+\frac{\mathrm{d}}
+     {\mathrm{d}u}
+f^{-1}(u) \Big|_{u = y}
+\,
+\right|.
+$$
+
+
+We're going to work through this in pieces using our running exmaple.
+To keep the puzzle pieces straight, let $X = \Theta \sim
+\mbox{uniform}(0, 1)$ be our uniform probability varibale let
+$Y = \Phi = \mbox{logit}(\Theta)$ be the transformed variable on the
+log odds scale.  The question is now what is the desnity of $\Phi$.
+We start by noting that
+
+$$
+\mbox{logit}^{-1}(y) = \frac{1}{1 + \exp(-y)}.
+$$
+
+So to evaluate $p_{\Phi}(\phi)$, we first need to evaluate
+$p_{\Theta}(\mbox{logit}^{-1}(\phi))$. We know this term will evaluate
+to 1, because $p_{\Theta}(\theta) = 1$ for every $\theta$.  So clearly
+just inverting and plugging in isn't enough.
+
+We also need to account for the change in variables from $\Theta$ to
+$\Phi$.  This is where the Jacobian term comes into the
+equation---that's everything past the $\times$ sign.  The Jacobian is
+the absolute value of the derivative of the inverse transform
+evaluated at the value in question.  For our running example, we can
+work out through the chain rule that
+
+$$
+\frac{\mathrm{d}}{\mathrm{d} u}
+\mbox{logit}^{-1}(u)
+\ = \
+\mbox{logit}^{-1}(u)
+\times \left(1 - \mbox{logit}^{-1}(u)\right).
+$$
+
+So if we plug in $u = \phi$ here, and put all the pieces back
+together, we get
+
+$$
+p_{\Phi}(\phi)
+\ = \
+\mbox{logit}^{-1}(\phi)
+\times
+\left( 1 - \mbox{logit}^{-1}(\phi) \right).
+$$
+
+This distribution is known as the standard logistic distribution,
+
+$$
+\mbox{std_logistic}(\phi)
+\ = \
+\mbox{logit}^{-1}(\phi)
+\times
+\left( 1 - \mbox{logit}^{-1}(\phi) \right).
+$$
+
+Thus after all the dust has settled, we know that if $\Theta \sim
+\mbox{uniform}(0, 1)$ and $\Phi = \mbox{logit}(\Theta)$, then $\Phi
+\sim \mbox{std_logistic}()$.
