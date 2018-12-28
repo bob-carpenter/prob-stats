@@ -589,3 +589,91 @@ force, namely $\frac{11}{16} \approx 0.688$.^[There are at most four
 more turns required, which have a total of $2^4 = 16$ possible
 outcomes, HHHH, HHHT, HHTH, $\ldots,$ TTTH, TTTT, of which 11 produce
 wins for the first player.]
+
+
+## Independence of random variables
+
+Informally, we say that a pair of random variables is independent if
+knowing about one variable does not provide any information about the
+other.  If $X$ and $Y$ are the variables in question, this property
+can be stated directly in terms of their probability mass functions as
+
+$$
+p_{X}(x) = p_{X|Y}(x | y).
+$$
+
+In practice, we use an equivalent definition.  Random variables $X$
+and $Y$ are said to be *independent* if
+
+$$
+p_{X,Y}(x, y) = p_X(x) \times p_Y(y).
+$$
+
+for all $x$ and $y$.^[This is equivalent to requiring the events $X
+\leq x$ and $Y \leq y$ to be independent for every $x$ and $y$.
+Events A and B are said to be *independent* if $\mbox{Pr}[\mathrm{A},
+\mathrm{B}] \ = \ \mbox{Pr}[\mathrm{A}] \times
+\mbox{Pr}[\mathrm{B}]$.]
+
+By way of example, we have been assuming that a fair dice throw
+involves the throw of two independent and fair dice.  That is, if
+$Y_1$ is the first die and $Y_2$ is the second die, then $Y_1$ is
+independent of $Y_2$.
+
+In the diagnostic testing example, the disease state $Z$ and the test
+result $Y$ are not independent.^[That would be a very poor test,
+indeed!].  This can easily be verified because $p_{Y|Z}(y | z) \neq
+p_Y(y)$.
+
+
+
+## Independence of multiple random variables
+
+It would be nice to be able to say that a set of random $Y_1, \ldots,
+Y_N$ was independent if each of its pairs of random variables was
+independent.  We'd settle for being able to say that the joint
+probability factors into the product of marginals,
+
+$$
+p_{Y_1, \ldots, Y_N}(y_1, \ldots, y_N)
+\ = \
+p_{Y_1}(y1) \times \cdots \times p_{Y_N}(y_N).
+$$
+
+But neither of these is enough.^[Analysis in general and probability
+theory in particular defeat simple definitions with nefarious edge
+cases.]  For a set of random variables to be *independent*, the
+probability of each of its subsets must factor into the product of its
+marginals.^[More precisely, $Y_1, \ldots, Y_N$ are *independent* if
+for every $M \leq N$ and permutation $\pi$ of $1:N$ (i.e., a bijection
+between $1:N$ and itself), we have $$\begin{array}{l}
+\displaystyle p_{Y_{\pi(1)},
+\ldots, Y_{\pi(M)}}(u_1, \ldots, u_M)
+\\ \displaystyle \mbox{ } \ \ \ = \
+p_{Y_{\pi(1)}}(u_1) \times \cdots \times p_{Y_{\pi(M)}}(u_M)
+\end{array}$$
+for all $u_1, \ldots, u_M.$]
+
+## Conditional independence
+
+Often, a pair of variables are not independent only because they both
+depend on a third variable.  The random variables $Y_1$ and $Y_2$ are
+said to be *conditionally independent* given the variable $Z$ if they
+are independent after conditioning,
+
+$$
+p_{Y_1, Y_2 \mid Z}(y_1, y_2 \mid z)
+\ = \
+p_{Y_1 \mid Z}(y_1 \mid z) \times p_{Y_2 \mid Z}(y_2 \mid z).
+$$
+
+
+## Independent and identically distributed variables
+
+If the variables $Y_1, \ldots, Y_N$ are not only independent, but also
+have the same probability mass functions (i.e., $p_{Y_n} = p_{Y_{m}}$
+for all $m, n \in 1:N$), we say that they are *independent and
+identically distributed*, or "iid" for short.  Many of our statistical
+models, such as linear regression, will make the assumption that
+observations are conditionally independent and identically
+distributed.

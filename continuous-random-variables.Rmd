@@ -1,0 +1,530 @@
+# Continuous Random Variables
+
+So far, we have only considered discrete random variables, i.e.,
+variables taking only integer values.  But what if we want to use
+random variables to represent lengths or volumes or distances or
+masses or concentrations or any of the other continuous properties in
+the physical world?  We will need to generalize our approach so far.
+
+Continuous random variables take on real values.  The set of real
+numbers is *uncountable* in the sense of being strictly larger than
+the set of integers.^[Georg Cantor developed the technique of
+diagonalization to show it was impossible to have a one-to-one map
+from the reals to the integers, thus proving the set of reals is
+uncountable.]
+
+The mathematics of probability is the same for real values.  Even more
+importantly from a practical standpoint, the way we calculate event
+probabilities and estimates remains the same with continuous
+quantities.  The notion of a probability mass function, on the other
+hand, must be replaced by its continuous equivalent, the probability
+density function.
+
+
+## Spinners and uniform continuous variables
+
+Suppose $\Theta$ is a random variable representing the angle at which
+a fair spin of a spinner lands.  We will use degrees and thus suppose
+the value of $\Theta$ is between 0 and 360^[The end points are the
+same, representing a complete rotation of 360 degrees; they are
+labeled as such in the plot.]
+
+```{r fig.cap = "A spinner resting at 36 degrees, or 10% of the way around the circle.  A fair spin might land anywhere between 0 and 360 degrees."}
+
+df_spinner <- data.frame(value = c("0-360 degrees"), prob = c(0.3))
+plot_spinner <-
+  ggplot(data = df_spinner,
+         aes(x = factor(1), y = prob, fill = value)) +
+  geom_bar(stat = "identity", position = "fill", fill = "#ffffe8",
+           color="black", size = 0.25) +
+  coord_polar(theta = "y") +
+  geom_segment(aes(y =  0.1, yend =  0.1, x = -1, xend = 1.375),
+               arrow = arrow(type = "open"),
+	       size = 0.5, color = "#666666") +
+  geom_point(aes(x = -1, y = 0), color = "#666666", size = 3) +
+  scale_x_discrete(breaks = c()) +
+  scale_y_continuous(breaks = c(0, 0.1, 0.25, 0.5, 0.75),
+                     labels = c("360 | 0    ", "36", "90", "180", "270")) +
+  xlab(expression(paste(theta, " degrees"))) +
+  ylab("") +
+  ggtheme_tufte() +
+  theme(legend.position = "none")
+plot_spinner
+```
+
+What does fair mean for continuous probabilities?  At the least, we
+should be able to say that the probality of landing in any
+band is the same no matter where the band lies on the circle.  That
+is, landing between 0 and 36 degrees should be the same as landing
+between 200 and 236 degrees.  Also, because 36 degrees is one tenth of
+the way around the circle, the chance of landing in any 36 degree band
+has to be 10%.^[This is because the circle can be divided into ten
+bands to create exhaustive and exclusive intervals, the event
+probabilities of landing in which must be the same by fairness and
+must total one because they exhaust all possible outcomes.] We can
+express that in probability notation as
+
+$$
+\mbox{Pr}[0 \leq \Theta \leq 36]
+\ = \
+\frac{1}{10}
+$$
+
+and
+
+$$
+\mbox{Pr}[200 \leq \Theta \leq 236]
+\ = \
+\frac{1}{10}.
+$$
+
+We are not talking about the probability of $\Theta$ taking on a
+particular value, but rather of it falling in a particular interval.^[
+In general, the probability of a fair spinner $\Theta$ falling in
+interval is the fraction of the circle represented by the interval, i.e.,
+$$
+\mbox{Pr}[\theta_1 \leq \Theta \leq \theta_2]
+= \frac{\theta_2 - \theta_1}{360}.
+$$
+for $0 \leq \theta_1 \leq \theta_2 \leq 360.$
+]
+For continuous random variables, outcomes do not have probability
+mass.  Instead, probability mass is assigned continuously based on the
+probability of a variable falling in a region.
+
+## The paradox of vanishing point probabilities
+
+In our first example, we took a fair spinner to land at exactly 36
+degrees; it could've been 36.0376531 degrees or even an irrational
+number such as $0.3333\cdots.$^[When I learned decimal
+representations, we wrote $0.\bar{3}$ for the decimal
+representation of $\frac{1}{3}.$] What's the probability the spinner
+landed on exactly 36 degrees? Paradoxically, the answer is zero.
+
+$$
+\mbox{Pr}[\Theta = 36] = 0.
+$$
+
+Why must this be?  If the probability of any specific outcome was
+greater than zero, every other possible value would have to have the
+same probability to satisfy fairness.  But then if we summed them all
+up, the total would be greater than one, which is not possible.
+Something has to give, and that something is the idea of particular
+point outcomes having probability mass in a continuous distribution.
+The paradox arises because some number must come up, but every number
+has zero probability.
+
+## Simulating uniform values
+
+We will assume that our programming language comes equipped with a
+function `uniform_rng(L, H)` that generates numbers uniformly in the
+interval $[L, H]$.
+
+For instance, the following program simulates from the uniform
+interval.
+
+
+```
+for (m in 1:M)
+  y[m] = uniform_rng(0, 1)
+print 'y = ' y
+```
+Let's simulate $M = 10$ draws and look at the result,
+
+```{r}
+set.seed(1234)
+M <- 10
+y = runif(M)
+for (m in 1:M)
+  printf('%5.4f ', y[m])
+```
+
+These are only printed to a few decimal places.  As usual, it's hard
+to get a sense for the sequence of values as raw numbers.  The most
+popular way to summarize one-dimensional data is with a *histogram*,
+as shown in the following plot.
+
+```{r fig.cap="Histogram of 10 draws from a $\\mbox{uniform}(0, 1)$ distribution."}
+df_unif_10 <- data.frame(y = y)
+unif_10_plot <-
+  ggplot(df_unif_10, aes(y)) +
+  geom_histogram(binwidth = 0.1, center = 0.05,
+                 color = "black", fill="#ffffe6", size = 0.25) +
+  scale_x_continuous("y", breaks = seq(0, 1, 0.1),
+                    limits = c(0, 1), expand = c(0, 0.02)) +
+  scale_y_continuous("count", breaks = c(1, 2, 3, 4, 5),
+                     expand = c(0.02, 0)) +
+  ggtheme_tufte()
+unif_10_plot
+```
+
+The range of values from 0 to 1 is broken up into ten equally spaced
+bins, 0 to 0.1, 0.1 to 0.2, up to 0.9 to 1.0.  Each bin is then drawn
+as a box with a height proportional to the number of values that fell
+into the bin.
+
+Even though the distribution draws uniformly in the interval, with
+only ten draws, the probability of having one draw in each bin is
+small,^[The first draw can be in any bin, the second in any of 9 bins,
+the third in any of 8 bins, and so on, yielding a probability for each
+bin containing a single draw of $$\prod_{n=1}^{10} \frac{n}{10}
+\approx 0.00036.$$] whereas the probability of having many values in a
+single bin is relatively high.^[For example, the probability of having
+a bin with exactly five draws involves a choice of the distinguished
+bin, a choice of which of the five draws go in the distinguished
+bin, then the probabilities of the distinguished bins and other bins,
+$${10 \choose 1} \times {10 \choose 5} \times \left(\frac{1}{10}\right)^5 \times
+\left(\frac{9}{10}\right)^5 \approx 0.015.$$]  As usual, we turn to
+repetition and sizing to see what's going on.
+
+```{r}
+set.seed(1234)
+df_runif <- data.frame()
+for (N in 2^c(2, 4, 6, 8, 10, 12))
+  df_runif <- rbind(df_runif,
+                    data.frame(y = runif(N),
+                               size = rep(N, N)))
+```
+
+```{r fig.asp = 1.25, fig.cap="Histograms for uniform(0, 1) samples of increasing sizes.  The proportion of draws falling into each bin becomes more uniform as the sample size increases.  With each sample plotted to the same height, the vertical count axis varies in scale among the plots."}
+
+plot_runif <-
+  ggplot(df_runif, aes(y)) +
+  facet_grid(size ~ ., scales = "free") +
+  geom_histogram(binwidth = 0.1, center = 0.05, color = "black",
+                 fill="#ffffe6", size = 0.25) +
+  scale_x_continuous("y", breaks = seq(0, 1, 0.2), limits = c(0, 1),
+                     expand = c(0, 0.02)) +
+  scale_y_continuous("proportion of draws", breaks = c(),
+                     expand = c(0.02, 0)) +
+  coord_fixed(ratio = 0.5) +
+  theme(panel.spacing.y = unit(24, "pt")) +
+  ggtheme_tufte()
+plot_runif
+```
+
+## Continuous cumulative distribution functions
+
+Suppose $\Theta \sim \mbox{uniform}(0, 360)$ is the result of spinning
+a fair spinner.  The cumulative distribtution function is defined
+exactly as for discrete random variables,
+
+$$
+F_{\Theta}(\theta) = \mbox{Pr}[\Theta \leq \theta].
+$$
+
+That is, it's the probability the random variable is less than or
+equal to $\theta$.  In this case, because the spinner is assumed to be
+fair, the cumulative distribution function is
+
+$$
+F_{\Theta}(\theta) = \frac{\theta}{360}.
+$$
+
+This is a linear function of $\theta$, i.e., $\frac{1}{360} \times
+\theta$, as is reflected in the plot.
+
+
+```{r echo=FALSE, fig.cap="Cumulative distribution function for the angle $\theta$ (in degrees) resulting from a fair spin of a spinner.  The dotted line shows the value at 180 degrees, which is a probability of one half and the dashed line at 270 degrees, which is a probability of three quartersxs."}
+
+library(ggplot2)
+df_cdf_spinner <- data.frame(x = c(-90, 0, 360, 450), y = c(0, 0, 1, 1))
+cdf_spinner_plot <-
+  ggplot(df_cdf_spinner, aes(x = x, y = y)) +
+  geom_line(size = 0.5, color = "#333333") +
+  scale_x_continuous(breaks =c(0, 90, 180, 270, 360)) +
+  scale_y_continuous(breaks= c(0, 0.25, 0.5, 0.75, 1),
+                     labels = c("0", "1/4", "1/2", "3/4", "1")) +
+  xlab(expression(theta)) +
+  ylab(expression('F'[Theta](theta))) +
+  geom_segment(aes(x = 180, y = 0, xend = 180, yend = 0.5),
+               color="#333333", linetype="dotted", size = 1) +
+  geom_segment(aes(x = 180, y = 0.5, xend = -90, yend = 0.5),
+               color="#333333", linetype="dotted", size = 1) +
+  geom_segment(aes(x = 270, y = 0, xend = 270, yend = 0.75),
+               color="#333333", linetype="dashed", size = 0.5) +
+  geom_segment(aes(x = 270, y = 0.75, xend = -90, yend = 0.75),
+               color="#333333", linetype="dashed", size = 0.5) +
+  ggtheme_tufte()
+cdf_spinner_plot
+```
+
+As with discrete parameters, the cumulative distribution function may
+be used to calculate interval probabilities, e.g.,^[With continuous
+variables, the interval probabilities are open below ($180 \lt
+\Theta$) and closed above ($\Theta \leq 270$), due to the definition
+of the cumulative distribution function as a closed upper bound
+($F_{\Theta}(\theta) = \mbox{Pr}[\Theta \leq \theta]$).]
+
+$$
+\begin{array}{rcl}
+\mbox{Pr}[180 < \Theta \leq 270]
+& = & \mbox{Pr}[\Theta \leq 270] \ - \ \mbox{Pr}[\Theta \leq 180]
+\\[2pt]
+& = & F_{\Theta}(270) - F_{\Theta}(180)
+\\[2pt]
+& = & \frac{3}{4} - \frac{1}{2}
+\\[2pt]
+& = & \frac{1}{4}.
+\end{array}
+$$
+
+
+## The log odds transform
+
+Now that we have seen how to generate uniform random numbers from 0 to
+360, it is time to consider generating standard uniform variates from
+0 to 1. Suppose $\Theta$ is a random variable with a standard uniform
+distribution, i.e., $\Theta \sim \mbox{uniform}(0, 1)$.  Because
+probabilities are scaled from zero to one, we can think of $\Theta$ as
+denoting a random probability.
+
+Given a probability value $\theta \in (0, 1)$, we can define its *log odds* by
+
+$$
+\mbox{logit}(\theta) = \log \frac{\theta}{1 - \theta}.
+$$
+
+This is just the natural logarithm of the odds, $\frac{\theta}{1 -
+\theta}$.  Now let
+
+$$
+\Phi = \mbox{logit}(\Theta)
+$$
+
+be the random variable representing the log odds. We say that $\Phi$
+is a transform of $\Theta$, because its value is determined by the
+value of $\Theta$.
+
+Simulating transformed variables is straightforward.
+
+```
+for (m in 1:M)
+  theta[m] = uniform_rng(0, 1)
+  alpha[m] = logit(theta[m])
+print 'alpha = ' alpha[1:10] ' ... '
+```
+
+We can run this and see the first ten values,
+
+```{r}
+set.seed(1234)
+M <- 10000
+logit <- function(x) log(x / (1 - x))
+theta <- runif(M)
+alpha <- logit(theta)
+for (m in 1:10)
+  printf('%3.2f ', alpha[m])
+printf(' ... \n')
+```
+
+To understand the distribution of values of $\Phi$, let's look at histograms.  First, we have the uniform draws of $\Theta$,
+
+```{r fig.cap='Histogram of $10\\,000$ simulated draws of $\\Theta \\sim \\mbox{uniform}(0, 1)$. '}
+
+df_prob_unif <- data.frame(theta = theta)
+unif_prob_plot <-
+  ggplot(df_prob_unif, aes(theta)) +
+  geom_histogram(binwidth = 1/34, center = 1/68, color = "black",
+                 fill="#ffffe6", size = 0.25) +
+  scale_x_continuous(breaks = c(0, 0.25, 0.5, 0.75, 1)) +
+  scale_y_continuous(lim = c(0, 1300), breaks = c(500, 1000)) +
+  xlab(expression(paste(Theta, " ~ uniform(0, 1)"))) +
+  ggtheme_tufte()
+unif_prob_plot
+```
+
+and then the transform to log odds $\Phi = \mathrm{logit}(\Theta)$,
+
+```{r fig.cap='Histogram of $10\\,000$ simulated draws of $\\Theta \\sim \\mbox{uniform}(0, 1)$ transformed to the log odds scale by $\\Phi = \\mbox{logit}(\\Theta).$'}
+
+df_log_odds <- data.frame(alpha = alpha)
+log_odds_plot <-
+  ggplot(df_log_odds, aes(alpha)) +
+  geom_histogram(binwidth = 0.5, color = "black", fill="#ffffe6",
+                 size = 0.25) +
+  scale_x_continuous(breaks = c(-6, -4, -2, 0, 2, 4, 6)) +
+  scale_y_continuous(lim = c(0, 1300), breaks = c(500, 1000)) +
+  xlab(expression(paste(Phi, " = ", logit(Theta)))) +
+  ggtheme_tufte()
+log_odds_plot
+```
+
+Even though the probability variable $\Theta \sim \mbox{uniform}(0,
+1)$ is uniform by construction, the log odds variable $\Phi =
+\mbox{logit}(\Theta)$ is not distributed uniformly.
+
+A further feature of the log odds plot is that the distribution of
+values is symmetric around zero. Zero on the log odds scale
+corresponds to 0.5 on the probability scale,^[Recall that the inverse
+log odds function is defined by $$\mbox{logit}^{-1}(u) = \frac{1}{1 +
+\exp(-u)}.$$ This function is called the *logistic sigmoid* in
+engineering circles. Inverses satisfy for $u \in \mathbb{R}$,
+$$\mbox{logit}(\mbox{logit}^{-1}(u)) = u$$ and $v \in (0, 1)$,
+$$\mbox{logit}^{-1}(\mbox{logit}(v)) = v.$$] i.e.,
+
+$$
+0 = \mbox{logit}(0.5),
+$$
+
+or equivalently,
+
+$$
+\mbox{logit}^{-1}(0) = 0.5.
+$$
+
+Symmetry around zero makes the log odds convenient as a parameter.
+
+The third relevant feature of the log odds plot is that almost all of
+the values are within $\pm 6$ of the origin. This is not surprising
+given that we took $10\,000$ draws and
+
+$$
+\mbox{logit}^{-1}(-6) = 0.0025
+$$
+
+and
+
+$$
+\mbox{logit}^{-1}(6) = 0.9975
+$$
+
+on the probability scale.
+
+## From histograms to densities
+
+There is no equivalent of a probability mass function for continuous
+random variables. Instead, there is a probability density function,
+which in simulation terms may usefully be thought of as a limit of a
+histogram as the number of draws increases and the width of bins
+shrinks.  Letting the number of simulations grow from $10$ to
+$1\,000\,000$, we see the limiting behavior of the histograms.
+
+```{r fig.width = 8, out.width="100%", fig.cap='Histograms of $M$ simulated draws of $\\Theta \\sim \\mbox{uniform}(0, 1)$ transformed to the log odds scale by $\\Phi = \\mbox{logit}(\\Theta).$ The limiting behavior is shown in the bell-shaped curve in the lower right based on $1\\,000\\,000$ draws.'}
+set.seed(1234)
+df_log_odds_growth <- data.frame()
+for (log10M in 1:6) {
+  M <- 10^log10M
+  alpha <- logit(runif(M))
+  df_log_odds_growth = rbind(df_log_odds_growth,
+                             data.frame(alpha = alpha,
+			                M =  rep(sprintf("M = %d", M), M)))
+}
+log_odds_growth_plot <-
+  ggplot(df_log_odds_growth, aes(alpha)) +
+  geom_histogram(color = "black", fill="#ffffe6",
+                 bins=75) +
+  facet_wrap(~ M, scales = "free") +
+  scale_x_continuous(lim = c(-8.5, 8.5), breaks = c(-5, 0, 5)) +
+  xlab(expression(paste(Phi, " = ", logit(Theta)))) +
+  ylab("proportion of draws") +
+  ggtheme_tufte() +
+  theme(axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        panel.spacing.x = unit(2, "lines"),
+        panel.spacing.y = unit(2, "lines"))
+log_odds_growth_plot
+```
+
+In a histogram, a bin's height is proportional to the number of
+simulations that landed in that bin. Because each bin is the same
+width, a bin's area (given by its width time its height) must also
+be proportional to the number of simulations that landed in that bin.
+
+With simulation, the estimate of a probability landing in a bin is
+just the proportion of simulate values that land in the bin. Thus we
+can think of the area of a histogram's bar as an estimate of the
+probability a value will fall in that bin.
+
+Because the bins are exclusive (a number can't fall in two bins), the
+probability of landing in either of two bins is proportional to the
+sum of their areas. This notion extends to intervals, where the
+estimated probability of the random variable falling between -2 and 2
+is just the proportion of area between those two values in the
+histogram of simulations. Similarly, we can take a simulation-based
+estimate of $\mbox{Pr}[\Theta \leq \theta]$ for any $\theta$ as the
+proportion of simulated values that are less than or equal to
+$\theta$. This is just the area to the left of the $\theta$.
+
+As the number of draws $M$ increases, the estimated bin probabilities
+become closer and closer to the true values. Now we are going to look
+at the limiting continuous behavior. Put a point in the middle of the
+top of each histogram bar and connect them with lines. With a finite
+number of bins, that makes a jagged pointwise linear function. As the
+number of bins increases and the number of draws per bin increases,
+the function gets smoother and smoother. In the limit as $M
+\rightarrow \infty$, it approaches a smooth function. That smooth
+function is called the *probability density function* of the random
+variable.  Let's see what that limiting function looks like with $M =
+1\,000\,000$ draws.
+
+
+```{r fig.width= 10, out.width="100%", fig.cap='Histogram of $M = 1\\,000\\,000$ simulations of $\\Theta \\sim \\mbox{uniform}(0,1)$ transformed to $\\Phi = \\mbox{logit}(\\Theta)$. The black line connects the tops of the histogram bins.  In the limit, as the number of draws and bins approach infinity, the connecting line approaches the probability density function for the variable being simulated.'}
+
+set.seed(1234)
+M <- 1e6
+alpha <- logit(runif(M))
+density_limit_df = data.frame(alpha = alpha)
+density_limit_plot <-
+  ggplot(density_limit_df, aes(alpha)) +
+  geom_histogram(stat = "density", n = 75, color = "black", fill="#ffffe6",
+                 size = 0.15) +
+  stat_function(fun = dlogis,
+                args = list(location = 0, scale = 1),
+                col = 'black',
+                size = 0.3) +
+  scale_x_continuous(lim = c(-9, 9),
+                     breaks = c(-6, -4, -2, 0, 2, 4,  6)) +
+  xlab(expression(paste(Phi, " = ", logit(Theta)))) +
+  ylab("proportion of draws") +
+  ggtheme_tufte() +
+  theme(axis.text.y = element_blank(),
+        axis.ticks.y = element_blank())
+density_limit_plot
+```
+
+We have seen that the probability of a variable falling in an interval
+is estimated by proportion of the overall histogram area falls in the
+interval---that is, the sum of the histogram areas in the interval.
+What we want to do is let the number of bins and number of draws
+continue to increase to get ever better approximations.  When we let
+the number of bins increase toward infinity, we have a familiar limit
+from integral calculus.
+
+If $p_Y(y)$ is the continuous density function we get as the limit of
+the histogram, then the probability that $Y$ falls between $a$ and $b$
+is given by the proportion of area between $a$ and $b$ in the function
+$p_Y(y)$. This is the key insight for understanding density functions
+and continuous random variables.  For bounded intervals, we have
+
+$$
+\mbox{Pr}[a \leq Y \leq b]
+\ \propto \
+\int^b_a \ p_Y(y) \, \mathrm{d}y.
+$$
+
+To make our lives easier and avoid writing the proportional-to symbol
+($\propto$) everywhere, we will make the conventional assumption that
+our density functions like $p_Y$ are *normalized*.  This means that
+the overall area under their curve is one,
+
+$$
+\int_{-\infty}^{infty} p_Y(y) \mathrm{d}y \ = \ 1.
+$$
+
+With this assumption in place, we now have equality and can define
+closed interval probabilities by definite integrals as
+
+$$
+\mbox{Pr}[a \leq Y \leq b]
+\ = \
+\int^b_a \ p_Y(y) \, \mathrm{d}y.
+$$
+
+For simple upper bounds, we just integrate from negative infinity,
+
+$$
+\mbox{Pr}[Y \leq b]
+\ = \
+\int_{-\infty}^b \ p_Y(y) \, \mathrm{d}y.
+$$

@@ -397,7 +397,7 @@ distribution.  We define it as a function with somewhat peculiar
 notation,
 
 $$
-\mathsf{Bernoulli}(y \mid \theta)
+\mathrm{Bernoulli}(y \mid \theta)
 \ = \
 \begin{cases}
 \theta & \mbox{if} \ \ y = 1
@@ -422,20 +422,20 @@ to our example random variable $Y$ which had a 27% chance of being 1
 and a 73% chance of being 0, we can write
 
 $$
-p_Y(y) = \mathsf{Bernoulli}(y \mid 0.27).
+p_Y(y) = \mathrm{Bernoulli}(y \mid 0.27).
 $$
 
 To simplify notation even further, we will say that a random variable
 $U$ has a Bernoulli distribution and write
 
 $$
-U \sim \mathsf{Bernoulli}(\theta)
+U \sim \mathrm{Bernoulli}(\theta)
 $$
 
 to indicate that the probability mass function of $U$ is
 
 $$
-p_U(u) = \mathsf{Bernoulli}(u \mid \theta).
+p_U(u) = \mathrm{Bernoulli}(u \mid \theta).
 $$
 
 
@@ -1039,3 +1039,146 @@ Rounded to the nearest integer, the odds are 1817:1 against, so the
 Earl should expect to profit from his bet.^[Modulo the fact that one
 rare event might ruin him---these market-making schemes require a
 large bankroll and many repetitions to avoid ruin.]
+
+
+## Binomial and repeated binary trials
+
+Suppose we have a sequence of random variables, $V_1, \ldots, V_N$,
+each with a Bernoulli distribution $V_n \sim
+\mathrm{Bernoulli}(\theta)$.  That is, each $V_n$ takes on the value 1
+with a probabilty of $\theta$.
+
+We can think of $V_1, \ldots, V_N$ as $N$ repeated binary trials, each
+with a $\theta$ chance of success.^[The term "success" is the
+conventional name for the result 1 in an abstract binary trial, with
+result 0 being "failure".]  That is, each $V_n$ is a completely
+independent trial and each trial has a $\theta$ chance of success. By
+independent, we mean that the success of $Y_n$ does not depend on
+$Y_{n'}$ if $n \neq n'$.
+
+What can we say about the number of successes in $N$ trials?  Let
+
+$$
+\begin{array}{rcl}
+Y & = & V_1 + \cdots + V_N
+\\[3pt]
+& = & \sum_{n = 1}^N V_n,
+\end{array}
+$$
+
+and the question reduces to what we can say about the random variable
+$Y$.  Repeated binary trials come up so often that the distribution of
+$Y$ has a name, the *binomial distribution*.  Pascal figured out that
+for any number of trials $N \geq 0$, chance of success $\theta \in [0,
+1]$, the probability of a total number of successes $y \in 0:N$ is
+
+$$
+p_Y(y) = \mathrm{Binomial}(y \mid N, \theta),
+$$
+
+where^[The value ${N \choose y}$ is called the *binomial coefficient*
+due to its use here, and defined by $${N \choose y} = \frac{N!}{(N -
+y)! \times y!}.$$ The value of the *factorial* $m!$ for $m > 0$ is
+$$m! = m \times (m - 1) \times \cdots 2 \times 1.$$ The recursive
+definition has base case $0! = 1$ and inductive case $(n + 1)! = n
+\times n!.$ The postfix factorial operator binds more tightly than
+multiplication, so this resolves as $n \times (n!)$. ]
+
+$$
+\mathrm{Binomial}(y \mid N, \theta)
+\ = \
+{N \choose y} \times \theta^y \times (1 - \theta)^{N - y}.
+$$
+
+## Variance of the Bernoulli and binomial
+
+If $Y \sim \mathrm{Bernoulli}(\theta)$, then
+
+$$
+\begin{array}{rcl}
+\mathbb{E}[Y]
+& = &
+\sum_{y \in 0:1} p_Y(y) \times y
+& = &
+\\[2pt]
+& = & \mathrm{Bernoulli}(0 \mid \theta) \times 0
+      + \mathrm{Bernoulli}(1 \mid \theta) \times 1
+\\[2pt]
+& = & (1 - \theta) \times 0 + \theta \times 1
+\\[2pt]
+& = & \theta.
+\end{array}
+$$
+
+Plugging this into the formula for variance yields
+
+$$
+\begin{array}{rcl}
+\mathrm{var}[Y]
+& = &
+\mathbb{E}\left[ (Y - \mathbb{E}[Y])^2 \right]
+\\[2pt]
+& = &
+\sum_{y \in 0:1} p_Y(y) \times (y - \theta)^2
+\\[2pt]
+& = & (1 - \theta) \times (0 - \theta)^2
+      +  \theta \times (1 - \theta)^2
+\\[2pt]
+& = &
+(1 - \theta) \times \theta^2
++ \theta \times (1 - 2 \times \theta + \theta^2)
+\\[2pt]
+& = &
+\theta^2 - \theta^3
++ \theta - 2 \times \theta^2 + \theta^3
+\\[2pt]
+& = &
+\theta - \theta^2
+\\[2pt]
+& = &
+\theta \times (1 - \theta).
+\end{array}
+$$
+
+
+## The multinomial distribution
+
+The binomial distribution is for repeated binary trials---the
+multinomial distribution extends the same idea to repeated categorical
+trials.  Just as a multiple coin tosses can be represented by a
+binomial distribution, multiple die rolls can be represented by
+multinomial distributions.
+
+
+## Counts and the Poisson distribution
+
+Consider two binomial random variables,
+
+$$
+Y \sim \mathrm{binomial}(N, \theta),
+$$
+
+and
+
+$$
+Z \sim \mathrm{binomial}(2 \times N, \frac{1}{2} \theta).
+$$
+
+The variable $Z$ has a maximum value that is twice as large of that of
+$Y$, yet it has the same expectation,
+
+$$
+\mathbb{E}[Y] = \mathbb{E}[Z] = N \times \theta.
+$$
+
+Poisson is the limit of the binomial in the sense that
+
+$$
+\mathrm{Poisson}(y \mid \lambda)
+\ = \
+\lim_{N \rightarrow \infty}
+\mathrm{Binomial}(y \mid N, \frac{1}{N} \lambda)
+$$
+
+We can plot this out in a series of binomials:
+binomial(N, lambda / N) for N in ceil(lambda), *= sqrt(10) ...

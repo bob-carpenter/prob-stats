@@ -3,6 +3,7 @@
 library(ggplot2)
 library(knitr)
 knitr::opts_chunk$set(
+  dev.args = list(bg = '#FFFFF8'),
   cache = TRUE,
   collapse = TRUE,
   comment = "  ",
