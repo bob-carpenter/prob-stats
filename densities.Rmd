@@ -4,7 +4,10 @@
 
 Suppose $\Theta \sim \mbox{uniform}(0, 360)$ is the result of spinning
 a fair spinner.  The cumulative distribtution function is defined
-exactly as for discrete random variables,
+exactly as for discrete random variables,^[Note that we have moved
+from Roman to Greek letters, but have kept to our capitalization
+convention for random variables---$\Theta$ is the capitalized form of
+$\theta$.]
 
 $$
 F_{\Theta}(\theta) = \mbox{Pr}[\Theta \leq \theta].
@@ -22,7 +25,7 @@ This is a linear function of $\theta$, i.e., $\frac{1}{360} \times
 \theta$, as is reflected in the plot.
 
 
-```{r echo=FALSE, fig.cap="Cumulative distribution function for the angle $\theta$ (in degrees) resulting from a fair spin of a spinner.  The dotted line shows the value at 180 degrees, which is a probability of one half and the dashed line at 270 degrees, which is a probability of three quartersxs."}
+```{r echo=FALSE, fig.cap="Cumulative distribution function for the angle $\\theta$ (in degrees) resulting from a fair spin of a spinner.  The dotted line shows the value at 180 degrees, which is a probability of one half and the dashed line at 270 degrees, which is a probability of three quartersxs."}
 
 library(ggplot2)
 df_cdf_spinner <- data.frame(x = c(-90, 0, 360, 450), y = c(0, 0, 1, 1))
@@ -170,7 +173,8 @@ $$
 \mbox{logit}^{-1}(0) = 0.5.
 $$
 
-Symmetry around zero makes the log odds convenient as a parameter.
+Unboundedness and symmetry around zero make log odds quite convenient
+statistically and will resurface in categorical regressions.
 
 The third relevant feature of the log odds plot is that almost all of
 the values are within $\pm 6$ of the origin. This is not surprising
@@ -488,7 +492,7 @@ f^{-1}(u) \Big|_{u = y}
 $$
 
 
-We're going to work through this in pieces using our running exmaple.
+We're going to work through this in pieces using our running example.
 To keep the puzzle pieces straight, let $X = \Theta \sim
 \mbox{uniform}(0, 1)$ be our uniform probability varibale let
 $Y = \Phi = \mbox{logit}(\Theta)$ be the transformed variable on the
