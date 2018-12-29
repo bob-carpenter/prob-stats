@@ -8,5 +8,6 @@ rmd_files: [
   "multiple-random-variables.Rmd",
   "expectations.Rmd",
   "joint.Rmd",
-  "continuous-random-variables.Rmd"
+  "continuous-random-variables.Rmd",
+  "densities.Rmd"
 ]
