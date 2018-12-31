@@ -59,8 +59,11 @@ theta_ascending <- sort(theta)
 prob <- (1:M) / M
 ```
 
-The trick is to make the sorted random variable the $x$-axis in the
-plot.  Here's a run with $M = 1\,000$ simulated values.
+The expression `(1:M)` denotes the sequence $1, 2, \ldots, M$, so that
+`(1:M) / M` denotes $\frac{1}{M}, \frac{2}{M}, \ldots, \frac{M}{M}$.
+The trick is to put the sorted random variable the $x$-axis and the
+probability values on the $y$ axis. Here's a run with $M = 1\,000$
+simulated values.
 
 ```{r fig.cap="Plot of the cumulative distribution function of a random variable $\\Theta$ representing the result of a fair spin of a spinner from 0 to 360 degrees.  As expected, it is a simple linear function because the underlying variable $\\Theta$ has a uniform distribution."}
 
@@ -227,6 +230,65 @@ $$
 
 on the probability scale.
 
+We can also do what we did for uniform distributions and plot the
+cumulative distribution based on simulation; we need merely insert the
+log-odds transform.
+
+```
+for (m in 1:M)
+  theta[m] <- logit(uniform_rng(0, 360))
+theta_ascending <- sort(theta)
+prob <- (1:M) / M
+```
+
+We again plot with $M = 1\,000$ simulated values.
+
+```{r fig.cap="Plot of the cumulative distribution function of a random variable $\\Phi = \\mbox{logit}(\\Theta)$ representing the the log odds transform of a uniformly distributed random variable $\\Theta \\sim \\mbox{uniform}(0, 1)$.  The curve it picks out is S-shaped.  The asymptotes at 0 and 1 are indicated with dashed lines; the symmetries around 0 on the $x$-axis and 0.5 on the $y$-axis are picked out with dotted lines."}
+
+logit <- function(u) log(u / (1 - u))
+
+M <- 1000
+phi <- logit(runif(M))
+phi_asc <- sort(phi)
+prob <- (1:M)/M
+
+logistic_cdf_df <- data.frame(phi = phi_asc, prob = prob)
+logistic_cdf_plot <-
+  ggplot(logistic_cdf_df, aes(x = phi, y = prob)) +
+  geom_line() +
+  geom_hline(yintercept = 1, size = 0.3, linetype = "dashed",
+             color = "#333333") +
+  geom_hline(yintercept = 0, size = 0.3, linetype = "dashed",
+             color = "#333333") +
+  geom_vline(xintercept = 0, size = 0.3, linetype = "dotted",
+             color = "#333333") +
+  geom_hline(yintercept = 0.5, size = 0.3, linetype = "dotted",
+             color = "#333333") +
+  scale_x_continuous(breaks = c(-8, -6, -4, -2, 0, 2, 4, 6, 8)) +
+  scale_y_continuous(breaks = c(0, 0.25, 0.5, 0.75, 1.0)) +
+  xlab(expression(phi)) +
+  ylab(expression(F[Phi](phi))) +
+  ggtheme_tufte()
+logistic_cdf_plot
+```
+
+The result is an S-shaped function whose values lie between 0 and 1,
+with asymptotes at one as $\theta$ approaches $\infty$ and at zero as
+$\theta$ approaches $-\infty$.  The argument of 0 has a value of 0.5.
+
+The cumulative distribution function of this distribution is well
+known and has a closed analytic form based on the inverse of the log
+odds transform,
+
+$$
+F_{\Theta}(\theta)
+\ = \
+\mathrm{logit}^{-1}(\theta)
+\ = \
+\frac{1}{1 + \exp(-\theta)}.
+$$
+
+
 ## Expectation and variance of continuous random variables
 
 Just as with discrete random variables, the expectation of a
@@ -257,29 +319,33 @@ $$
 \right].
 $$
 
-Let's check this with some simulation.  We know how to simulate
-logistic random variables---let's estimate their expectation and
-variance.  We just perform draws then calculate means and variances,
+Let's check this with some simulation by estimating the mean and
+variance of our running example. Suppose we have a a random variable
+$\Phi = \mbox{logit}(\Theta)$, where $\Theta \sim \mbox{uniform}(0,
+1)$. We can estimate the expectation and variance of $\Phi$ by
+simulating and calculating means and variances of the simulated values,
 
 ```
+set.seed(1234)
+phi <- rep(NA, M)
 for (m in 1:M)
-  y[m] = logit(uniform_rng(0, 1))
-E_Y = sum(y) / M
-var_Y = sum((y - E_y)^2) / M
-print 'Estimated E[Y] = ' E_Y
-      '; var[Y] = ' var_Y
-      '; sd[Y] = ' sqrt(var_Y)
+  phi[m] = logit(uniform_rng(0, 1))
+E_Phi = sum(phi) / M
+var_Phi = sum((phi - E_Phi)^2) / M
+print 'Estimated E[Phi] = ' E_Phi
+      '; var[Phi] = ' var_Phi
+      '; sd[Phi] = ' sqrt(var_Phi)
 ```
 
 Let's run that for $M = 1\,000\,000$ and see what we get.
 
 ```{r}
 M <- 1e6
-y <- rlogis(M)
-E_Y <- sum(y) / M
-var_Y <- sum((y - E_Y)^2) / M
-printf('Estimated  E[Y] = %3.2f;  var[Y] = %3.2f;  sd[Y] = %3.2f',
-       E_Y, var_Y, sqrt(var_Y))
+phi <- rlogis(M)
+E_Phi <- sum(phi) / M
+var_Phi <- sum((phi - E_Phi)^2) / M
+printf('Estimated  E[Phi] = %3.2f;  var[Phi] = %3.2f;  sd[Phi] = %3.2f',
+       E_Phi, var_Phi, sqrt(var_Phi))
 ```
 
 The true value of the expectation $\mathbb{E}[Y]$ is zero, and the
