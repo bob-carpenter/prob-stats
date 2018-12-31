@@ -22,8 +22,7 @@ F_{\Theta}(\theta) = \frac{\theta}{360}.
 $$
 
 This is a linear function of $\theta$, i.e., $\frac{1}{360} \times
-\theta$, as is reflected in the plot.
-
+\theta$, as is reflected in the following plot.
 
 ```{r echo=FALSE, fig.cap="Cumulative distribution function for the angle $\\theta$ (in degrees) resulting from a fair spin of a spinner.  The dotted line shows the value at 180 degrees, which is a probability of one half and the dashed line at 270 degrees, which is a probability of three quartersxs."}
 
@@ -48,6 +47,42 @@ cdf_spinner_plot <-
   ggtheme_tufte()
 cdf_spinner_plot
 ```
+
+We can verify this result using simulation.  To estimate cumulative
+distribution functions, we take $M$ simulated values $\theta^{(m)}$ and
+then sort them in ascending order.
+
+```
+for (m in 1:M)
+  theta[m] <- uniform_rng(0, 360)
+theta_ascending <- sort(theta)
+prob <- (1:M) / M
+```
+
+The trick is to make the sorted random variable the $x$-axis in the
+plot.  Here's a run with $M = 1\,000$ simulated values.
+
+```{r fig.cap="Plot of the cumulative distribution function of a random variable $\\Theta$ representing the result of a fair spin of a spinner from 0 to 360 degrees.  As expected, it is a simple linear function because the underlying variable $\\Theta$ has a uniform distribution."}
+
+M <- 1000
+theta <- runif(M, 0, 360)
+theta_asc <- sort(theta)
+prob <- (1:M)/M
+
+unif_cdf_df <- data.frame(theta = theta_asc, prob = prob)
+unif_cdf_plot <-
+  ggplot(unif_cdf_df, aes(x = theta, y = prob)) +
+  geom_line() +
+  scale_x_continuous(breaks = c(0, 90, 180, 270, 360)) +
+  scale_y_continuous(breaks = c(0, 0.25, 0.5, 0.75, 1.0)) +
+  xlab(expression(theta)) +
+  ylab(expression(F[Theta](theta))) +
+  ggtheme_tufte()
+unif_cdf_plot
+```
+
+Even with $M = 1\,000$, this is pretty much indistinguishable from the
+one plotted analytically.
 
 As with discrete parameters, the cumulative distribution function may
 be used to calculate interval probabilities, e.g.,^[With continuous
@@ -191,6 +226,69 @@ $$
 $$
 
 on the probability scale.
+
+## Expectation and variance of continuous random variables
+
+Just as with discrete random variables, the expectation of a
+continuous random variable $Y$ is defined as a weighted average of its
+values.  Only this time, the weights are defined by the probability
+density function rather than by the probability mass function.
+Because $Y$ takes on continuous values, we'll need calculus to compute
+the weighted average.
+
+$$
+\mathbb{E}[Y] = \int_{-\infty}^{\infty} y \times p_Y(y) \, \mathrm{d}y.
+$$
+
+Integrals of this general form should be read as a weighted average.
+It averages the value of $y$ with weights equal to the density
+$p_Y(y)$ of $y$.^[Sometimes physicists will rearrange integral
+notation to reflect this and write $$\mathbb{E}[f(y)] = \int
+\mathrm{d}y \ p_Y(y) \times f(y)$$ or even $$\mathbb{E}[f(y)] = \int
+p_Y(\mathrm{d}y) \times f(y).$$]
+
+Variances are calculated just as they were for discrete variables, as
+
+$$
+\mbox{var}[Y]
+\ = \
+\mathbb{E}\left[
+\left(Y - \mathbb{E}[Y]\right)
+\right].
+$$
+
+Let's check this with some simulation.  We know how to simulate
+logistic random variables---let's estimate their expectation and
+variance.  We just perform draws then calculate means and variances,
+
+```
+for (m in 1:M)
+  y[m] = logit(uniform_rng(0, 1))
+E_Y = sum(y) / M
+var_Y = sum((y - E_y)^2) / M
+print 'Estimated E[Y] = ' E_Y
+      '; var[Y] = ' var_Y
+      '; sd[Y] = ' sqrt(var_Y)
+```
+
+Let's run that for $M = 1\,000\,000$ and see what we get.
+
+```{r}
+M <- 1e6
+y <- rlogis(M)
+E_Y <- sum(y) / M
+var_Y <- sum((y - E_Y)^2) / M
+printf('Estimated  E[Y] = %3.2f;  var[Y] = %3.2f;  sd[Y] = %3.2f',
+       E_Y, var_Y, sqrt(var_Y))
+```
+
+The true value of the expectation $\mathbb{E}[Y]$ is zero, and the
+true value of the variance is $\frac{\pi^2}{3} \approx 3.29$.^[The
+true mean and variance for the logistic distribution can be calculated
+analytically. See the final section on this chapter for the analytic
+derivativation of the probability density function.  The density must
+be integrated to analytically calcuate the mean and variance, though
+the result for the mean also arises from symmetry.]
 
 ## From histograms to densities
 
@@ -527,7 +625,7 @@ of $x$ by averaging,
 $$
 p_X(x)
 \ \approx \
-\sum_{m \in 1:M} p_{X,Y}(x, y^{(m)}).
+\frac{1}{M} \sum_{m \in 1:M} p_{X,Y}(x, y^{(m)}).
 $$
 
 Conditional densities $p_{X \mid Y}$ are defined by dividing the joint
@@ -582,8 +680,9 @@ p_{X \mid Y}(x \mid y)
 p_X(x).
 $$
 
-Expectations for continuous random variables are defined by
-integration,
+Expectations for continuous random variables are defined using
+integration to calculate the average of $y$ weighted by the density
+$p_Y(y)$,
 
 $$
 \mathbb{E}[Y]
@@ -591,11 +690,21 @@ $$
 \int_{-\infty}^{\infty} y \times p_Y(y) \, \mathrm{d}y.
 $$
 
-An integral such as this should be read as a weighted average.  It
-averages the value of $y$ with weights equal to the density $p_Y(y)$
-of $y$.^[Sometimes physicists will rearrange integral notation to
-reflect this and write $$\mathbb{E}[f(y)] = \int \mathrm{d}y \ p_Y(y) \times f(y)$$ or
-even $$\mathbb{E}[f(y)] = \int p_Y(\mathrm{d}y) \times f(y).$$]
+In moving from discrete to continuous variables, we have merely
+switched the definition from summation to integration.  Luckily,
+calculation by simulation need not change---we will still be
+calculating expectations by averaging over simulated values.  If we
+can simulate $y^{(m)}$ according to $p_Y(y)$ for $m \in 1:M$, our
+simulation-based estimate is
+
+$$
+\mathbb{E}[f(y)]
+\ \approx \
+\frac{1}{M} \sum_{m = 1}^M
+f \! \left( y^{(m)} \right).
+$$
+
+This estimate becomes exact as $M \rightarrow \infty$.
 
 Variances are defined in terms of expectation, just as before,
 
@@ -611,6 +720,16 @@ Y - \mathbb{E}[Y]
 \mathbb{E}[Y^2]
 - \left( \mathbb{E}[Y] \right)^2.
 $$
+
+Variances can be estimated through simulation like any other
+expectation.^[The sample variance computed by standard software
+divides by $M - 1$ to correct for the bias introduced by using the
+sample mean to estimate variance.  The maximum likelihood estimate
+resulting from dividing by $M$ is biased to underestimate variance
+with finite samples; asymptotically, it provides the correct
+result, because the $\frac{M}{M-1}$ correction factor approaches one
+as as $M$ increases.]
+
 
 
 ## Jacobians and changes of variables
@@ -642,10 +761,11 @@ $$
 
 We're going to work through this in pieces using our running example.
 To keep the puzzle pieces straight, let $X = \Theta \sim
-\mbox{uniform}(0, 1)$ be our uniform probability varibale let
-$Y = \Phi = \mbox{logit}(\Theta)$ be the transformed variable on the
-log odds scale.  The question is now what is the density of $\Phi$.
-We start by noting that
+\mbox{uniform}(0, 1)$ be our uniform probability variable and $Y =
+\Phi = \mbox{logit}(\Theta)$ be the transformed variable on the log
+odds scale.  Our goal is to calculate the density of $\Phi$ given that
+we know the density of $\Theta$ and the transform from
+$\Theta$ to $\Phi$.  We begin by noting that
 
 $$
 \mbox{logit}^{-1}(y) = \frac{1}{1 + \exp(-y)}.
