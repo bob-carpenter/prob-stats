@@ -264,7 +264,8 @@ logistic_cdf_plot <-
              color = "#333333") +
   geom_hline(yintercept = 0.5, size = 0.3, linetype = "dotted",
              color = "#333333") +
-  scale_x_continuous(breaks = c(-8, -6, -4, -2, 0, 2, 4, 6, 8)) +
+  scale_x_continuous(lim = c(-7, 7),
+                     breaks = c(-6, -4, -2, 0, 2, 4, 6)) +
   scale_y_continuous(breaks = c(0, 0.25, 0.5, 0.75, 1.0)) +
   xlab(expression(phi)) +
   ylab(expression(F[Phi](phi))) +
@@ -288,6 +289,11 @@ F_{\Theta}(\theta)
 \frac{1}{1 + \exp(-\theta)}.
 $$
 
+The inverse log odds function is itself known as the
+*logistic sigmoid* function.^[A name presumably derived from its shape
+and the propensity of mathematicians, like doctors, to prefer Greek
+terminology---the Greek letter "$\sigma$" (sigma) corresponds to the
+Roman letter "s".]
 
 ## Expectation and variance of continuous random variables
 

@@ -190,7 +190,7 @@ for (N in 2^c(2, 4, 6, 8, 10, 12))
 
 plot_runif <-
   ggplot(df_runif, aes(y)) +
-  facet_grid(size ~ ., scales = "free") +
+  facet_grid(size ~ .) +
   geom_histogram(binwidth = 0.1, center = 0.05, color = "black",
                  fill="#ffffe6", size = 0.25) +
   scale_x_continuous("y", breaks = seq(0, 1, 0.2), limits = c(0, 1),

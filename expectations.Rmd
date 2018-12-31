@@ -211,7 +211,6 @@ d20_var_plot <-
   geom_vline(xintercept = 10.5, size = 0.3, linetype = "dashed",
              color = "#333333") +
   scale_x_continuous(breaks=c(1, 5, 10, 11, 15, 20)) +
-#  scale_y_log10(lim = c(1/10, 100), breaks = c(1/10, 1, 10, 100)) +
   ylab("squared difference from mean") +
   ggtheme_tufte()
 d20_var_plot
