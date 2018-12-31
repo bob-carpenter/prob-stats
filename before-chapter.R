@@ -11,7 +11,7 @@ knitr::opts_chunk$set(
   dpi = 300,
   echo = FALSE,
   fig.align = "center",
-  fig.width = 8,
+  fig.width = 7,
   fig.asp = 0.618,
   fig.show = "hold",
   include = TRUE,

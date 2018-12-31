@@ -140,7 +140,7 @@ where the constant $c = \mathbb{E}[Y]$.
 
 In our example of the six-sided die, the expectation is the average
 roll, $\mathrm{E}[Y] = 3.5$.  As is often the case with averages of
-discrete random variables, they are not possible values of the
+discrete random variables, 3.5 is not itself a possible value of the
 variable.  That is, it's not possible to roll a 3.5 on a six-sided
 die.
 
@@ -175,6 +175,8 @@ $$
 \end{array}
 $$
 
+
+
 We can, of course, use simulation to calculate variances.
 
 ```
@@ -193,18 +195,40 @@ printf('estimated var[Y] = %3.2f\n',
        sum((sample(6, size = M, replace = TRUE) - 3.5)^2) / M)
 ```
 
+We see that the extreme values have an outsized influence on the sum
+of squared errors.  That's because we're dealing with squared error,
+which reduces small errors (e.g., $0.5^2 = 0.25$) and magnifies large
+errors (e.g., $5^2 = 25$).  We can see a plot of the squared
+differences from the mean that wold be involved in calculating
+the variance of a 20-sided die.
+
+```{r fig.cap="Squared differences from the mean of 10.5 for a 20-sided die roll.  The mean is indicated with a dashed vertical line."}
+d20_var_df <- data.frame(roll = 1:20, sqe = (1:20 - 10.5)^2)
+d20_var_plot <-
+  ggplot(d20_var_df, aes(x = roll, y = sqe)) +
+  geom_line() +
+  geom_point() +
+  geom_vline(xintercept = 10.5, size = 0.3, linetype = "dashed",
+             color = "#333333") +
+  scale_x_continuous(breaks=c(1, 5, 10, 11, 15, 20)) +
+#  scale_y_log10(lim = c(1/10, 100), breaks = c(1/10, 1, 10, 100)) +
+  ylab("squared difference from mean") +
+  ggtheme_tufte()
+d20_var_plot
+```
+
 ## Why squared error?
 
 Why are we calculating average squared difference from the expectation
 rather than, say, average absolute difference?  The answer has to do
 with the nature of averages.   It turns out the average is the $x$
-that minimizes the sum of squared differences
+that minimizes the sum of squared differences,
 
 $$
-\mathrm{sqe}(x, y) = \sum_{n \in 1:N} (y_n - x)^2
+\mathrm{sqe}(x, y) = \sum_{n \in 1:N} (y_n - x)^2,
 $$
 
-or equivalently, minimizes the averaged squared difference,
+or equivalently, minimizes the average (or mean) squared difference,
 
 $$
 \mathrm{msqe}(x, y) = \frac{1}{N} \sum_{n \in 1:N} (y_n - x)^2.

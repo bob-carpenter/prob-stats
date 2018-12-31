@@ -230,11 +230,9 @@ Mathematicians are picky because, topologically speaking, a disc has
 two dimensions whereas a circle has but one.]
 
 ```{r fig.cap="A unit circle (dotted line) centered at the origin is inscribed in a square (dashed lines) with axes running from -1 to 1."}
-
+radians <- seq(0, 2 * pi, length.out=100)
 bullseye_target_plot <-
   ggplot(data.frame(x = c(), y = c()), aes(X, Y), xlim = c(-1, 1), ylim = c(-1, 1)) +
-#  geom_vline(xintercept = 0, size = 0.3, color = "#333333") +
-#  geom_hline(yintercept = 0, size = 0.3, color = "#333333") +
   annotate("path", x = cos(radians), y = sin(radians),
            size = 0.8, color = '#333333', linetype="dotted") +
   annotate("path", x = c(-1, -1, 1, 1, -1), y = c(-1, 1, 1, -1, -1),
@@ -481,9 +479,10 @@ curse_plot <-
 curse_plot
 ```
 
-It seems intuitively that draws should be uniformly dispersed, they in
-fact do two things that are quite surprising based on our intuitions
-in low dimensions,
+While it may seem intuitively from thinking in two dimensions that
+draws should be uniformly dispersed and thus appear near the origin,
+they in fact do two things that are quite surprising based on our
+low-dimensional intuitions,
 
 * draws get further and further away from the origin, on average, as
 dimension increases, and
@@ -527,9 +526,9 @@ for (m in 1:M) {
   y <- runif(N)
   d[m] <- euclidean_length(x - y)
 }
-printf('min = %5.1f;  mean = %5.1f;  max = %5.1f\n',
+printf('min = %2.1f;  mean = %2.1f;  max = %2.1f\n',
        min(d), mean(d), max(d))
 ```
 
-We see that the average distances between points is even greater than
-the average distance to the origin.
+We see that the average distances between randomly generated points is
+even greater than the average distance to the origin.

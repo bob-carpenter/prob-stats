@@ -465,6 +465,154 @@ don't even require the formula for the density functin $p_{\Phi}$---we
 only need to be able to simulate random instantiations of the random
 variable in question.
 
+## Laws of probability for densities
+
+Whether a random variable $Y$ is continuous or discrete, its
+cumulative distribution function $F_Y$ is defined by
+
+$$
+F_Y(y) = \mbox{Pr}[Y \leq y].
+$$
+
+Using simulation, if $Y$ is a continuous random variable, its
+probability density function $p_Y$ is the limit of the histogram of
+simulation draws.  Using calculus, the density $p_Y$ of a continuous
+random variable $Y$ is defined as the derivative of the cumulative
+distribution function $F_Y$,^[Differential notation avoids the fiddly
+notation arising from bound vaiables, e.g., $$p_Y(y) \ = \
+\frac{\mathrm{d}}{\mathrm{d}y} F_Y(y).$$ With multivariate functions,
+the derivative operator is replaced with the gradient operator $\nabla.$]
+
+$$
+p_Y = \mathrm{d} F_Y.
+$$
+
+Joint cumulative distibution functions for a pair of continuous random
+variables $X, Y$ are defined as expected,
+
+$$
+F_{X, Y}(x, y) = \mbox{Pr}[X \leq x \ \mbox{and} \ Y \leq y],
+$$
+
+and may be easily extended to more variables.  With simulation,
+cumulative distribution functions may be recreated by sorting the
+simulated values and normalizing.
+
+Joint densities for a pair $X, Y$ of continuous random variables are
+defined by differentiating the joint cumulative distribution
+twice,^[With bound variables, $$p_{X, Y}(x, y) =
+\frac{\partial^2}{\partial x \partial y} F_{X, Y}(x, y).$$]
+
+$$
+p_{X, Y} = \mathrm{\partial^2} F_{X, Y}.
+$$
+
+Marginal densities $p_X$ may now be defined in terms of the joint
+density $p_{X, Y}$ by integration,^[If we had a convenient integral
+operator, we could avoid the bound variable fiddling.  As written, in
+the traditional style, it is muddied that the integral just averages
+over $y$ treating $x$ as a variable bound by the function definition
+notation.]
+
+$$
+p_X(x) = \int_{-\infty}^{\infty} p_{X, Y}(x, y) \, \mathrm{d}y.
+$$
+
+With simulation, if we can simulate $x^{(m)}, y^{(m)}$ jointly, then
+we can simulate $x^{(m)}$ by simply dropping $y^{(m)}$.
+
+If we can simulate from $Y$, we can compute $p_X(x)$ for a given value
+of $x$ by averaging,
+
+$$
+p_X(x)
+\ \approx \
+\sum_{m \in 1:M} p_{X,Y}(x, y^{(m)}).
+$$
+
+Conditional densities $p_{X \mid Y}$ are defined by dividing the joint
+density $p_{X, Y}$ by the marginal density $p_{X}$,
+
+$$
+p_{X \mid Y}(x \mid y)
+\ = \
+\frac{\displaystyle p_{X, Y}(x, y)}
+     {p_Y(y)}.
+$$
+
+Conditional densities $p_{X \mid Y}(x \mid y)$ may be handled by
+simulation for specific values of $y$.
+
+Equivalently, we can see this as a definition of the joint density in
+terms of the conditional and marginal,
+
+$$
+p_{X, Y}(x, y)
+\ = \
+p_{X \mid Y}(x \mid y) \times p_Y(y).
+$$
+
+With simulation, this is often the strategy to generate simulations
+from the joint distribution---first simulate from $Y$, then simulate
+$X$ given $Y$.
+
+A convenient form of marginalization uses this definition,
+
+$$
+p_X(x)
+= \int_{-\infty}^{\infty}
+p_{X \mid Y}(x, y) \times p_Y(y)
+\, \mathrm{d} y.
+$$
+
+Continuous random variables $X$ and $Y$ are independent if their
+densities factor, so that for all $x, y$,
+
+$$
+p_{X, Y}(x, y)
+\ = \
+p_X(x) \times p_Y(y),
+$$
+
+or equivalently,
+
+$$
+p_{X \mid Y}(x \mid y)
+\ = \
+p_X(x).
+$$
+
+Expectations for continuous random variables are defined by
+integration,
+
+$$
+\mathbb{E}[Y]
+\ = \
+\int_{-\infty}^{\infty} y \times p_Y(y) \, \mathrm{d}y.
+$$
+
+An integral such as this should be read as a weighted average.  It
+averages the value of $y$ with weights equal to the density $p_Y(y)$
+of $y$.^[Sometimes physicists will rearrange integral notation to
+reflect this and write $$\mathbb{E}[f(y)] = \int \mathrm{d}y \ p_Y(y) \times f(y)$$ or
+even $$\mathbb{E}[f(y)] = \int p_Y(\mathrm{d}y) \times f(y).$$]
+
+Variances are defined in terms of expectation, just as before,
+
+$$
+\mbox{var}[Y]
+\ = \
+\mathbb{E}\left[
+\left(
+Y - \mathbb{E}[Y]
+\right)^2
+\right]
+\ = \
+\mathbb{E}[Y^2]
+- \left( \mathbb{E}[Y] \right)^2.
+$$
+
+
 ## Jacobians and changes of variables
 
 When we moved from a random variable $\Theta \sim \mbox{uniform}(0,

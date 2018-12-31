@@ -1,4 +1,4 @@
-# Joint, Marginal, and Conditional Distributions
+# Joint, Marginal, and Conditional Probabilities
 
 
 ## Diagnostic accuracy
@@ -46,10 +46,11 @@ $$
 \mbox{Pr}[Y = 0 \mid Z = 0] = 0.95.
 $$
 
-We read $\mbox{Pr}[\mathrm{A} \mid \mathrm{B}]$ as the *conditional probability* of
-event $\mathrm{A}$ given that we know event $\mathrm{B}$ occurred.  Knowing that event
-$\mathrm{B}$ occurs often gives us information about the probability of $\mathrm{A}$
-occurring.
+We read $\mbox{Pr}[\mathrm{A} \mid \mathrm{B}]$ as the *conditional
+probability* of event $\mathrm{A}$ given that we know event
+$\mathrm{B}$ occurred.  Knowing that event $\mathrm{B}$ occurs often,
+but not always, gives us information about the probability of
+$\mathrm{A}$ occurring.
 
 The conditional probability function $\mbox{Pr}[\, \cdot \mid
 \mathrm{B}]$ behaves just like the unconditional probability function
@@ -66,7 +67,10 @@ $\mathrm{B}$ instead of the original $\Omega$.]
 
 For example, the sum of exclusive and exhaustive probabilities must be
 one, and thus the diagnostic error probabilities are one minus the
-correct diagnosis probabilities,
+correct diagnosis probabilities,^[These error rates are often called the
+false positive rate and false negative rate, the positive and negative
+in this case being the test result and the false coming from not
+matching the true disease status.]
 
 $$
 \mbox{Pr}[Y = 0 \mid Z = 1] = 0.05
@@ -398,13 +402,33 @@ Z = 1 \ \mbox{or} \ Z = 0 & \mathit{0.0545} & \mathit{0.8505}
 \end{array}
 $$
 
+Here's the same table with the symbolic values.
+
+$$
+\begin{array}{|r|r|r|r|}
+\hline
+\mbox{Probability} & Y = 1  & Y = 0 & Y = 1 \ \mbox{or} \ Y = 0
+\\ \hline
+Z = 1 & \mbox{Pr}[Y = 1, Z = 1] & \mbox{Pr}[Y = 0, Z = 1]
+& \mbox{Pr}[Z = 1]
+\\ \hline
+Z = 0 & \mbox{Pr}[Y = 1, Z = 0] & \mbox{Pr}[Y = 0, Z = 0]
+& \mbox{Pr}[Z = 0]
+\\ \hline
+Z = 1 \ \mbox{or} \ Z = 0
+& \mbox{Pr}[Y = 1] & \mbox{Pr}[Y = 0]
+& \mbox{Pr}[ \ ]
+\\ \hline
+\end{array}
+$$
+
 For example, that $\mbox{Pr}[Z = 1] = 0.01$ can be read off the top of
 the right margin column---it is the sum of the two table entries in
-the top row, $\mbox{Pr}[Z = 1, Y = 1]$ and $\mbox{Pr}[Z = 1, Y = 0]$.
+the top row, $\mbox{Pr}[Y = 1, Z = 1]$ and $\mbox{Pr}[Y = 0, Z = 1]$.
 
 In the same way, $\mbox{Pr}[Y = 0] = 0.8505$ can be read off the right
 of the bottom margin row, being the sum of the entries in the right
-column, $\mbox{Pr}[Z = 1, Y = 0]$ and $\mbox{Pr}[Z = 0, Y = 0]$.
+column, $\mbox{Pr}[Y = 0, Z = 1]$ and $\mbox{Pr}[Y = 0, Z = 0]$.
 
 The extra headings define the table so that
 each entry is the probability of the event on the top row and on the
@@ -429,7 +453,7 @@ The *joint probability mass function* for two discrete random variables
 $Y$ and $Z$ is defined by the joint probability,
 
 $$
-p_{Y,Z}(y, z) = \mbox{Pr}[Y = y, Z = z].$
+p_{Y,Z}(y, z) = \mbox{Pr}[Y = y, Z = z].
 $$
 
 The notation follows the previous notation with $Y, Z$ indicating that
@@ -440,6 +464,15 @@ Similarly, the conditional probablity mass function is defined by
 
 $$
 p_{Y \mid Z}(y \mid z) = \mbox{Pr}[Y = y \mid Z = z].
+$$
+
+It can equivalently be defined as
+
+$$
+p_{Y \mid Z}(y \mid z)
+\ = \
+\frac{\displaystyle p_{Y, Z}(y, z)}
+     {\displaystyle p_{Z}(z)}.
 $$
 
 The notation again follows that of the conditional probability
@@ -499,16 +532,32 @@ $$
 \end{array}
 $$
 
-Letting $\mathrm{A}$ be the event $Y = y$ and letting $\mathrm{B}$ be the event $Z = z$,
-Bayes's rule can be expressed using probability mass functions as
+Letting $\mathrm{A}$ be the event $Y = y$, $\mathrm{B}$ be the event
+$Z = z$, and $A_k$ be the event $Y = k$, Bayes's rule can be
+instantiated to
+
+$$
+\mbox{Pr}[Y = y \mid Z = z]
+\ = \
+\frac{\displaystyle
+        \mbox{Pr}[Z = z \mid Y = y] \times \mbox{Pr}[Y = y]}
+     {\displaystyle
+       \sum_{y' \in 1:K} \mbox{Pr}[Z = z \mid Y = y'] \times \mbox{Pr}[Y = y']}.
+$$
+
+This allows us to express Bayes's rule in terms of probabilty mass
+functions as
 
 $$
 p_{Y \mid Z}(y \mid z)
 \ = \
 \frac{\displaystyle p_{Z \mid Y}(z \mid y) \times p_{Y}(y)}
-     {\displaystyle \sum_{y' \ \in \ 1:K} p_{Z \mid Y}(z \mid y') \times p_Y(y')}.
+     {\displaystyle \sum_{y' \in 1:K} p_{Z \mid Y}(z \mid y') \times p_Y(y')}.
 $$
 
+Bayes's rule can be extended to infinite partitions of the event $B$,
+or in the probability mass function case, a variable $Y$ taking on
+infinitely many possible values.
 
 
 ## Fermat and the problem of points
@@ -585,7 +634,7 @@ for (k in 1:5) {
 ```
 
 This is very much in line with the result Fermat derived by brute
-force, namely $\frac{11}{16} \approx 0.688$.^[There are at most four
+force, namely $\frac{11}{16} \approx 0.688.$^[There are at most four
 more turns required, which have a total of $2^4 = 16$ possible
 outcomes, HHHH, HHHT, HHTH, $\ldots,$ TTTH, TTTT, of which 11 produce
 wins for the first player.]
