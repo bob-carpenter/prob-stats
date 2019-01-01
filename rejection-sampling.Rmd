@@ -1,0 +1,210 @@
+# Sampling from Arbitrary Distributions
+
+We have so far assumed we have a uniform random number generator that
+can sample from a $\mbox{uniform}(0, 1)$ distribution. That
+immediately lets us generate from a $\mbox{uniform}(a, b).$^[If $$ U
+\sim \mbox{uniform}(0, 1) $$ then $$a + U * (b - a) \sim
+\mbox{uniform}(a, b).$$] But what if we want to simulate realizations
+of a random variable $Y$ whose density $p_Y$ is not uniform?
+
+
+## Beta distribution
+As a first non-trivial example, let's consider the
+beta distribution.^[We'll have a lot more to say about beta
+distributions as we go along as they have a close connection to binary
+trial data.]  If $\Theta$ has a beta distribution, then its density
+$p_{\Theta}$ is
+
+$$
+\mbox{beta}(\theta \mid \alpha, \beta)
+\ \propto \
+\theta^{\alpha - 1} \times (1 - \theta)^{\beta - 1}.
+$$
+
+For example, here is a plot of a few beta distributions.
+
+```{r, out.width = "100%", fig.width=9, fig.asp = 0.8, fig.cap="Plots of the densities $\\mbox{beta}(\\theta \\mid \\alpha, \\beta)$ for different total counts $\\alpha + \\beta$ and different means $\\alpha / (\\alpha + \\beta).$ The vertical dotted lines are drawn at the mean. Only the distribution with 0.5 mean has a symmetric density; the other densities are skewed toward the right and thus have means to the left of their modes (maxima), where the modes exist."}
+
+beta_density_df <-
+  data.frame(theta = c(), p_theta = c(), count = c(), mean = c())
+mean_df <- data.frame(expectation = c(), count = c(), mean = c())
+thetas = (0:100)/100
+for (kappa in c(0.5, 2, 8, 32)) {
+  for (mu in c(0.5, 0.675, 0.85)) {
+    df_temp <-
+          data.frame(theta = thetas,
+                     p_theta = dbeta(thetas, kappa * mu, kappa * (1 - mu)),
+                     count = rep(paste("count ", kappa), length(thetas)),
+		     mean = rep(paste("mean ", mu), length(thetas)),
+		     mu = rep(mu, length(thetas)))
+    beta_density_df <- rbind(beta_density_df, df_temp)
+  }
+}
+beta_density_plot <-
+  ggplot(beta_density_df, aes(x = theta, y = p_theta)) +
+  facet_grid(mean ~ count) +
+  geom_line() +
+  geom_hline(yintercept = 0, linetype = "dashed", size = 0.25) +
+  geom_vline(aes(xintercept = mu), linetype = "dotted") +
+  scale_x_continuous(lim = c(0, 1), breaks = c(0, 0.5, 1),
+                     labels = c("0", "0.5", "1")) +
+  scale_y_continuous(lim = c(0, 7), breaks = c(0, 3, 6)) +
+  ggtheme_tufte() +
+  xlab(expression(theta)) +
+  ylab(expression(p[Theta](theta))) +
+  theme(panel.spacing.x = unit(3, "lines"),
+        panel.spacing.y = unit(2, "lines"))
+beta_density_plot
+```
+
+The area under each of these curves, as drawn, is exactly one. The
+beta distributions with small total count ($\alpha + \beta$)
+concentrate most of the probability mass near the boundaries. For many
+of these distributions, there is no mode as the density grows without
+limit as it approaches zero and/or one. As the count grows, the
+probability mass concentrates away from the boundaries and around the
+mean.
+
+## Uniform, bounded rejection sampling
+
+How do we sample from a beta distribution?  Rejection sampling is
+very simple algorithm to sample from general distributions for which
+we know how to compute the density.  It is a good starter algorithm
+because it is easy to understand, but points the way toward more
+complex sampling algorithms we will consider later.
+
+Let's start with the simplest possible kind of rejection sampling
+where we have a bounded distribution like a beta distribution.  In the
+case of the beta distribution, draws are bounded between 0 and 1.
+And lets's start with a $\mbox{beta}(6.8, 1.2)$ distribution,
+corresponding to the mean 0.675 and count of 8 case from the previous
+section.
+
+We observe that all values fall below 5 in the range we care about, so
+we will create a box with height 5 and width of 1. This box is shown
+in dotted lines in the following plot. Next, we draw uniformly from
+the box, drawing a horizontal position $\theta^{(m)} \sim
+\mbox{uniform}(0, 1)$ and vertical position $u^{(m)} \sim
+\mbox{uniform}(0, 5)$.  The points whose value for $u$ falls below the
+density at the value for $\theta$ are marked with plus signs.
+
+```{r}
+M <- 500
+alpha <- 6.8
+beta <- 1.2
+mean = alpha / (alpha + beta)
+mode = (alpha - 1) / (alpha + beta - 2)
+y <- (0:100) / 100
+u <- runif(M, 0, 5)
+theta <- runif(M, 0, 1)
+accept <- (u < dbeta(theta, alpha, beta))
+
+reject_beta_df <-
+  data.frame(y = y,
+             p_y = dbeta(y, alpha, beta))
+accept_beta_df <-
+  data.frame(theta = theta, u = u, accept = accept)
+
+reject_beta_plot <-
+  ggplot(accept_beta_df) +
+  geom_line(aes(x = y, y = p_y), data = reject_beta_df) +
+  geom_point(aes(x = theta, y = u, shape = accept),
+             color = "#333333", size = 1) +
+  scale_shape_manual(values = c(1, 3)) +
+  geom_vline(xintercept = c(0, 1), linetype="dotted") +
+  geom_hline(yintercept = 5, linetype = "dotted") +
+  geom_hline(yintercept = 0, linetype = "dotted") +
+  xlab(expression(theta)) +
+  ylab(expression(u)) +
+  ggtheme_tufte() +
+  theme(legend.position = "none")
+reject_beta_plot
+```
+
+More specifically, we keep the points $\theta^{(m)}$ where
+
+$$
+u^{(m)} < \mbox{beta}(\theta^{(m)} \mid 6.8, 1.2).
+$$
+
+To generate a single draw from $\mbox{beta}(6.8, 1.2)$, we continually
+sample $(u, \theta)$ uniformly until we find one meeting the above
+condition and return the $\theta$ value.
+
+```
+while (true)
+  u = uniform_rng(0, 5)
+  theta = uniform_rng(0, 1)
+  if (u < beta(theta | 6.8, 1.2))
+    return theta
+```
+
+Let's run this algorithm for $M = 100\,000$ iterations and see what the
+histogram looks like.
+
+```{r, fig.cap="Histogram of $M = 100\\,000$ Draws from $\\mbox{beta}(6.8, 1.2)$ made via rejection sampling.  The true density is plotted over the histogram as a black line.  The acceptance rate for draws was roughly 20%."}
+
+set.seed(1234)
+M <- 100000
+accept <- 0
+total <- 0
+m <- 1
+theta <- rep(NA, M)
+while (m <= M) {
+  u <- runif(1, 0, 5)
+  theta_star <- runif(1, 0, 1)
+  total <- total + 1
+  if (u < dbeta(theta_star, 6.8, 1.2)) {
+    accept <- accept + 1
+    theta[m] <- theta_star
+    m <- m + 1
+  }
+}
+beta_draws_df <- data.frame(theta = theta)
+beta_draws_plot <-
+  ggplot(beta_draws_df, aes(x = theta)) +
+  geom_histogram(stat = "density", n = 80, color = "black", fill = "#ffffe8",
+                 size = 0.15) +
+  stat_function(fun = dbeta, args = list(shape1 = 6.8, shape2 = 1.2),
+               size = 0.25, color = "black") +
+  xlab(expression(theta)) +
+  ylab(expression(p[Theta](theta))) +
+  ggtheme_tufte()
+beta_draws_plot
+# printf("acceptance percentage = %3.2f\n", accept/total)
+```
+
+This looks like it's making the appropriately distributed draws from
+the beta distribution.
+
+## General rejection sampling
+
+The more general form of rejection sampling takes a proposal from an
+arbitrary scaled density. In the example of the previous section, we
+used a $\mbox{uniform}(0, 1)$ distribution scaled by a factor of five.
+The acceptance procedure in the general case remains exactly the same.
+
+In the general case, suppose we want to draw from a density $p(y)$.
+We'll need a density $q(y)$ from which we know how to simulate draws,
+and we'll need a constant $c$ such that
+
+$$
+c \times q(y) > p(y)
+$$
+
+for all $y$.^[This means the support of the proposal distribution must
+be at least as large as that of the target distribution.]
+
+The general rejection sampling algorithm for target density $p(y)$,
+proposal density $q(y)$ with constant $c$ such that $c \times q(y) >
+p(y)$ for all $y$, is as follows:
+
+```
+while (true)
+  y = q_rng(y)
+  u = uniform(0, c * q(y))
+  if (u < p(y)) return y
+```
+
+Our simplified algorithm in the previous section was just a special
+case where $q(y)$ is uniform over a bounded interval.
