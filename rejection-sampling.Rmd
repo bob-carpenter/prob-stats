@@ -9,11 +9,11 @@ of a random variable $Y$ whose density $p_Y$ is not uniform?
 
 
 ## Beta distribution
-As a first non-trivial example, let's consider the
-beta distribution.^[We'll have a lot more to say about beta
-distributions as we go along as they have a close connection to binary
-trial data.]  If $\Theta$ has a beta distribution, then its density
-$p_{\Theta}$ is
+
+As a first non-trivial example, let's consider the beta
+distribution.^[We'll have a lot more to say about beta distributions
+as we go along as they have a close connection to binary trial data.]
+If $\Theta$ has a beta distribution, then its density $p_{\Theta}$ is
 
 $$
 \mbox{beta}(\theta \mid \alpha, \beta)
@@ -21,7 +21,10 @@ $$
 \theta^{\alpha - 1} \times (1 - \theta)^{\beta - 1}.
 $$
 
-For example, here is a plot of a few beta distributions.
+We like to think of the beta distribution parameters in terms of the
+total count $\alpha + \beta$ and mean $\alpha / (\alpha + \beta)$. The
+higher the total count, lower the variance. For example, here is a
+plot of a few beta distributions organized by total count and mean.
 
 ```{r, out.width = "100%", fig.width=9, fig.asp = 0.8, fig.cap="Plots of the densities $\\mbox{beta}(\\theta \\mid \\alpha, \\beta)$ for different total counts $\\alpha + \\beta$ and different means $\\alpha / (\\alpha + \\beta).$ The vertical dotted lines are drawn at the mean. Only the distribution with 0.5 mean has a symmetric density; the other densities are skewed toward the right and thus have means to the left of their modes (maxima), where the modes exist."}
 
@@ -57,13 +60,28 @@ beta_density_plot <-
 beta_density_plot
 ```
 
+For example, a total count of $\alpha + \beta = 8$ and mean of $\alpha
+/ (\alpha + \beta) = 0.85$ corresponds to beta distribution parameters
+$\alpha = 8 \times 0.85 = 6.8$ and $\beta = 8 \times (1 - 0.85) = 1.2.$
+
+
 The area under each of these curves, as drawn, is exactly one. The
 beta distributions with small total count ($\alpha + \beta$)
-concentrate most of the probability mass near the boundaries. For many
-of these distributions, there is no mode as the density grows without
-limit as it approaches zero and/or one. As the count grows, the
-probability mass concentrates away from the boundaries and around the
-mean.
+concentrate most of the probability mass near the boundaries. As the
+count grows, the probability mass concentrates away from the
+boundaries and around the mean.
+
+Each of these distributions has a well-defined mean, as shown in row
+labels in the plot. But they do not all have well defined modes
+(maxima). For example, consider the beta distribution whose density is
+shown in the upper left example in the plot. It shows the U-shaped
+density for a $\mbox{beta}(0.25, 0.25)$ distribution, which
+corresponds to mean $0.5 = 0.25 / (0.25 + 0.25)$ and total count $0.5
+= 0.25 + 0.25$. As $\theta$ approaches either boundary, 0 or 1, the
+density grows without bound. There is simply no maximum value for the
+density.^[Despite the lack of a maximum, the area under the density is
+one. The region of very high density near the boundary becomes
+vanishingly narrow in order to keep the total area at one.]
 
 ## Uniform, bounded rejection sampling
 
@@ -74,10 +92,10 @@ because it is easy to understand, but points the way toward more
 complex sampling algorithms we will consider later.
 
 Let's start with the simplest possible kind of rejection sampling
-where we have a bounded distribution like a beta distribution.  In the
-case of the beta distribution, draws are bounded between 0 and 1.
-And lets's start with a $\mbox{beta}(6.8, 1.2)$ distribution,
-corresponding to the mean 0.675 and count of 8 case from the previous
+where we have a bounded distribution like a beta distribution. In the
+case of the beta distribution, draws are bounded between 0 and 1. And
+lets's start psecifically with a $\mbox{beta}(6.8, 1.2)$ distribution,
+corresponding to the mean 0.85 and count of 8 case from the previous
 section.
 
 We observe that all values fall below 5 in the range we care about, so
@@ -121,15 +139,17 @@ reject_beta_plot <-
 reject_beta_plot
 ```
 
-More specifically, we keep the points $\theta^{(m)}$ where
+More specifically, we keep the values $\theta^{(m)}$ where
 
 $$
 u^{(m)} < \mbox{beta}(\theta^{(m)} \mid 6.8, 1.2).
 $$
 
 To generate a single draw from $\mbox{beta}(6.8, 1.2)$, we continually
-sample $(u, \theta)$ uniformly until we find one meeting the above
-condition and return the $\theta$ value.
+sample points $(u, \theta)$ uniformly until we find one meeting the
+above condition and return the $\theta$ value. Because the variable
+$u$ is only of use for sampling, it is called an *auxiliary variable*.
+Many sampling methods use auxiliary variables.
 
 ```
 while (true)
