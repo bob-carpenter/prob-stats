@@ -3,7 +3,7 @@
 We have so far assumed we have a uniform random number generator that
 can sample from a $\mbox{uniform}(0, 1)$ distribution. That
 immediately lets us generate from a $\mbox{uniform}(a, b).$^[If $$ U
-\sim \mbox{uniform}(0, 1) $$ then $$a + U * (b - a) \sim
+\sim \mbox{uniform}(0, 1) $$ then $$a + U \times (b - a) \sim
 \mbox{uniform}(a, b).$$] But what if we want to simulate realizations
 of a random variable $Y$ whose density $p_Y$ is not uniform?
 
@@ -145,11 +145,26 @@ $$
 u^{(m)} < \mbox{beta}(\theta^{(m)} \mid 6.8, 1.2).
 $$
 
+The set of accepted draws that are retained are distributed uniformly
+under the density plot. The probability of a draw from rejection
+sampling for variable $U$ falling between points $a$ and $b$ is
+proportional to the area under the density curve between $a$ and $b$,
+which is the correct probability by the definition of the probability
+density function $p_U$, which ensures
+
+$$
+\mbox{Pr}[a \leq U \leq b] = \int_a^b p_U(u) \, \mathrm{d}u.
+$$
+
+
+## Rejection sampling algorithm
+
 To generate a single draw from $\mbox{beta}(6.8, 1.2)$, we continually
 sample points $(u, \theta)$ uniformly until we find one meeting the
 above condition and return the $\theta$ value. Because the variable
 $u$ is only of use for sampling, it is called an *auxiliary variable*.
-Many sampling methods use auxiliary variables.
+Many sampling methods use auxiliary variables.  The rejection sampling
+algorithm written out for our particular case is as follows.
 
 ```
 while (true)
@@ -195,7 +210,32 @@ beta_draws_plot
 ```
 
 This looks like it's making the appropriately distributed draws from
-the beta distribution.
+the beta distribution.^[After we introduce the normal distribution, we
+will develop a $\\chi^2$ test statistic for whether a given set of
+draws come from a specified distribution. For now, we perform
+"$\\chi$-by-eye."]
+
+## Acceptance, concentration, and the curse of dimensionality
+
+As noted in the caption of the plot, the acceptance rate is only 20%
+for the uniform proposals. This acceptance rate can become arbitrarily
+bad with uniform proposals as the true distribution from which we want
+to sample concentrates around a single value. As such, rejection
+sampling's value is as a pedagogical example for introducing generic
+sampling and also as a component in more robust sampling algorithms.
+
+The algorithm could also be extended to higher dimensions, but the
+problem of rejection becomes worse and worse due to the curse of
+dimensionality. If the posterior is concentrated into a reasonably
+small area (even as mildly in our $\mbox{beta}(6.8, 1.2)$ example) in
+each dimension, the chance of a random multidimensional sample being
+accepted in every dimension is only $0.2^N$, which becomes vanishingly
+small for practical purposes even in 10 dimensions.^[In ten
+dimensions, overall acceptance of a uniform draw would be $0.2^10$, or
+a little less than one in ten million.  While this may be possible
+with patience, another 10 dimensions becomes completely unworkable,
+even with massive parallelism.]
+
 
 ## General rejection sampling
 

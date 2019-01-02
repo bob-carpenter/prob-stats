@@ -10,5 +10,6 @@ rmd_files: [
   "joint.Rmd",
   "continuous-random-variables.Rmd",
   "densities.Rmd",
-  "rejection-sampling.Rmd"
+  "rejection-sampling.Rmd",
+  "inference.Rmd"
 ]
