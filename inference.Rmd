@@ -10,7 +10,7 @@ observations, then induction is a kind of inverse inference.
 *Statistical inference* is a kind of inductive inference that is
 specifically formulated as an inverse problem.
 
-## Laplace's inverse problem of birth ratios
+## Laplace's birth ratio model
 
 The roots of statistical inference lie not in games of chance, but in
 the realm of public health.  Pierre-Simon Laplace was investigating
@@ -33,14 +33,26 @@ $$
 \end{array}
 $$
 
-Laplace assumed each birth was an independent event with an unknown
-probability $\Theta \in [0, 1]$ of being a boy that did not vary among
-the births.  Letting $Y$ be the number of male births and $N$ be the
-total number of births, Laplace assumed the model
+Laplace assumed each birth is independent and each has probability
+$\Theta \in [0, 1]$ of being a boy.  Letting $Y$ be the number of male
+births and $N$ be the total number of births, Laplace assumed the
+model
 
 $$
 Y  \sim \mbox{binomial}(N, \Theta).
 $$
+
+In other words, his data-generating distribution had the probability
+mass function
+
+$$
+p_{Y \mid \Theta}(y \mid \theta)
+\ = \
+\mbox{binomial}(y \mid N, \theta).
+$$
+
+Note that the constant $N$ that appears in the full binomial notation
+is suppressed in the density $p_{Y \mid \Theta}$.
 
 Laplace was faced with the *inverse problem* of drawing inferences
 about $\Theta$ based on observations about $Y$.
@@ -86,10 +98,108 @@ of reviews a movie receives depends on its popularity.
 As originally formulated by Thomas Bayes,^[Bayes, T., 1763. LII. An
 essay towards solving a problem in the doctrine of chances. By the
 late Rev. Mr. Bayes, FRS communicated by Mr. Price, in a letter to
-John Canton, AMFRS. *Philosophical Transactions of the Royal Society*, pp. 370--418.]
-Laplace also treated $\Theta$ as a random variable.  That is, Laplace
-wanted to infer, based on observation and measurement, that the
-probability that $\Theta$'s value was in a certain range.
-Specifically, Laplace was curious about the question of whether the
-male birth rate is higher, which can be expressed in probabilistic
-terms by the event probability $\mbox{Pr}[\Theta > 0.5]$.
+John Canton, AMFRS. *Philosophical Transactions of the Royal Society*,
+pp. 370--418.]  Laplace also treated $\Theta$ as a random variable.
+That is, Laplace wanted to infer, based on observation and
+measurement, that the probability that $\Theta$'s value was in a
+certain range.  Specifically, Laplace was curious about the question
+of whether the male birth rate is higher, which can be expressed in
+probabilistic terms by the event probability $\mbox{Pr}[\Theta >
+0.5]$.
+
+
+## Laplace's inverse problem
+
+Given a total of $N$ births, we have introduced random variables for
+
+* the observed data of $Y$ male births, and
+* the probability $\Theta$ that a live birth will result in a boy.
+
+We also have the actual observed number of male births, $y$.  That is,
+we know the value of the random variable $Y$.  Given our observed
+data, we can ask two obvious questions, namely
+
+* What is the probability of a boy being born?
+
+* Is it more likely that a boy is born than a girl?
+
+Given that $\Theta$ is the male birth rate, the first question is
+asking about the value of $\Theta$.  To provide a probabilistic
+answer, we want to look at the distribution of $\Theta$ given that we
+observe the actual data $Y = y$, which has the density $p_{\Theta \mid
+Y}(\theta \mid y)$.  We can summarize this distribution
+probabilistically using intervals, for instance by reporting the
+central 95% interval probability,
+
+$$
+\mbox{Pr}\left[ 0.025 \leq \Theta \leq 0.975
+                \ \Big| \
+		Y = y
+         \right].
+$$
+
+The second question, namely whether boys are more likely to be born,
+is true if $\Theta > \frac{1}{2}$.  The probability of this event is
+
+$$
+\mbox{Pr}\left[ \Theta > \frac{1}{2}
+                \ \Bigg| \
+		Y = y
+         \right].
+$$
+
+If we can estimate this event probability, we can answer Laplace's
+first question.^[The quality of the answer will be determined by the
+quality of the data and the quality of the model.]
+
+## Bayes's rule to solve the inverse problem
+
+The model we have is a *generative model*^[Also known as a *forward
+model* or a *mechanistic model* by scientists.]---it works from the
+parameter value $\theta$ to the observed data $y$ through a *sampling
+distribution* with probability function $p_{Y \mid \Theta}(y \mid
+\theta).$ What we need to solve our inference problems is the
+*posterior density* $p_{\Theta \mid Y}(\theta \mid y)$.  Bayes
+realized that the posterior could be defined in terms of the sampling
+distribution as
+
+$$
+\begin{array}{rcl}
+p_{\Theta \mid Y}(\theta \mid y)
+& = &
+\frac{\displaystyle
+      p_{Y \mid \Theta}(y \mid \theta)
+      \times
+      p_{\Theta}(\theta)}
+     {\displaystyle
+      p_Y(y)}
+\\[6pt]
+& \propto &
+p_{Y \mid \Theta}(y \mid \theta)
+\times
+p_{\Theta}(\theta).
+\end{array}
+$$
+
+All of our sampling algorithms will work with densities known only up
+to a proportion.  This still leaves the not inconsequential matter of
+how to determine $p_{\Theta}(\theta)$, the density of the so-called
+*prior distribution* of $\Theta$.  Philosophically, we think of the
+prior distribution as encapsulating what we know about the parameters
+$\Theta$ before observing the actual data $y$.  Because we are working
+probabilistically, this prior knowledge is encapsulated in the form of
+a probability distribution whose density is $p_{\Theta}(\theta)$.
+
+We will have a lot to say about prior knowledge later in the book, but
+for now we can follow Laplace and complete our model by assigning a
+uniform prior on the probability scale,
+
+$$
+\Theta \sim \mbox{uniform}(0, 1).
+$$
+
+In other words, we assume the prior density is given by
+
+$$
+p_{\Theta}(\theta) =  \mbox{uniform}(\Theta \mid 0, 1).
+$$
