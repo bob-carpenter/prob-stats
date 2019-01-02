@@ -1,1 +1,95 @@
-# Statistical Inference
+# Statistical Inference and Inverse Problems
+
+*Deductive inference* works from facts toward conclusions
+determinstically.  For example, if I tell you that all men are mortal
+and that Socrates is a man, you can deductively conclude that Socrates
+is mortal.  *Inductive inference*, on the other hand, is a bit more
+slippery to define, as it works from observations back to facts.  That
+is, if we think of the facts as governing or generating the
+observations, then induction is a kind of inverse inference.
+*Statistical inference* is a kind of inductive inference that is
+specifically formulated as an inverse problem.
+
+## Laplace's inverse problem of birth ratios
+
+The roots of statistical inference lie not in games of chance, but in
+the realm of public health.  Pierre-Simon Laplace was investigating
+the rate of child births by sex in France in an attempt to predict
+future population sizes.^[Pierre-Simon Laplace. 1812. *Essai
+philosophique sur les probabilités*. H. Remy. p. lvi of the
+Introduction.  Annotated English translation of the 1825 Fifth
+Edition: Andrew I. Dale, 1995. *Philosophical Essay on
+Probabilities*. Springer-Verlag.]  Laplace reports the following
+number of live births, gathered from thirty departments of France
+between 1800 and 1802 was as follows.
+
+$$
+\begin{array}[r|r]
+{ } \mbox{sex} & \mbox{live births}
+\\ \hline
+\mbox{male} & 110\,312
+\\
+\mbox{female} & 105\,287
+\end{array}
+$$
+
+Laplace assumed each birth was an independent event with an unknown
+probability $\Theta \in [0, 1]$ of being a boy that did not vary among
+the births.  Letting $Y$ be the number of male births and $N$ be the
+total number of births, Laplace assumed the model
+
+$$
+Y  \sim \mbox{binomial}(N, \Theta).
+$$
+
+Laplace was faced with the *inverse problem* of drawing inferences
+about $\Theta$ based on observations about $Y$.
+
+
+## What is a model?
+
+We say that this simple formula is a *model* in the sense that it is
+not the actual birth process, but rather a mathematical construct
+meant to reflect properties of the birth process.  In this sense, it's
+like Newton's model of the planetary motions using differential
+equations.  It will allow us to predict certain things, but it is not
+even a completely realistic or fully detailed description of the
+process at hand.^[Conception through to birth is a complex process and
+may depend on any number of factors; planetary motion as described by
+Newon is only an approximation to the relativistic model, which itself
+is presumably still only an approximation.]  Newton's model is better
+than the ball-and-string type model of Copernicus, in the sense that
+it is better at prediction.
+
+So when we say "model", we mean a mathematical construct meant to
+represent some aspect of reality.  Whether a model is useful is a
+pragmatic question, often judged by its ability to make useful and
+replicable predictions.  Other factors include whether it provides
+insight into underlying processes---a matter more of elegance than
+predictive accuracy.
+
+
+## What is a random variable?
+
+As in all statistical modeling, Laplace treated the observed number of
+male births $Y$ as a random variable.  This assumes a form of
+counterfactual reasoning whereby we assume the world might have been
+some other way than it actually turned out to be.
+
+As in most statistical models, Laplace treated $N$ as a constant.  In
+many cases, the denominator of binary events is not itself a constant,
+but is itself a random variable determined by factors of the
+environment.  For instance, the number of attempts an athlete on a
+sports team get depends on the ability of that athlete and the number
+of reviews a movie receives depends on its popularity.
+
+As originally formulated by Thomas Bayes,^[Bayes, T., 1763. LII. An
+essay towards solving a problem in the doctrine of chances. By the
+late Rev. Mr. Bayes, FRS communicated by Mr. Price, in a letter to
+John Canton, AMFRS. *Philosophical Transactions of the Royal Society*, pp. 370--418.]
+Laplace also treated $\Theta$ as a random variable.  That is, Laplace
+wanted to infer, based on observation and measurement, that the
+probability that $\Theta$'s value was in a certain range.
+Specifically, Laplace was curious about the question of whether the
+male birth rate is higher, which can be expressed in probabilistic
+terms by the event probability $\mbox{Pr}[\Theta > 0.5]$.
