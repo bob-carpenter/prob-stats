@@ -293,7 +293,7 @@ The inverse log odds function is itself known as the
 *logistic sigmoid* function.^[A name presumably derived from its shape
 and the propensity of mathematicians, like doctors, to prefer Greek
 terminology---the Greek letter "$\sigma$" (sigma) corresponds to the
-Roman letter "s".]
+Roman letter "S".]
 
 ## Expectation and variance of continuous random variables
 
@@ -877,7 +877,7 @@ $$
 This distribution is known as the standard logistic distribution,
 
 $$
-\mbox{std_logistic}(\phi)
+\mbox{logistic}(\phi \mid 0, 1)
 \ = \
 \mbox{logit}^{-1}(\phi)
 \times
@@ -886,4 +886,5 @@ $$
 
 Thus after all the dust has settled, we know that if $\Theta \sim
 \mbox{uniform}(0, 1)$ and $\Phi = \mbox{logit}(\Theta)$, then $\Phi
-\sim \mbox{std_logistic}()$.
+\sim \mbox{logistic}(0, 1)$.^[The meaning of the parameters 0 and
+1 will be explained in the next section.]

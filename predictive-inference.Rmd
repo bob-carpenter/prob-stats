@@ -1,0 +1,125 @@
+# Posterior Predictive Inference
+
+One of the primary reasons we fit models is to make predictions about
+the future.  More specifically, we want to observe some data $y$ and
+use it to predict future data $\tilde{y}$.  Even more specifically,
+our goal is to understand the probability distribution of the future
+data $\tilde{y}$ given the observed data $y$.
+
+We are working relative to a model whose sampling distribution has a
+density $p(y \mid \theta)$. ^[From now on, we'll be dropping random
+variable subscripts on probabilty functions.  The convention in
+applied statistics is to choose names for bound variables that allow
+the random variables to be determined by context.  For example, we
+will write $p(\theta \mid y)$ for a posterior, taking it to mean
+$p_{\Theta \mid Y}(\theta \mid y)$.]  Thus if we knew the value of
+$\theta$,^[We are also overloading lowercase variables like $\theta$
+to mean their random variable counterpart $\Theta$ when necessary, as
+it is here, where we should properly be saying that the random
+variable $\Theta$ takes on some known value $\theta$.]  the prediction
+we'd want to make is $p(\tilde{y} \mid \theta)$.  Here, we are
+assuming that the sampling distribution will be the same density for
+the original data $p(y \mid \theta)$ and the predictive data
+$p(\tilde{y} \mid \theta)$.
+
+Unfortunately, we don't know the true value of $\theta$.  All we have
+to go on are the inferences we can make about $\theta$ given our model
+and observed data $y$.  As we saw in the last chapter, this knowledge
+is encapsulated in a posterior distribution with density $p(\theta
+\mid y)$.  So rather than making predictions $p(\tilde{y} \mid
+\theta)$ based on a single estimated value of $\theta$, we are going
+to create a weighted average of predictions for every possible
+$\theta$ with weights determined by the posterior $p(\theta \mid y)$.
+Because $\theta$ is continuous, the averaging must proceed by
+integration.  The result is the *posterior predictive distribution*,
+with density defined by
+
+$$
+p(\tilde{y} \mid y)
+\ = \
+\displaystyle
+\int_{\Theta}
+p(\tilde{y} \mid \theta)
+\times
+p(\theta \mid y)
+\,
+\mathrm{d}\theta
+$$
+
+The variable $\Theta$ is now doing extra duty as the set of possible
+values for $\theta$, that is the range of variables over which
+$\theta$ is averaged.
+
+When estimating the probability of new data, there are two forms of
+uncertainty that need to be taken into account.  The first is
+estimation uncertainty arising from not knowing the exact value of
+$\theta$.  This comes into play by averaging over the posterior
+$p(\theta \mid y)$.  The second form of uncertainty is introduced by
+the sampling distribution $p(\tilde{y} \mid \theta)$.  Even if we knew
+the precise value of $\theta$, we would still not know the value of
+$\tilde{y}$ because it is being generated from $\theta$.
+
+
+## Calculation via simulation
+
+Because the posterior predictive distribution is an expectation
+conditioned on data, it can be estimated using simulation of
+draws $\theta^{(m)}$ from the posterior as
+
+$$
+p(\tilde{y} \mid y)
+\ \approx \
+\frac{1}{M} \sum_{m=1}^M p(\tilde{y} \mid \theta^{(m)}).
+$$
+
+That is, we just take the average prediction over our sample.
+
+
+## Expectation form
+
+Working with expectations and conditional expectations is natural for
+posterior inference, but initially requires some mental gymnastics to
+interpret all the implicit bindings.  Using expectation notation, the
+posterior predictive distribution can be defined as
+
+$$
+p(\tilde{y} \mid y)
+\ = \
+\displaystyle
+\mathbb{E}\!\left[ p(\tilde{y} \mid \theta) \mid y \right].
+$$
+
+We are now overloading lower case variables to do double duty as their
+upper-case counterparts.  Rendered with full random variable
+indexing, the expectation and its definition are
+
+$$
+\begin{array}{rcl}
+p_{\tilde{Y} \mid Y}(\tilde{y} \mid y)
+& = &
+\displaystyle
+\mathbb{E}\!\left[
+p_{\tilde{Y}\mid\Theta}(\tilde{y} \mid \Theta) \mid Y = y
+\right]
+\\[8pt]
+& = &
+\displaystyle
+\int_T
+  p_{\tilde{Y}\mid\Theta}(\tilde{y} \mid \theta)
+  \times p_{\Theta \mid Y}(\theta \mid y)
+\, \mathrm{d} \theta,
+\end{array}
+$$
+
+where $T$ is domain of integration for $\theta$, i.e., possible values
+for $\Theta$.  The twist is that the function whose expectation is
+being taken is now a density $p(\tilde{y} \mid \theta)$ in which
+$\theta$ shows up as a conditioning variable for the data $\tilde{y}$
+being predicted.  The value of $\tilde{y}$ is not free in the
+expectation---it is fixed by the input to the function being defined,
+
+
+Because it's averaging over a conditional density (the posterior), it
+works out to be a conditional expectation.^[Expectations average
+jointly over their free random variables, here just $\Theta$, because
+$\tilde{y}$ is bound by the function definition.]

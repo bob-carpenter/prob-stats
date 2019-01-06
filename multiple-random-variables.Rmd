@@ -1079,7 +1079,7 @@ $$
 where^[The value ${N \choose y}$ is called the *binomial coefficient*
 due to its use here, and defined by $${N \choose y} = \frac{N!}{(N -
 y)! \times y!}.$$ The value of the *factorial* $m!$ for $m > 0$ is
-$$m! = m \times (m - 1) \times \cdots 2 \times 1.$$ The recursive
+$$m! = m \times (m - 1) \times (m - 2) \times \cdots 1.$$ The recursive
 definition has base case $0! = 1$ and inductive case $(n + 1)! = n
 \times n!.$ The postfix factorial operator binds more tightly than
 multiplication, so this resolves as $n \times (n!)$. ]

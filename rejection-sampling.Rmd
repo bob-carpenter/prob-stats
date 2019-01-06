@@ -99,14 +99,15 @@ corresponding to the mean 0.85 and count of 8 case from the previous
 section.
 
 We observe that all values fall below 5 in the range we care about, so
-we will create a box with height 5 and width of 1. This box is shown
-in dotted lines in the following plot. Next, we draw uniformly from
-the box, drawing a horizontal position $\theta^{(m)} \sim
-\mbox{uniform}(0, 1)$ and vertical position $u^{(m)} \sim
-\mbox{uniform}(0, 5)$.  The points whose value for $u$ falls below the
-density at the value for $\theta$ are marked with plus signs.
+we will create a box with height 5 and width of 1.^[In general, we
+could use an optimization algorithm to find the largest value.] Next,
+we draw uniformly from the box, drawing a horizontal position
+$\theta^{(m)} \sim \mbox{uniform}(0, 1)$ and vertical position
+$u^{(m)} \sim \mbox{uniform}(0, 5)$. The points whose value for $u$
+falls below the density at the value for $\theta$ are retained.
 
-```{r}
+```{r fig.cap = 'A simple instance of rejection sampling from a bounded $\\mbox{beta}(6.8, 1.2)$ distribution, whose density is shown as a solid line.  Points $(\\theta, u)$ are drawn uniformly from the rectangle, then accepted as a draw of $\\theta$ if $u$ falls below the density at $\\theta$.  The accepted draws are rendered as plus signs and the rejected ones as circles.  The acceptance rate here is roughly 20%.'}
+
 M <- 500
 alpha <- 6.8
 beta <- 1.2
@@ -127,7 +128,7 @@ reject_beta_plot <-
   ggplot(accept_beta_df) +
   geom_line(aes(x = y, y = p_y), data = reject_beta_df) +
   geom_point(aes(x = theta, y = u, shape = accept),
-             color = "#333333", size = 1) +
+             color = "#333333", size = 1.5) +
   scale_shape_manual(values = c(1, 3)) +
   geom_vline(xintercept = c(0, 1), linetype="dotted") +
   geom_hline(yintercept = 5, linetype = "dotted") +
@@ -146,7 +147,7 @@ u^{(m)} < \mbox{beta}(\theta^{(m)} \mid 6.8, 1.2).
 $$
 
 The set of accepted draws that are retained are distributed uniformly
-under the density plot. The probability of a draw from rejection
+in the area under the density plot. The probability of a draw from rejection
 sampling for variable $U$ falling between points $a$ and $b$ is
 proportional to the area under the density curve between $a$ and $b$,
 which is the correct probability by the definition of the probability
@@ -160,11 +161,12 @@ $$
 ## Rejection sampling algorithm
 
 To generate a single draw from $\mbox{beta}(6.8, 1.2)$, we continually
-sample points $(u, \theta)$ uniformly until we find one meeting the
-above condition and return the $\theta$ value. Because the variable
-$u$ is only of use for sampling, it is called an *auxiliary variable*.
-Many sampling methods use auxiliary variables.  The rejection sampling
-algorithm written out for our particular case is as follows.
+sample points $(u, \theta)$ uniformly until we find one where $u$
+falls below the density value for $\theta$, then return the $\theta$
+value. Because the variable $u$ is only of use for sampling, it is
+called an *auxiliary variable*. Many sampling methods use auxiliary
+variables. The rejection sampling algorithm written out for our
+particular case is as follows.
 
 ```
 while (true)
@@ -177,7 +179,7 @@ while (true)
 Let's run this algorithm for $M = 100\,000$ iterations and see what the
 histogram looks like.
 
-```{r, fig.cap="Histogram of $M = 100\\,000$ Draws from $\\mbox{beta}(6.8, 1.2)$ made via rejection sampling.  The true density is plotted over the histogram as a black line.  The acceptance rate for draws was roughly 20%."}
+```{r, fig.cap="Histogram of $M = 100\\,000$ Draws from $\\mbox{beta}(6.8, 1.2)$ made via rejection sampling.  The true density is plotted over the histogram as a line.  The acceptance rate for draws was roughly 20%."}
 
 set.seed(1234)
 M <- 100000
@@ -201,7 +203,7 @@ beta_draws_plot <-
   geom_histogram(stat = "density", n = 80, color = "black", fill = "#ffffe8",
                  size = 0.15) +
   stat_function(fun = dbeta, args = list(shape1 = 6.8, shape2 = 1.2),
-               size = 0.25, color = "black") +
+               size = 0.35, color = "black") +
   xlab(expression(theta)) +
   ylab(expression(p[Theta](theta))) +
   ggtheme_tufte()
@@ -211,9 +213,9 @@ beta_draws_plot
 
 This looks like it's making the appropriately distributed draws from
 the beta distribution.^[After we introduce the normal distribution, we
-will develop a $\\chi^2$ test statistic for whether a given set of
-draws come from a specified distribution. For now, we perform
-"$\\chi$-by-eye."]
+will develop a $\chi^2$ test statistic for whether a given set of
+draws come from a specified distribution. For now, we perform the
+inaccurate test known informally as "$\chi$ by eye."]
 
 ## Acceptance, concentration, and the curse of dimensionality
 
@@ -267,4 +269,7 @@ while (true)
 ```
 
 Our simplified algorithm in the previous section was just a special
-case where $q(y)$ is uniform over a bounded interval.
+case where $q(y)$ is uniform over a bounded interval. The argument for
+correctness in the more general case is identical---draws are made
+proportional to the area under the density, which provides the correct
+distribution.

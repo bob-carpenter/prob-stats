@@ -43,7 +43,11 @@ Y  \sim \mbox{binomial}(N, \Theta).
 $$
 
 In other words, his data-generating distribution had the probability
-mass function
+mass function^[The constant $N$ that appears in the full binomial
+notation is suppressed in the density notation $p_{Y \mid
+\Theta}$---it is common to suppress constants in the notation to make
+the relationship between the modeled data $Y$ and parameters $\Theta$
+easier to scan.]
 
 $$
 p_{Y \mid \Theta}(y \mid \theta)
@@ -51,10 +55,14 @@ p_{Y \mid \Theta}(y \mid \theta)
 \mbox{binomial}(y \mid N, \theta).
 $$
 
-Note that the constant $N$ that appears in the full binomial notation
-is suppressed in the density $p_{Y \mid \Theta}$.
+Because it employs a binomial distribution, this model assumes that
+the sex of each baby is independent, with probability $\theta$ of
+being a boy.  This may or may not be a good approximation to reality.
+Part of our job is going to be to check the assumptions like this
+built into our models.
 
-Laplace was faced with the *inverse problem* of drawing inferences
+We know how to generate $Y$ given values for the parameter $\Theta$,
+but we are now faced with the *inverse problem* of drawing inferences
 about $\Theta$ based on observations about $Y$.
 
 
@@ -63,22 +71,42 @@ about $\Theta$ based on observations about $Y$.
 We say that this simple formula is a *model* in the sense that it is
 not the actual birth process, but rather a mathematical construct
 meant to reflect properties of the birth process.  In this sense, it's
-like Newton's model of the planetary motions using differential
-equations.  It will allow us to predict certain things, but it is not
-even a completely realistic or fully detailed description of the
-process at hand.^[Conception through to birth is a complex process and
-may depend on any number of factors; planetary motion as described by
-Newon is only an approximation to the relativistic model, which itself
-is presumably still only an approximation.]  Newton's model is better
-than the ball-and-string type model of Copernicus, in the sense that
-it is better at prediction.
+like Isaac Newton's model of the planetary motions using differential
+equations.^[Isaac Newton. 1687. *Philosophiae Naturalis Principia
+Mathematica*.  Translated as I. Bernard Cohen and Anne
+Whitman. 1999. *The Principia: Mathematical Principles of Natural
+Philosophy.* University of California Press.]  The equations are not
+the planets, just descriptions of how they move in response to
+gravitational and other forces.
 
-So when we say "model", we mean a mathematical construct meant to
-represent some aspect of reality.  Whether a model is useful is a
-pragmatic question, often judged by its ability to make useful and
-replicable predictions.  Other factors include whether it provides
-insight into underlying processes---a matter more of elegance than
-predictive accuracy.
+Models like Newton's allow us to predict certain things, such as the
+motion of the planets, the tides, and balls dropped from towers.  But
+they typically only approximate the full process being modeled in some
+way.  Even Newton's model, which is fabulously accurate at predictions
+at observable scales, is only an approximation to the finer-grained
+models of motion and gravity introduced by Albert Einstein.^[Einstein,
+Albert. 1907. On the relativity principle and the conclusions drawn
+from it. *Jahrbuch der Radioaktivitﬁt and Elektronik* 4:411--462.]
+which itself was only a special case of the more general theory of
+relativity.^[Einstein, Albert. 1916. The foundation of the general
+theory of relativity. *Annalen Phys.* 14:769--822.]  Each successive
+model is better than the last in that it's better at prediction, more
+general, or more elegant---science does not progress based on a single
+criterion for improving models.
+
+The reproductive process is complex, and many factors may impinge on
+the sex of a baby being born.  Part of our job as scientists is to
+check the assumptions of our models and refine them as necessary.
+This needs to be done relative to the goal of the model.  If the goal
+of this simple reproductive model is only to predict the prevalence of
+male births at a national scale, then a simple, direct prevalence
+model with a single parameter like the one we have introduced may be
+sufficient.
+
+To conclude, when we say "model", all we have in mind is some
+mathematical construct taken to represent some aspect of reality.
+Whether a model is useful is a pragmatic question which must be judged
+relative to its intended application.
 
 
 ## What is a random variable?
@@ -120,7 +148,6 @@ we know the value of the random variable $Y$.  Given our observed
 data, we can ask two obvious questions, namely
 
 * What is the probability of a boy being born?
-
 * Is it more likely that a boy is born than a girl?
 
 Given that $\Theta$ is the male birth rate, the first question is
@@ -149,13 +176,13 @@ $$
 $$
 
 If we can estimate this event probability, we can answer Laplace's
-first question.^[The quality of the answer will be determined by the
+second question.^[The quality of the answer will be determined by the
 quality of the data and the quality of the model.]
 
 ## Bayes's rule to solve the inverse problem
 
 The model we have is a *generative model*^[Also known as a *forward
-model* or a *mechanistic model* by scientists.]---it works from the
+model* or a *mechanistic model* by scientists.]---it works from a
 parameter value $\theta$ to the observed data $y$ through a *sampling
 distribution* with probability function $p_{Y \mid \Theta}(y \mid
 \theta).$ What we need to solve our inference problems is the
@@ -182,17 +209,50 @@ p_{\Theta}(\theta).
 $$
 
 All of our sampling algorithms will work with densities known only up
-to a proportion.  This still leaves the not inconsequential matter of
-how to determine $p_{\Theta}(\theta)$, the density of the so-called
-*prior distribution* of $\Theta$.  Philosophically, we think of the
-prior distribution as encapsulating what we know about the parameters
-$\Theta$ before observing the actual data $y$.  Because we are working
-probabilistically, this prior knowledge is encapsulated in the form of
-a probability distribution whose density is $p_{\Theta}(\theta)$.
+to a proportion.
+
+## The prior distribution
+
+This still leaves the not inconsequential matter of how to determine
+$p_{\Theta}(\theta)$, the density of the so-called *prior
+distribution* of $\Theta$.  The prior distribution encapsulates what
+we know about the parameters $\Theta$ before observing the actual data
+$y$.  This prior knowledge may be derived in many different ways.
+
+* We may have prior knowledge from physical constraints.  For example,
+  if we are modeling the concentration of a molecule in a solution,
+  the concentration must be positive.
+* We may have prior knowledge of the basic scale of the answer from
+  prior scientific knowledge.  For example, if we are modeling human
+  growth, we know that heights above two meters are rare and heights
+  above three meters are unheard of.
+* We may have prior knowledge from directly related prior experiments.
+  For example, if we are doing a Phase II drug trial, we will have
+  data from the Phase I trial, or we may have data from Europe if we
+  are doing a trial in the United States.
+* We may have experiments from indirectly related trials.  For
+  example, if we are modeling football player abilities, we have years
+  and years of data from prior seasons.  We know nobody is going to average 10 points
+  a game---it's just not done.
+
+Because we are working probabilistically, our prior knowledge will
+itself be modeled with a probability distribution, say with density
+$p_{\Theta}(\theta)$.  The prior distribution may depend on
+parameters, which may be constants or may themselves be unknown.  This
+may seem like an awfully strong imposition to have to express prior
+knowledge as a density.  If we can express our knowledge well and
+sharply in a distribution, we will have an *informative prior.*
+Luckily, because we are only building approximate models of reality,
+the prior knowledge model does not need to be perfect.  We usually err
+on the side of underpowering the prior a bit compared to what we
+really know, imposing only *weakly informative priors*, such as those
+that determine scales, but not exact boundaries of parameters.^[The
+notion of a truly *uninformative prior* is much trickier, because to be
+truly uninformative, a prior must be scale free.]
 
 We will have a lot to say about prior knowledge later in the book, but
-for now we can follow Laplace and complete our model by assigning a
-uniform prior on the probability scale,
+for now we can follow Laplace in adopting a uniform prior for the rate
+of male births,
 
 $$
 \Theta \sim \mbox{uniform}(0, 1).
@@ -203,3 +263,256 @@ In other words, we assume the prior density is given by
 $$
 p_{\Theta}(\theta) =  \mbox{uniform}(\Theta \mid 0, 1).
 $$
+
+
+
+Here, the bounds zero and one, expressed as constant parameters of the
+uniform distribution, are logical constraints imposed by the fact that
+the random variable $\Theta$ denotes a probability.
+
+Other than the logical bounds, this uniform prior distribution is
+saying a value in the range 0.01 to 0.05 is as likely as one in 0.48
+to 0.52.  This is a very weak prior indeed compared to what we know
+about births.  Nevertheless, it will suffice for this first analysis.
+
+## The proportional posterior
+
+With a prior and sampling distribution, we have our full joint model
+in hand,
+
+$$
+p_{Y \mid \Theta}(y \mid N, \theta) \times p_{\Theta}(\theta)
+\ = \
+\mbox{binomial}(y \mid N, \theta)
+  \times \mbox{uniform}(\theta \mid 0, 1).
+$$
+
+We have carried along the constant $N$ so we don't forget it, but it
+simply appears on the right of the conditioning bar on both sides of
+the equation.
+
+The sampling distribution $p(y \mid \theta)$ is considered as a
+density for $y$ given a value of $\theta$.  If we instead fix $y$ and
+view $p(y \mid \theta)$ as a function of $\theta$, it is called the
+*likelihood function*.  As a function, the likelihood function is not
+itself a density.  Nevertheless, it is crucial in posterior inference.
+
+With Bayes's rule, we know the posterior is proportional to the prior
+times the likelihood,
+
+$$
+\underbrace{p_{\Theta \mid Y}(\theta \mid y)}_{\text{posterior}}
+\ \propto \
+\underbrace{p_{Y \mid \Theta}(y \mid \theta)}_{\text{likelihood}}
+\ \times \
+\underbrace{p_{\Theta}(\theta)}_{\text{prior}}.
+$$
+
+Given the definitions of the relevant
+probability functions,^[
+For reference, these are the sampling distribution
+$$
+\mbox{binomial}(y \mid N, \theta)
+\ \propto \
+\theta^y \times (1 - \theta)^{N - y}
+$$
+and the prior
+$$
+\mbox{uniform}(\theta \mid 0, 1)
+\ = \
+1.
+$$
+]
+we have
+
+$$
+\begin{array}{rcl}
+p_{\Theta \mid Y}(\theta \mid y, N)
+& \propto &
+\mbox{binomial}(y \mid N, \theta)
+  \times \mbox{uniform}(\theta \mid 0, 1)
+\\[4pt]
+& \propto &
+\theta^y \times (1 - \theta)^{N - y}
+\end{array}
+$$
+
+To summarize, we know the posterior $p_{\Theta \mid Y}$ up to a
+proportion, but are still missing the normalizing constant so that it
+integrates to one.^[We return to the normalizer later when we discuss
+the beta distribution.]
+
+
+## Sampling from the posterior
+
+Now that we have a formula for the posterior up to a proportion, we
+are in business for sampling from the posterior.  All of the sampling
+algorithms in common use require the density only up to a proportion.
+
+For now, we will simply assume a method exists to draw a sample
+$\theta^{(1)}, \cdots, \theta^{(M)}$ where each $\theta^{(m)}$ is
+drawn from the posterior $p_{\Theta \mid y}(\theta \mid y)$ given the
+observed data $y$.
+
+When we do begin to employ general samplers, they are going to require
+specifications of our models that are exact enough to be programmed.
+Rather than relying on narrative explanation, we'll use a pseudocode
+for models that can be easily translated for an assortment of
+posterior samplers.^[This specification is sufficient for coding a
+sampler in BUGS, Edward, emcee, Greta, JAGS, NIMBLE, PyMC, Pyro, or
+Stan.]
+
+$$
+\begin{array}{r|lr}
+\mbox{Name} & \mbox{simple binomial}
+\\ \hline
+\mbox{Data}
+& N \in \mathbb{N}
+\\
+& y_n \in \{ 0, 1 \}
+& \mbox{ } \hfill \mbox{for} \ n \in 1:N
+\\ \hline
+\mbox{Parameters}
+& \theta \in (0, 1)
+\\ \hline
+\mbox{Prior}
+& \theta \sim \mbox{uniform}(0, 1)
+\\ \hline
+\mbox{Likelihood}
+& y_n \sim \mbox{binomial}(N, \theta)
+& \mbox{ } \hfill \mbox{for} \ n \in 1:N
+\end{array}
+$$
+
+## Simulating data
+
+Rather than starting with Laplace's data, which will present
+computational problems, we will start with some simulated data.  We
+simulate data for a model by simulating the parameters from the prior,
+then simulating the data from the parameters.  That is, we run the
+model in the forward direction from prior to parameters to data.  This
+is usually how we construct the models in the first place, so this
+should be a natural step.  In pseudocode, this is a two-liner.
+
+```
+theta = uniform_rng(0, 1)
+y = binomial_rng(N, theta)
+print 'theta = ' theta ';  y = ' y
+```
+
+
+Before we can actually simulate, we need to set the constants, because
+they don't have priors.  Here, we'll just take $N = 10$ for
+pedagogical convenience.  Let's run it a few times and see what we
+get.
+
+```{r}
+set.seed(123)
+N = 10
+for (m in 1:5) {
+  theta = runif(1, 0, 1)
+  y = rbinom(1, N, theta)
+  printf('theta = %3.2f;  y = %d\n', theta, y)
+}
+```
+
+The values simulated for $\theta$ are not round numbers, so we know
+that we won't satisfy $y = N \times \theta$, the expected value of a
+random variable $Y$ such that $Y \sim \mbox{binomial}(N, \theta)$.
+From an estimation perspective, we won't have $\theta = y / N$,
+either.  So the question becomes what are reasonable values for
+$\theta$ based on our observation of $y$?  That's precisely the
+posterior, so let's proceed to sampling from that.  We'll just assume
+we have a function that samples from the posterior of a model with a
+given name when passed the data for the model.  Here, the data
+consists of the values of $y$ and $N$, and we will run $M = 1\,000$
+iterations.
+
+```
+N = 10
+y = 4
+theta[1:M] = posterior_sample('simple binomial', y, N)
+
+print 'theta = ' theta[1:10] '...'
+```
+
+Let's run that and see what a few posterior draws look like.
+
+```{r}
+M <- 1000
+N <- 10
+y <- 4
+theta <- rbeta(M, y + 1, N - y + 1)
+printf('theta = ')
+for (n in 1:10) printf('%3.2f', theta[n])
+```
+
+It's hard to glean much from the draws.  Instead, we'll want to look
+at summaries of the posterior.  For visualizing draws of a single
+variable, histograms are handy.
+
+
+```{r}
+binom_post_df <- data.frame(theta = theta)
+binomial_post_plot <-
+  ggplot(binom_post_df, aes(x = theta)) +
+  geom_histogram(color = 'black', fill = '#ffffe6', size = 0.25) +
+  scale_x_continuous(lim = c(0, 1),
+                     breaks = c(0, 0.25, 0.5, 0.75, 1)) +
+  xlab(expression(theta)) +
+  ylab("posterior draw proportion") +
+  ggtheme_tufte()
+binomial_post_plot
+```
+
+We often want to look at summaries of the posterior, the posterior
+mean, standard deviation, and quantiles being common.  These are all
+easily calculated based on the sample draws.  For instance, the
+posterior mean and standard deviation are as simple as calling
+built-in mean and standard deviation functions
+
+```
+print 'estimated posterior mean = ' mean(theta) '
+print 'estimated posterior sd = ' sd(theta) '
+```
+
+Let's see what we get.
+
+```{r}
+printf('estimated posterior mean = %3.2f', mean(theta))
+printf('estimated posterior   sd = %3.2f', sd(theta))
+```
+
+We can estimate quantiles just as easily, assuming we have built-in
+functions to compute quantiles.
+
+```
+print 'estimated posterior median = ' quantile(theta, 0.5)
+print 'estimated posterior central 80% interval = '
+      quantiles(theta, { 0.1, 0.9 })
+```
+
+Running this produces the following.
+
+```{r}
+printf('estimated posterior median = %3.2f\n',
+       quantile(theta, 0.2))
+printf('estimated posterior central 80 pct interval = (%3.2f, %3.2f)\n',
+       quantile(theta, 0.1), quantile(theta, 0.9))
+```
+
+This answers the question pretty thoroughly about Laplace's questions
+about estimating $\theta$.  To answer the question about whether boys
+are more prevalent than girls, we need to estimate $\mbox{Pr}[\theta >
+0.5]$, which is straightforward with simulation.
+
+```
+print 'Pr[theta > 0.5] = ' sum(theta > 0.5) / M
+```
+
+Running this, we see that with 4 boys in 10 births, the probability
+they represent more than 50% of the live births is
+
+```{r}
+printf('Pr[theta > 0.5] = %3.2f\n', sum(theta > 0.5) / M)
+```

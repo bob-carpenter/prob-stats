@@ -40,9 +40,28 @@ philosophical terms, the nature of probability is *epistemic* (based
 on knowledge) rather than *ontological* (based on metaphysics) or
 *deontic* (based on belief).]  This allows us to believe the world is
 deterministic, while still reasoning probabilistically based on
-available evidence.^[This provides us the wiggle room to side with
-Einstein in believing that nature does not play dice, while still
-allowing us to build probabilisic models of our knowledge of nature.]
+available evidence. Apparently, this was Pierre-Simon Laplace's
+position, as he wrote,^[Pierre-Simon Laplace. 1814.  *A Philosophical
+Essay on Probabilities*. English translation of the 6th edition,
+Truscott, F.W. and Emory, F.L. 1951. Dover Publications.  page 4.]
+
+> We may regard the present state of the universe as the effect of its
+  past and the cause of its future. An intellect which at a certain
+  moment would know all forces that set nature in motion, and all
+  positions of all items of which nature is composed, if this
+  intellect were also vast enough to submit these data to analysis, it
+  would embrace in a single formula the movements of the greatest
+  bodies of the universe and those of the tiniest atom; for such an
+  intellect nothing would be uncertain and the future just like the
+  past would be present before its eyes.
+
+It also provides us the wiggle room to take sides with Albert
+Einstein, who wrote,^[Albert Einstein.  1926.  Personal letter to Max
+Born. December 4.]
+
+> The theory [quantum mechanics] says a lot, but does not really bring
+  us any closer to the secret of the "old one." I, at any rate, am
+  convinced that He does not throw dice.
 
 Probability theory merely provides a mathematically and logically
 consistent approach to quantifying uncertainty and performing
