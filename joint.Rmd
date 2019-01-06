@@ -581,7 +581,7 @@ $Y_{n, 1}$ be the
 number of heads for player 1 after $n$ flips, $Y_{n, 2}$ be the same
 for player 2.  Let $Z$ be a binary random variable taking value 1 if
 the first player wins and 0 if the other player wins.  Fermat managed
-to evaluate a formula like Fermat evaluated $\mbox{Pr}[Z = 1 | Y_{n,
+to evaluate a formula like Fermat evaluated $\mbox{Pr}[Z = 1 \mid Y_{n,
 1} = 8, Y_{n, 2} = 7]$ by enumerating the possible game continuations
 and adding up the probabilities of the ones in which the first player
 wins.
@@ -648,7 +648,7 @@ other.  If $X$ and $Y$ are the variables in question, this property
 can be stated directly in terms of their probability mass functions as
 
 $$
-p_{X}(x) = p_{X|Y}(x | y).
+p_{X}(x) = p_{X|Y}(x \mid y).
 $$
 
 In practice, we use an equivalent definition.  Random variables $X$
@@ -671,7 +671,7 @@ independent of $Y_2$.
 
 In the diagnostic testing example, the disease state $Z$ and the test
 result $Y$ are not independent.^[That would be a very poor test,
-indeed!].  This can easily be verified because $p_{Y|Z}(y | z) \neq
+indeed!].  This can easily be verified because $p_{Y|Z}(y \mid z) \neq
 p_Y(y)$.
 
 
@@ -715,6 +715,53 @@ p_{Y_1, Y_2 \mid Z}(y_1, y_2 \mid z)
 \ = \
 p_{Y_1 \mid Z}(y_1 \mid z) \times p_{Y_2 \mid Z}(y_2 \mid z).
 $$
+
+## Conditional expectations
+
+The expectation $\mathbb{E}[Y]$ of a random variable $Y$ is its
+average value (weighted by density or mass, depending on whether it is
+continuous or discrete).  The conditional expectation $\mathbb{E}[Y
+\mid A]$ given some event $A$ is defined to be the average value of $Y$
+conditioned on the event $A$,
+
+$$
+\mathbb{E}[Y \mid A]
+\ = \
+\int_Y y \times p_{Y \mid A}(y \mid A) \, \mathrm{d} y,
+$$
+
+where $p_{Y \mid A}$ is the density of $Y$ conditioned on event $A$
+occurring.  This conditional density $p_{Y \mid A}$ is defined just
+like the ordinary density $p_Y$ only with the conditional cumulative
+distribution function $F_{Y \mid A}$ instead of the standard
+cumulative distribution function $F_Y$,
+
+$$
+p_{Y \mid A}(y \mid A)
+\ = \
+\frac{\mathrm{d}}{\mathrm{d} y} F_{Y \mid A}(y \mid A).
+$$
+
+The conditional cumulative distribution function $F_{Y \mid A}$
+is, in turn, defined by the conditioning on the event probability,
+
+$$
+F_{Y \mid A}(y \mid A)
+\ = \
+\mbox{Pr}[Y < y \mid A].
+$$
+
+This also works to condition on zero probability events, such as
+$\Theta = \theta$, by taking the usual definition of conditional
+density,
+
+$$
+\mathbb{E}[Y \mid \Theta = \theta]
+\ = \
+\int_Y y \times p_{Y \mid \Theta}(y \mid \theta) \, \mathrm{d}y.
+$$
+
+When using discrete variables, integrals are replaced with sums.
 
 
 ## Independent and identically distributed variables

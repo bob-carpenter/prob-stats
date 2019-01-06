@@ -47,7 +47,7 @@ mass function^[The constant $N$ that appears in the full binomial
 notation is suppressed in the density notation $p_{Y \mid
 \Theta}$---it is common to suppress constants in the notation to make
 the relationship between the modeled data $Y$ and parameters $\Theta$
-easier to scan.]
+3easier to scan.]
 
 $$
 p_{Y \mid \Theta}(y \mid \theta)
@@ -430,7 +430,7 @@ iterations.
 
 ```
 N = 10
-y = 4
+y = 3
 theta[1:M] = posterior_sample('simple binomial', y, N)
 
 print 'theta = ' theta[1:10] '...'
@@ -441,10 +441,10 @@ Let's run that and see what a few posterior draws look like.
 ```{r}
 M <- 1000
 N <- 10
-y <- 4
+y <- 3
 theta <- rbeta(M, y + 1, N - y + 1)
 printf('theta = ')
-for (n in 1:10) printf('%3.2f', theta[n])
+for (n in 1:10) printf('%3.2f  ', theta[n])
 ```
 
 It's hard to glean much from the draws.  Instead, we'll want to look
@@ -452,7 +452,9 @@ at summaries of the posterior.  For visualizing draws of a single
 variable, histograms are handy.
 
 
-```{r}
+```{r fig.cap = 'Histogram of one thousand draws from the posterior $p(\\theta \\mid y)$.   With thirty bins, the histogram appears ragged, but conveys the rough shape and location of the posterior.'}
+
+
 binom_post_df <- data.frame(theta = theta)
 binomial_post_plot <-
   ggplot(binom_post_df, aes(x = theta)) +
@@ -461,15 +463,53 @@ binomial_post_plot <-
                      breaks = c(0, 0.25, 0.5, 0.75, 1)) +
   xlab(expression(theta)) +
   ylab("posterior draw proportion") +
-  ggtheme_tufte()
+  ggtheme_tufte() +
+  theme(axis.text.y = element_blank())
 binomial_post_plot
 ```
 
+Let's up $M$ to $1\,000\,000$ and double the number of bins to get a
+better look at the posterior density. ^[A sample size $M > 100$ is
+rarely necessary for calculating estimates, event probabilities, or
+other expectations conditioned on data. For histograms, many draws are
+required to ensure low relative error in every bin so that the
+resulting histogram is smooth.]
+
+```{r fig.cap = 'Histogram of one million draws from the posterior $p(\\theta \\mid y)$.  A *much* larger $M$ is required to get a fine-grained view of the whole posterior distribution than is required for an accurate summary statistic.'}
+
+
+set.seed(1234)
+M <- 1e6
+theta <- rbeta(M, y + 1, N - y + 1)
+
+binom_post_df2 <- data.frame(theta = theta)
+binomial_post_plot2 <-
+  ggplot(binom_post_df2, aes(x = theta)) +
+  geom_histogram(color = 'black', fill = '#ffffe6',
+                 size = 0.25, bins = 60) +
+  scale_x_continuous(lim = c(0, 1),
+                     breaks = c(0, 0.25, 0.5, 0.75, 1)) +
+  xlab(expression(theta)) +
+  ylab("posterior draw proportion") +
+  ggtheme_tufte() +
+  theme(axis.text.y = element_blank())
+binomial_post_plot2
+```
+
+Histograms have their limitations. The distribution is slightly
+skewed, but that is not clearly visible by inspection. It's also hard
+to tell the exact location of the posterior mean and median.
+
+
+## Posterior summary statistics
+
 We often want to look at summaries of the posterior, the posterior
-mean, standard deviation, and quantiles being common.  These are all
-easily calculated based on the sample draws.  For instance, the
-posterior mean and standard deviation are as simple as calling
-built-in mean and standard deviation functions
+mean, standard deviation, and quantiles being the most commonly used
+in practice.  These are all easily calculated based on the sample
+draws.
+
+Calculating the posterior mean and standard deviation are as
+simple as calling built-in mean and standard deviation functions,
 
 ```
 print 'estimated posterior mean = ' mean(theta) '
@@ -483,12 +523,19 @@ printf('estimated posterior mean = %3.2f', mean(theta))
 printf('estimated posterior   sd = %3.2f', sd(theta))
 ```
 
+The posterior mean and standard deviation are excellent marginal
+summary statistics for posterior quantities that have a roughly normal
+distribution.^[Most posterior distributions we will consider approach
+normality as more data is observed.]  If the posterior distribution
+has very broad or narrow tails or is highly skewed, standard deviation
+and mean are less useful.
+
 We can estimate quantiles just as easily, assuming we have built-in
 functions to compute quantiles.
 
 ```
 print 'estimated posterior median = ' quantile(theta, 0.5)
-print 'estimated posterior central 80% interval = '
+print 'estimated posterior central 80 pct interval = '
       quantiles(theta, { 0.1, 0.9 })
 ```
 
@@ -496,23 +543,58 @@ Running this produces the following.
 
 ```{r}
 printf('estimated posterior median = %3.2f\n',
-       quantile(theta, 0.2))
-printf('estimated posterior central 80 pct interval = (%3.2f, %3.2f)\n',
+       quantile(theta, 0.5))
+printf('estimated posterior central 90 pct interval = (%3.2f, %3.2f)\n',
        quantile(theta, 0.1), quantile(theta, 0.9))
 ```
 
-This answers the question pretty thoroughly about Laplace's questions
-about estimating $\theta$.  To answer the question about whether boys
-are more prevalent than girls, we need to estimate $\mbox{Pr}[\theta >
-0.5]$, which is straightforward with simulation.
+The median (aka, the 50% quantile), is just slightly lower than the
+mean. This answers Laplace's question about estimating $\theta$ as a
+distribution, then summarizing those estimates. To answer the question
+about whether boys are more prevalent than girls, we need to estimate
+$\mbox{Pr}[\theta > 0.5]$, which is straightforward with simulation.
+As usual, we just count the number of times that the simulated value
+$\theta^{(m)} > 0.5$ and divide by the number of simulations $M$,
 
 ```
 print 'Pr[theta > 0.5] = ' sum(theta > 0.5) / M
 ```
 
 Running this, we see that with 4 boys in 10 births, the probability
-they represent more than 50% of the live births is
+boys represent more than 50% of the live births is estimated, relative
+to the model, to be
 
 ```{r}
 printf('Pr[theta > 0.5] = %3.2f\n', sum(theta > 0.5) / M)
+```
+
+In a normal distribution, plus or minus one standard deviation covers
+the quantiles $(0.159, 0.841)$, whereas plus or minus two standard
+deviations covers $(0.023, 0.978)$.
+
+Now let's overlay the median and central 95% interval (equivalently,
+the two 2.5% tail intervals) onto our fine-grained histogram.
+
+```{r fig.cap = "Histogram of $1\\,000\\,000$ draws from the posterior $$p(\\theta \\mid y, N) \\propto \\mbox{binomial}(y \\mid N, \\theta),$$ given $N = 10, y = 3$.  The median (50% quantile) is indicated with a dashed line and the boundaries of the central 95% interval (2.5% and 97.5% quantiles) are picked out with dotted lines.  The proportion of the total area shaded to the right of 0.5 represents the probability given our observed data that $\\theta > 0.5,$ which is about 11%."}
+
+binomial_post_plot3 <-
+  ggplot(binom_post_df2, aes(x = theta)) +
+  geom_histogram(color = 'black', fill = '#ffffe6',
+                 size = 0.25, binwidth = 0.01, boundary = 0.5) +
+  geom_histogram(data = subset(binom_post_df2, theta > 0.5),
+                 color = 'black', size = 0.25,
+		 fill = '#ccccb6', binwidth = 0.01, boundary = 0.5) +
+  geom_vline(xintercept = quantile(binom_post_df2$theta, 0.5),
+             linetype = "dashed", size = 0.5) +
+  geom_vline(xintercept = quantile(binom_post_df2$theta, 0.025),
+             linetype = "dotted", size = 0.5) +
+  geom_vline(xintercept = quantile(binom_post_df2$theta, 0.975),
+             linetype = "dotted", size = 0.5) +
+  scale_x_continuous(lim = c(0, 1),
+                     breaks = c(0, 0.25, 0.5, 0.75, 1)) +
+  xlab(expression(theta)) +
+  ylab("posterior draw proportion") +
+  ggtheme_tufte() +
+  theme(axis.text.y = element_blank())
+binomial_post_plot3
 ```
