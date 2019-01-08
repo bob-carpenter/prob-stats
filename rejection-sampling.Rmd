@@ -1,25 +1,99 @@
-# Sampling from Arbitrary Distributions
+# Rejection Sampling
+
+## Inverse cumulative distribution generation
+
 
 We have so far assumed we have a uniform random number generator that
 can sample from a $\mbox{uniform}(0, 1)$ distribution. That
-immediately lets us generate from a $\mbox{uniform}(a, b).$^[If $$ U
+immediately lets us simulate from a $\mbox{uniform}(a, b).$^[If $$ U
 \sim \mbox{uniform}(0, 1) $$ then $$a + U \times (b - a) \sim
 \mbox{uniform}(a, b).$$] But what if we want to simulate realizations
 of a random variable $Y$ whose density $p_Y$ is not uniform?
 
+If we happen to have a random variable $Y$ for which we can compute
+the inverse $F^{-1}_Y(p)$ of the cumulative distribution function for
+$p \in (0, 1),$^[If $F^{-1}_Y(p) = y$ then $F^{-1}(y) =
+\mbox{Pr}[Y \leq y] = p.$] then we can simulate random realizations of
+$Y$ as follows.  First, simulate a uniform draw $U$,
+
+$$
+u^{(m)} \sim \mbox{uniform}(0, 1),
+$$
+
+then apply the inverse cumulative distribution function to turn it
+into a simulation of $Y$,
+
+$$
+y^{(m)} = F^{-1}(u^{(m)}).
+$$
+
+It turns out we've already seen an example of this strategy---it is
+how we we simulated from a logistic distribution right off the bat.
+The log odds transform is the inverse cumulative distribution function
+for the logistic distribution. That is, if
+
+$$
+Y \sim \mbox{logistic}(0, 1),
+$$
+
+then
+
+$$
+F_Y(y) = \mbox{logit}^{-1}(y) = p
+$$
+
+and hence
+
+$$
+F^{-1}_Y(p) = \mbox{logit}(p) = y.
+$$
+
+This lets us simulate $Y$ by first simulating $U \sim
+\mbox{uniform}(0, 1)$, then setting $Y = \mbox{logit}(U)$. Both the
+log odds function and its inverse are easy to compute. Often, the
+inverse cumulative distribution function is an expensive
+computation.^[In general, the inverse cumulative distribution function
+$F^{-1}_Y(p)$ can be computed by solving $$F_Y(u) = \int_{\infty}^u p_Y(y)
+\mathrm{d} y = p$$ for $u$, which can typically be accomplished
+numerically if not analytically.]
+
 
 ## Beta distribution
 
-As a first non-trivial example, let's consider the beta
-distribution.^[We'll have a lot more to say about beta distributions
-as we go along as they have a close connection to binary trial data.]
-If $\Theta$ has a beta distribution, then its density $p_{\Theta}$ is
+As a first non-trivial example, let's consider the beta distribution,
+which arises naturally as a posterior in binary models. Recall that
+when we have a binomial likelihood $\mbox{binomial}(y \mid N, \theta)$
+and a uniform prior $\theta \sim \mbox{uniform}(0, 1)$, then the
+posterior density is
+
+$$
+p(\theta \mid y)
+\ \propto \
+\theta^y \times (1 - \theta)^{N - y}.
+$$
+
+This turns out to be a beta distribution with parameters $\alpha = y +
+1$ and $\beta = N - y + 1$. In general, if a random variable $\Theta
+\in (0, 1)$ has a beta distribution, then its density $p_{\Theta}$ is
 
 $$
 \mbox{beta}(\theta \mid \alpha, \beta)
 \ \propto \
-\theta^{\alpha - 1} \times (1 - \theta)^{\beta - 1}.
+\theta^{\alpha - 1} \times (1 - \theta)^{\beta - 1}
 $$
+
+for some $\alpha, \beta > 0$.^[We prefer to present densities up to
+normalizing constants, because the normalizing constants are
+distracting---what matters is how the density changes with the
+variate. Here, the fully normalized distribution is
+$$\mbox{beta}(\theta \mid \alpha, \beta) \ = \
+\frac{1}{\mbox{B}(\alpha, \beta)} \, \theta^{\alpha - 1} \times (1 -
+\theta)^{\beta - 1},$$ where Euler's beta function, which gives its
+namesake distribution its name, is defined as the integral of the
+unnormalized beta density $$ \mathrm{B}(\alpha,
+\beta) \ = \ \displaystyle \int_0^1 \theta^{\alpha - 1} (1 -
+\theta)^{\beta - 1} \, \mbox{d} \theta.$$  Hence, it's clear the
+beta density integrates to 1 for any $\alpha, \beta$.]
 
 We like to think of the beta distribution parameters in terms of the
 total count $\alpha + \beta$ and mean $\alpha / (\alpha + \beta)$. The
@@ -62,8 +136,29 @@ beta_density_plot
 
 For example, a total count of $\alpha + \beta = 8$ and mean of $\alpha
 / (\alpha + \beta) = 0.85$ corresponds to beta distribution parameters
-$\alpha = 8 \times 0.85 = 6.8$ and $\beta = 8 \times (1 - 0.85) = 1.2.$
+$\alpha = 8 \times 0.85 = 6.8$ and $\beta = 8 \times (1 - 0.85) =
+1.2.$
 
+We can see that when the mean is 0.5 and the count is 2, we have
+$\alpha = \beta = 1$, and the result is a uniform distribution,
+
+$$
+\begin{array}{rcl}
+\mbox{beta}(\theta \mid 1, 1)
+& \propto & \theta^(1 - 1) \times (1 - \theta)^(1 - 1)
+\\[4pt]
+& = & 1
+\\[4pt]
+& = & \mbox{uniform}(y \mid 0, 1).
+\end{array}
+$$
+
+We should thus be thinking of $\alpha + \beta = 2$ as being equivalent
+to a total count of zero, as a total count of 2 is required to lead to
+a uniform distribution.^[Arguably, the beta distribution would be more
+naturally parameterized with parameters $\alpha, \beta > -1$ to
+naturally scale the "counts" and avoid subtraction in the exponent
+expressions.]
 
 The area under each of these curves, as drawn, is exactly one. The
 beta distributions with small total count ($\alpha + \beta$)

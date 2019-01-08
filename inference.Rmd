@@ -447,10 +447,13 @@ printf('theta = ')
 for (n in 1:10) printf('%3.2f  ', theta[n])
 ```
 
-It's hard to glean much from the draws.  Instead, we'll want to look
-at summaries of the posterior.  For visualizing draws of a single
-variable, histograms are handy.
+It's hard to glean much from the draws. What it does tell us is that
+the posterior in the range we expect it to be in---near 0.3, because
+the data was $y = 3$ boys in $N = 10$ births.  The first thing we want
+to do with any posterior is check that it's reasonable.
 
+For visualizing draws of a single variable, such as the proportion of
+boy births $\theta$, histograms are handy.
 
 ```{r fig.cap = 'Histogram of one thousand draws from the posterior $p(\\theta \\mid y)$.   With thirty bins, the histogram appears ragged, but conveys the rough shape and location of the posterior.'}
 
@@ -477,7 +480,6 @@ resulting histogram is smooth.]
 
 ```{r fig.cap = 'Histogram of one million draws from the posterior $p(\\theta \\mid y)$.  A *much* larger $M$ is required to get a fine-grained view of the whole posterior distribution than is required for an accurate summary statistic.'}
 
-
 set.seed(1234)
 M <- 1e6
 theta <- rbeta(M, y + 1, N - y + 1)
@@ -497,8 +499,15 @@ binomial_post_plot2
 ```
 
 Histograms have their limitations. The distribution is slightly
-skewed, but that is not clearly visible by inspection. It's also hard
-to tell the exact location of the posterior mean and median.
+asymmetric, with a longer tail to the right than to the left, but
+asymmetry can be difficult to detect visually until it is more extreme
+than here. Asymmetric distributions are said to be *skewed*, either to
+the right or left, depending on which tail is longer.^[The formal
+measurement of the *skew* of a random variable $Y$ is just another
+expectation that may be estimated via simulation, $$\mbox{skew}[Y] =
+\mathbb{E}\left[\left(\frac{Y -
+\mathbb{E}[Y]}{\mbox{sd}[Y]}\right)^3\right].$$] It's also hard to
+tell the exact location of the posterior mean and median visually.
 
 
 ## Posterior summary statistics
@@ -539,7 +548,8 @@ print 'estimated posterior central 80 pct interval = '
       quantiles(theta, { 0.1, 0.9 })
 ```
 
-Running this produces the following.
+Running this produces the following.^[The median is slightly lower
+than the mean, as they will be in right skewed distributions.]
 
 ```{r}
 printf('estimated posterior median = %3.2f\n',
@@ -548,48 +558,72 @@ printf('estimated posterior central 90 pct interval = (%3.2f, %3.2f)\n',
        quantile(theta, 0.1), quantile(theta, 0.9))
 ```
 
-The median (aka, the 50% quantile), is just slightly lower than the
-mean. This answers Laplace's question about estimating $\theta$ as a
-distribution, then summarizing those estimates. To answer the question
-about whether boys are more prevalent than girls, we need to estimate
-$\mbox{Pr}[\theta > 0.5]$, which is straightforward with simulation.
-As usual, we just count the number of times that the simulated value
-$\theta^{(m)} > 0.5$ and divide by the number of simulations $M$,
+The posterior simulations and summaries answer Laplace's question
+about the value of $\theta$, i.e., the proportion of boys born, at
+least relative to this tiny data set.
+
+We have reported a central 90% interval here. It is a 90% interval in
+the sense that it is 90% probable to contain the value (relative to
+the model, as always). We have located that interval centrally in the
+sense that it runs from the 5% quantile to the 95% quantile.
+
+There is nothing privileged about the width or location of a posterior
+interval. A value is as likely to be in a posterior interval from the
+1% quantile to the 91% quantile, or from the 10% quantile to the 100%
+quantile. The width is chosen to be convenient to reason about.  With
+a 90% interval, we know roughly nine out of ten values will fall
+within it, and choosing a central interval gives us an idea of the
+central part of the distribution.
+
+To answer the question about whether boys are more prevalent than
+girls, we need to estimate $\mbox{Pr}[\theta > 0.5]$, which is
+straightforward with simulation. As usual, we just count the number of
+times that the simulated value $\theta^{(m)} > 0.5$ and divide by the
+number of simulations $M$,
 
 ```
-print 'Pr[theta > 0.5] = ' sum(theta > 0.5) / M
+print 'estimated Pr[theta > 0.5] = ' sum(theta > 0.5) / M
 ```
 
-Running this, we see that with 4 boys in 10 births, the probability
+Running this, we see that with 3 boys in 10 births, the probability
 boys represent more than 50% of the live births is estimated, relative
 to the model, to be
 
 ```{r}
-printf('Pr[theta > 0.5] = %3.2f\n', sum(theta > 0.5) / M)
+printf('estimated Pr[theta > 0.5] = %3.2f\n', sum(theta > 0.5) / M)
 ```
 
-In a normal distribution, plus or minus one standard deviation covers
-the quantiles $(0.159, 0.841)$, whereas plus or minus two standard
-deviations covers $(0.023, 0.978)$.
+Now let's overlay the median and central 90% interval.
 
-Now let's overlay the median and central 95% interval (equivalently,
-the two 2.5% tail intervals) onto our fine-grained histogram.
+```{r fig.cap = "Histogram of $1\\,000\\,000$ draws from the posterior $$p(\\theta \\mid y, N) \\propto \\mbox{binomial}(y \\mid N, \\theta),$$ given $N = 10, y = 3$.  The median (50% quantile) is indicated with a dashed line and the boundaries of the central 90% interval (5% and 95% quantiles) are picked out with dotted lines.  The proportion of the total area shaded to the right of 0.5 represents the posterior probability that $\\theta > 0.5,$ which is about 11%."}
 
-```{r fig.cap = "Histogram of $1\\,000\\,000$ draws from the posterior $$p(\\theta \\mid y, N) \\propto \\mbox{binomial}(y \\mid N, \\theta),$$ given $N = 10, y = 3$.  The median (50% quantile) is indicated with a dashed line and the boundaries of the central 95% interval (2.5% and 97.5% quantiles) are picked out with dotted lines.  The proportion of the total area shaded to the right of 0.5 represents the probability given our observed data that $\\theta > 0.5,$ which is about 11%."}
+q05 <- quantile(binom_post_df2$theta, 0.05)
+q50 <- quantile(binom_post_df2$theta, 0.50)
+q95 <- quantile(binom_post_df2$theta, 0.95)
 
 binomial_post_plot3 <-
   ggplot(binom_post_df2, aes(x = theta)) +
   geom_histogram(color = 'black', fill = '#ffffe6',
-                 size = 0.25, binwidth = 0.01, boundary = 0.5) +
+                 size = 0.25, binwidth = 0.015, boundary = 0.5) +
   geom_histogram(data = subset(binom_post_df2, theta > 0.5),
                  color = 'black', size = 0.25,
-		 fill = '#ccccb6', binwidth = 0.01, boundary = 0.5) +
-  geom_vline(xintercept = quantile(binom_post_df2$theta, 0.5),
+		 fill = '#ccccb6', binwidth = 0.015, boundary = 0.5) +
+  geom_vline(xintercept = q50,
              linetype = "dashed", size = 0.5) +
-  geom_vline(xintercept = quantile(binom_post_df2$theta, 0.025),
+  geom_vline(xintercept = q05,
              linetype = "dotted", size = 0.5) +
-  geom_vline(xintercept = quantile(binom_post_df2$theta, 0.975),
+  geom_vline(xintercept = q95,
              linetype = "dotted", size = 0.5) +
+  annotate("text", x = q05, y = 50000, label = "5%",
+           family = "Palatino") +
+  annotate("text", x = q50, y = 50000, label = "50%",
+           family = "Palatino") +
+  annotate("text", x = q95, y = 50000, label = "95%",
+           family = "Palatino") +
+  annotate("text", x = q95, y = 50000, label = "95%",
+           family = "Palatino") +
+  annotate("text", x = 0.75, y = 50000, label = "quantiles",
+           family = "Palatino") +
   scale_x_continuous(lim = c(0, 1),
                      breaks = c(0, 0.25, 0.5, 0.75, 1)) +
   xlab(expression(theta)) +
