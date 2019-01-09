@@ -53,9 +53,9 @@ This lets us simulate $Y$ by first simulating $U \sim
 log odds function and its inverse are easy to compute. Often, the
 inverse cumulative distribution function is an expensive
 computation.^[In general, the inverse cumulative distribution function
-$F^{-1}_Y(p)$ can be computed by solving $$F_Y(u) = \int_{\infty}^u p_Y(y)
-\mathrm{d} y = p$$ for $u$, which can typically be accomplished
-numerically if not analytically.]
+$F^{-1}_Y(p)$ can be computed by solving $$F_Y(u) = \int_{\infty}^u
+p_Y(y) \, \mathrm{d} y = p$$ for $u$, which can typically be
+accomplished numerically if not analytically.]
 
 
 ## Beta distribution
@@ -73,8 +73,8 @@ p(\theta \mid y)
 $$
 
 This turns out to be a beta distribution with parameters $\alpha = y +
-1$ and $\beta = N - y + 1$. In general, if a random variable $\Theta
-\in (0, 1)$ has a beta distribution, then its density $p_{\Theta}$ is
+1$ and $\beta = N - y + 1$. If a random variable $\Theta
+\in (0, 1)$ has a *beta distribution*, then its density $p_{\Theta}$ is
 
 $$
 \mbox{beta}(\theta \mid \alpha, \beta)
@@ -95,10 +95,20 @@ unnormalized beta density $$ \mathrm{B}(\alpha,
 \theta)^{\beta - 1} \, \mbox{d} \theta.$$  Hence, it's clear the
 beta density integrates to 1 for any $\alpha, \beta$.]
 
-We like to think of the beta distribution parameters in terms of the
-total count $\alpha + \beta$ and mean $\alpha / (\alpha + \beta)$. The
-higher the total count, lower the variance. For example, here is a
-plot of a few beta distributions organized by total count and mean.
+If $Y \sim \mbox{beta}(\alpha, \beta)$, then its expected value is
+
+$$
+\mathbb{E}[Y] = \frac{\alpha}{\alpha + \beta}.
+$$
+
+It is convenient to work with the beta distribution parameters in
+terms of the mean $\alpha / (\alpha + \beta)$ and the total count
+$\alpha + \beta$.^[Distributions have means, random variables have
+expectations.  The mean of a distribution is the expectation of a
+random variable with that distribution, so the terms are often
+conflated.] The higher the total count, lower the variance. For
+example, here is a plot of a few beta distributions organized by total
+count and mean.
 
 ```{r, out.width = "100%", fig.width=9, fig.asp = 0.8, fig.cap="Plots of the densities $\\mbox{beta}(\\theta \\mid \\alpha, \\beta)$ for different total counts $\\alpha + \\beta$ and different means $\\alpha / (\\alpha + \\beta).$ The vertical dotted lines are drawn at the mean. Only the distribution with 0.5 mean has a symmetric density; the other densities are skewed toward the right and thus have means to the left of their modes (maxima), where the modes exist."}
 
@@ -128,7 +138,8 @@ beta_density_plot <-
   scale_y_continuous(lim = c(0, 7), breaks = c(0, 3, 6)) +
   ggtheme_tufte() +
   xlab(expression(theta)) +
-  ylab(expression(p[Theta](theta))) +
+  ylab(expression(
+    paste("beta(", theta, " | ", alpha, ", ", beta, ")"))) +
   theme(panel.spacing.x = unit(3, "lines"),
         panel.spacing.y = unit(2, "lines"))
 beta_density_plot
@@ -139,37 +150,37 @@ For example, a total count of $\alpha + \beta = 8$ and mean of $\alpha
 $\alpha = 8 \times 0.85 = 6.8$ and $\beta = 8 \times (1 - 0.85) =
 1.2.$
 
-We can see that when the mean is 0.5 and the count is 2, we have
-$\alpha = \beta = 1$, and the result is a uniform distribution,
+The plot shows that when the mean is 0.5 and the count is 2 (i.e.,
+$\alpha = \beta = 1$), the result is a uniform distribution.  The
+algebra agrees,
 
 $$
 \begin{array}{rcl}
 \mbox{beta}(\theta \mid 1, 1)
-& \propto & \theta^(1 - 1) \times (1 - \theta)^(1 - 1)
+& \propto & \theta^{1 - 1} \times (1 - \theta)^{1 - 1}
 \\[4pt]
 & = & 1
 \\[4pt]
-& = & \mbox{uniform}(y \mid 0, 1).
+& = & \mbox{uniform}(\theta \mid 0, 1).
 \end{array}
 $$
 
-We should thus be thinking of $\alpha + \beta = 2$ as being equivalent
-to a total count of zero, as a total count of 2 is required to lead to
-a uniform distribution.^[Arguably, the beta distribution would be more
-naturally parameterized with parameters $\alpha, \beta > -1$ to
-naturally scale the "counts" and avoid subtraction in the exponent
-expressions.]
-
 The area under each of these curves, as drawn, is exactly one. The
 beta distributions with small total count ($\alpha + \beta$)
-concentrate most of the probability mass near the boundaries. As the
+concentrate most of their probability mass near the boundaries. As the
 count grows, the probability mass concentrates away from the
-boundaries and around the mean.
+boundaries and around the mean.^[Nevertheless, in higher dimensions,
+the curse of dimensionality rears its ugly head, and concentrates the
+total mass in the corners, even if each dimension is independently
+distributed and drawn from a distribution concentrated away from the
+edges in one dimension. The reason is the same---each dimension's
+value squared just pulls the expected distance of a draw further from
+the multidimensional mean.]
 
 Each of these distributions has a well-defined mean, as shown in row
 labels in the plot. But they do not all have well defined modes
 (maxima). For example, consider the beta distribution whose density is
-shown in the upper left example in the plot. It shows the U-shaped
+shown in the upper left example in the plot. It shows a U-shaped
 density for a $\mbox{beta}(0.25, 0.25)$ distribution, which
 corresponds to mean $0.5 = 0.25 / (0.25 + 0.25)$ and total count $0.5
 = 0.25 + 0.25$. As $\theta$ approaches either boundary, 0 or 1, the
@@ -187,19 +198,26 @@ because it is easy to understand, but points the way toward more
 complex sampling algorithms we will consider later.
 
 Let's start with the simplest possible kind of rejection sampling
-where we have a bounded distribution like a beta distribution. In the
-case of the beta distribution, draws are bounded between 0 and 1. And
-lets's start psecifically with a $\mbox{beta}(6.8, 1.2)$ distribution,
-corresponding to the mean 0.85 and count of 8 case from the previous
-section.
+where we have a bounded distribution like a beta distribution. The
+values drawn from a beta distribution are bounded between 0 and 1 by
+construction. Furthermore, if $\alpha, \beta > 1$, as we will assume
+for the time being, then there is a maximum value for
+$\mbox{beta}(\theta \mid \alpha, \beta)$.^[The maximum density occurs
+at the *mode* of the distribution, which for
+$\\mbox{beta}(\\theta \\mid \\alpha, \\beta)$ is given by
+$$\\theta^* = \\frac{\\alpha - 1}{\\alpha + \\beta - 2}.$$]
 
-We observe that all values fall below 5 in the range we care about, so
-we will create a box with height 5 and width of 1.^[In general, we
-could use an optimization algorithm to find the largest value.] Next,
-we draw uniformly from the box, drawing a horizontal position
-$\theta^{(m)} \sim \mbox{uniform}(0, 1)$ and vertical position
-$u^{(m)} \sim \mbox{uniform}(0, 5)$. The points whose value for $u$
-falls below the density at the value for $\theta$ are retained.
+
+For concreteness, let's start specifically with a $\mbox{beta}(6.8,
+1.2)$ distribution, corresponding to the mean 0.85 and count of 8 case
+from the previous section. We observe that all values fall below 5, so
+we will create a box with height 5 and width of 1.^[For an unknown
+distribution, we could use an optimization algorithm to find the
+largest value.] Next, we draw uniformly from the box, drawing a
+horizontal position $\theta^{(m)} \sim \mbox{uniform}(0, 1)$ and
+vertical position $u^{(m)} \sim \mbox{uniform}(0, 5)$. The points
+whose value for $u$ falls below the density at the value for $\theta$
+are retained.
 
 ```{r fig.cap = 'A simple instance of rejection sampling from a bounded $\\mbox{beta}(6.8, 1.2)$ distribution, whose density is shown as a solid line.  Points $(\\theta, u)$ are drawn uniformly from the rectangle, then accepted as a draw of $\\theta$ if $u$ falls below the density at $\\theta$.  The accepted draws are rendered as plus signs and the rejected ones as circles.  The acceptance rate here is roughly 20%.'}
 
@@ -251,6 +269,8 @@ density function $p_U$, which ensures
 $$
 \mbox{Pr}[a \leq U \leq b] = \int_a^b p_U(u) \, \mathrm{d}u.
 $$
+
+If the intervals are right, the density is right.
 
 
 ## Rejection sampling algorithm
@@ -328,9 +348,9 @@ small area (even as mildly in our $\mbox{beta}(6.8, 1.2)$ example) in
 each dimension, the chance of a random multidimensional sample being
 accepted in every dimension is only $0.2^N$, which becomes vanishingly
 small for practical purposes even in 10 dimensions.^[In ten
-dimensions, overall acceptance of a uniform draw would be $0.2^10$, or
+dimensions, overall acceptance of a uniform draw would be $0.2^{10}$, or
 a little less than one in ten million.  While this may be possible
-with patience, another 10 dimensions becomes completely unworkable,
+with patience, another ten dimensions becomes completely unworkable,
 even with massive parallelism.]
 
 

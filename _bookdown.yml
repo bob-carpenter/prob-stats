@@ -11,6 +11,7 @@ rmd_files: [
   "continuous-random-variables.Rmd",
   "densities.Rmd",
   "inference.Rmd",
+  "rejection-sampling.Rmd",
   "predictive-inference.Rmd",
-  "rejection-sampling.Rmd"
+  "testing-prngs.Rmd",
 ]
