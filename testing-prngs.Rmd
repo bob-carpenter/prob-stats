@@ -361,3 +361,13 @@ $$
 That is, we reject the null hypothesis at signifiance level $\alpha$
 if the test statistic $X^2$ is outside of the central $1 - \alpha$
 interval of the chi-squared distribution.
+
+There are lots of choices when using the chi-squared test, like how
+many bins to use and how to space them.  Generally, we want the
+expected number of elements in each bin to be good enough that the
+normal approximation is approximation, the traditionally suggested
+minimum for which is five or so.  If we're testing a pseudorandom
+number generator, the only bound is compute time, so we'll usually
+have many more expected elements per bin than five.  It's common to
+see equal probability bins used, generating them with an inverse
+cumulative distribution function where available.

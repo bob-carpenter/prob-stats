@@ -3,24 +3,24 @@
 One of the primary reasons we fit models is to make predictions about
 the future.  More specifically, we want to observe some data $y$ and
 use it to predict future data $\tilde{y}$.  Even more specifically,
-our goal is to understand the probability distribution of the future
+we'd like to understand the probability distribution of the future
 data $\tilde{y}$ given the observed data $y$.
 
-We are working relative to a model whose sampling distribution has a
-density $p(y \mid \theta)$. ^[From now on, we'll be dropping random
-variable subscripts on probabilty functions.  The convention in
-applied statistics is to choose names for bound variables that allow
-the random variables to be determined by context.  For example, we
-will write $p(\theta \mid y)$ for a posterior, taking it to mean
-$p_{\Theta \mid Y}(\theta \mid y)$.]  Thus if we knew the value of
-$\theta$,^[We are also overloading lowercase variables like $\theta$
-to mean their random variable counterpart $\Theta$ when necessary, as
-it is here, where we should properly be saying that the random
-variable $\Theta$ takes on some known value $\theta$.]  the prediction
-we'd want to make is $p(\tilde{y} \mid \theta)$.  Here, we are
-assuming that the sampling distribution will be the same density for
-the original data $p(y \mid \theta)$ and the predictive data
-$p(\tilde{y} \mid \theta)$.
+We are going to assume that we are still working relative to a model
+whose sampling distribution has a density $p(y \mid \theta)$.^[From
+now on, we'll be dropping random variable subscripts on probabilty
+functions.  The convention in applied statistics is to choose names
+for bound variables that allow the random variables to be determined
+by context.  For example, we will write $p(\theta \mid y)$ for a
+posterior, taking it to mean $p_{\Theta \mid Y}(\theta \mid y)$.]
+Thus if we knew the value of $\theta$,^[We are also overloading
+lowercase variables like $\theta$ to mean their random variable
+counterpart $\Theta$ when necessary, as it is here, where we should
+properly be saying that the random variable $\Theta$ takes on some
+known value $\theta$.] the distribution of $\tilde{y}$ would be given
+by $p(\tilde{y} \mid \theta)$.  Here, we are assuming that the
+sampling distribution will be the same density for the original data
+$p(y \mid \theta)$ and the predictive data $p(\tilde{y} \mid \theta)$.
 
 Unfortunately, we don't know the true value of $\theta$.  All we have
 to go on are the inferences we can make about $\theta$ given our model
@@ -32,7 +32,7 @@ to create a weighted average of predictions for every possible
 $\theta$ with weights determined by the posterior $p(\theta \mid y)$.
 Because $\theta$ is continuous, the averaging must proceed by
 integration.  The result is the *posterior predictive distribution*,
-with density defined by
+the density for which is defined by
 
 $$
 p(\tilde{y} \mid y)
@@ -43,7 +43,7 @@ p(\tilde{y} \mid \theta)
 \times
 p(\theta \mid y)
 \,
-\mathrm{d}\theta
+\mathrm{d}\theta.
 $$
 
 The variable $\Theta$ is now doing extra duty as the set of possible
@@ -57,14 +57,28 @@ $\theta$.  This comes into play by averaging over the posterior
 $p(\theta \mid y)$.  The second form of uncertainty is introduced by
 the sampling distribution $p(\tilde{y} \mid \theta)$.  Even if we knew
 the precise value of $\theta$, we would still not know the value of
-$\tilde{y}$ because it is being generated from $\theta$.
+$\tilde{y}$ because it is not a deterministic function of $\theta$.
+Let's write our formula again highlighting the two sources of
+uncertainty.
+
+$$
+p(\tilde{y} \mid y)
+\ = \
+\int_{\Theta}
+\underbrace{p(\tilde{y} \mid \theta)}_{\mbox{sampling uncertainty}}
+\times
+\underbrace{p(\theta \mid y)}_{\mbox{estimation uncertainty}}
+\,
+\mathrm{d}\theta.
+$$
+
 
 
 ## Calculation via simulation
 
 Because the posterior predictive distribution is an expectation
-conditioned on data, it can be estimated using simulation of
-draws $\theta^{(m)}$ from the posterior as
+conditioned on data, it can be estimated using simulations
+$\theta^{(m)}$ of the posterior $p(\theta \mid y)$ as
 
 $$
 p(\tilde{y} \mid y)
@@ -72,7 +86,126 @@ p(\tilde{y} \mid y)
 \frac{1}{M} \sum_{m=1}^M p(\tilde{y} \mid \theta^{(m)}).
 $$
 
-That is, we just take the average prediction over our sample.
+That is, we just take the average prediction over our sample of
+simulations.
+
+## Numerically stable calculation via simulation
+
+We often run into the problem of underflow when computing densities or
+probabilities.^[Underflow is the result of operations which produce
+real numbers $\epsilon$ smaller than the smallest number that can
+be represented.]  To get around that problem we compute on the log
+scale, using $\log p(y \mid \theta)$ rather than doing calculations on
+the original scale $p(y \mid \theta)$.
+
+But we have to be careful with averaging non-linear operations.  The
+averaging that we do with simulation-based estimates does not
+distribute.  For most $u$ and $v$,^[An exception is $u = v = 2.$]
+
+$$
+\log u + \log v \neq \log (u + v).
+$$
+
+As a result, the log of an average is not equal to the average of a
+log,
+
+$$
+\frac{1}{M} \sum_{m=1}^M \log u_m
+\neq
+\log \left( \frac{1}{M} \sum_{m = 1}^M u_m \right).
+$$
+
+All is not lost, however.  We will rewrite our desired result as
+
+$$
+\begin{array}{rcl}
+\log \frac{1}{M} \sum_{m = 1}^M p(\tilde{y} \mid \theta^{(m)})
+& = &
+\log \frac{1}{M} + \log \sum_{m = 1}^M p(\tilde{y} \mid \theta^{(m)})
+\\[4pt]
+& = &
+- \log M
++ \log \sum_{m=1}^M \exp
+     \left( \log p(\tilde{y} \mid \theta^{(m)}) \right)
+\\[4pt]
+& = &
+\mbox{log_sum_exp}(\log p(\tilde{y} \mid \theta)) - \log M.
+\end{array}
+$$
+
+The log-sum-exp operation we can carry out stably, as we show in the
+next section.
+
+## Logarithms of sums of exponentiated terms
+
+When we take a logarithm, it is well known that it converts
+multiplication into addition, in the sense that if we have $\log u$
+and $\log v$, we get $\log (u \times v)$ by addition,
+
+$$
+\log \left( u \times v \right)
+\ = \log u + \log v.
+$$
+
+But what if we have $\log u$ and $\log v$ and want to produce $\log (u
++ v)$?  It works out to
+
+$$
+\log \left( u + v  \right)
+\ = \
+\log \left( \exp(\log u) + \exp(\log v) \right).
+$$
+
+In words, it takes the logarithm of the sum of exponentiations.  This
+may seem like a problematic amount of work to carry out addition, but
+it is in fact an opportunity.  By rearraning terms, we have
+
+$$
+\log (\exp(a) + \exp(b))
+\ = \
+\max(a, b) + \log (\exp(a - \max(a, b))
+                   + \exp(b - \max(a, b))).
+$$
+
+This may seem like even more work, but when we write it out in code,
+it's less daunting and serves the important purpose of preventing
+overflow or underflow.
+
+```
+log_sum_exp(u, v)
+  c = max(u, v)
+  return c + log(exp(u - c) + exp(v - c))
+```
+
+Because $c$ is computed as the maximum of $u$ and $v$, we know that $u
+- c \leq 0$ and $v - c \leq 0$.  As a result, the exponentiations will
+not overflow.  They might underflow to zero, but that doesn't cause a
+problem, because the maximum is preserved by being brought out front,
+with all of its precision intact.
+
+If we have a vector, it works the same way, only the vectorized
+pseudocode is neater.  If `u` is an input vector, then we can compute
+the log sum of exponentials as
+
+```
+log_sum_exp(u)
+  c = max(u)
+  return c + log(exp(u - c))
+```
+
+This is how we calculate the average of a sequence of values whose
+logarithms are known.
+
+```
+log_mean(log_u)
+  M = size(log_u)
+  c = max(log_u)
+  return -log(M) + c + log(exp(log_u - c))
+```
+
+Thus we can calculate posterior predictive densities on the log scale
+using log scale density calculations throughout to prevent overflow
+and underflow in intermediate calculations or in the final result.
 
 
 ## Expectation form
