@@ -111,49 +111,82 @@ p(\tilde{y} \mid y, \tilde{N})
 $$
 
 If we treat $\mbox{binomial}$ as evaluating elementwise,^[A function
-$f : \mathbb{R} \rightarrow \mathbb{R} can be extended *elementwise*
+$f : \mathbb{R} \rightarrow \mathbb{R}$ can be extended *elementwise*
 to a function on sequences $f : \mathbb{R}^N \rightarrow \mathbb{R}^N$
 by defining $$f(x)[n] = f(x[n]).$$ For example, elementwise
-exponentiation satisfies $\exp((u, v, w)) = (\exp(a), \exp(v),
-\exp(w))$.] so that a collection of $\theta$ as input produces a
-collection as output, then we can write this using functional
-operators as
+exponentiation satisfies $$\exp((u, v, w)) = (\exp(a), \exp(v),
+\exp(w)).$$] so that a collection of $\theta$ as input produces a
+collection as output, then we can write this using the
+elementwise definition of the binomial and a function to calculation
+the mean of a collection as
 
 $$
 \begin{array}{rcl}
-p(\tilde{y} \mid y)
+p\!\left(\tilde{y} \mid y\right)
 & \approx &
-\mbox{mean}(\mbox{binomial}(\tilde{y} \mid \tilde{N}, \theta)).
+\mbox{mean}\!\left(\mbox{binomial}\!\left(\tilde{y} \mid \tilde{N}, \theta\right)\right).
+\\[6pt]
+& \approx &
+\mbox{mean}\!\left(\mbox{binomial}\!\left(\tilde{y} \mid \tilde{N},
+                   \left(\theta^{(1)}, \ldots \theta^{(M)}\right)\right)\right).
 \\[6pt]
 & = &
-\mbox{mean}(\mbox{binomial}(\tilde{y} \mid \tilde{N}, \theta^{(1)}),
-            \ldots,
-	    \mbox{binomial}(\tilde{y} \mid \tilde{N}, \theta^{(M)}))
+\mbox{mean}\!\left(
+( \mbox{binomial}\!\left(\tilde{y} \mid \tilde{N}, \theta^{(1)}\right),
+  \ldots,
+  \mbox{binomial}\!\left(\tilde{y} \mid \tilde{N}, \theta^{(M)}\right)
+\right)
 \\[6pt]
 & = &
 \frac{1}{M} \sum_{m=1}^M
-\mbox{binomial}(\tilde{y} \mid \tilde{N}, \theta^{(m)}).
+\mbox{binomial}\!\left(\tilde{y} \mid \tilde{N}, \theta^{(m)}\right).
 \end{array}
 $$
+
+The second two lines illustrate how an elementwise definition is
+expanded, and the third shows how the compound function for the mean
+is applied.^[The definition of the mean function is $$\mbox{mean}\!\left( (u_1, \ldots, u_N)
+\right) \ = \ \frac{1}{N} \sum_{n=1}^N u_n.$$]
 
 The pseudocode translates the mathematical definition directly.
 
 ```
 for (m in 1:M)
   draw theta(m) from posterior p(theta | y, N)
-  p[m] = binomial(y_pred | N_pred, theta(m)
+  p[m] = binomial(y_pred | N_pred, theta(m))
 print 'esimated p(y_pred | y) = ' mean(p)
 ```
 
-Let's continue with the small data $y = 3$ and $N = 10$.  We'll take
-$\tilde{N} = 20$ and calculate the results for all possible $\tilde{y}
-\in 0:\tilde{N}$, then plot them.
+With an elementwise version of the binomial probability mass function,
+this simplifies to the following.^[Simple can mean several
+things---we're measuring code simplicity, not necessarily how simple
+it is to undersetand. Code simplicity involves several things, among
+them shallower nesting of statments and fewer indexed expressions, as
+in this example. As another example, the calculation of the mean could
+be done manually, but it is simpler to use a library function. Even if
+there's no library function, it simplifies code to break complex
+operations down into well-named functions. Building up a personal
+library of such functions is the first step toward becoming a
+developer.]
+
+```
+for (m in 1:M)
+  draw theta(m) from posterior p(theta | y, N)
+p = binomial(y_pred | N_pred, theta)
+print 'esimated p(y_pred | y) = ' mean(p)
+```
+
+Let's continue with the small data example, where $y = 3$ and $N =
+10$. We'll take $\tilde{N} = 20$ in order to make a prediction over
+the next twenty observations and calculate the probability for each
+possible $\tilde{y} \in 0:\tilde{N}$.  Then we'll plot them in a bar
+chart to inspect the distribution.
 
 ```{r fig.cap = "Probablity mass function for the posterior predictive distribution of the number of boys $\\tilde{y}$ in a subsequent group of $\\tilde{N} = 20$ births based on observing 3 boys in 10 births with no prior information.  Although it is peaked near the 30% level observed in the data, it would not be that surprising to see more boys than girls in the next 20 births."}
 
 set.seed(1234)
 log_sum_exp <- function(u) max(u) + log(sum(exp(u - max(u))))
-M <- 100
+M <- 1000
 y <- 3
 N <- 10
 N_pred <- 20
@@ -167,9 +200,9 @@ for (y_pred in 0:N_pred) {
   log_pred[y_pred + 1] <- log_sum_exp(lp) - log(M)
 }
 
-pp1_df <- data.frame(y_pred = 0:20, log_p = exp(log_pred))
+pp3_10_df <- data.frame(y_pred = 0:20, log_p = exp(log_pred))
 pp1_plot <-
-  ggplot(pp1_df, aes(y_pred, log_p)) +
+  ggplot(pp3_10_df, aes(y_pred, log_p)) +
   geom_col(color='black', fill = '#ffffe8', size = 0.25) +
   xlab(expression(widetilde(y))) +
   ylab(expression(paste("p(", widetilde(y), " | ",  y, ")"))) +
@@ -179,8 +212,11 @@ pp1_plot
 
 Because we have only observed $N$ outcomes, the posterior is not very
 concentrated---it is consistent with a wide range of possible
-outcomes.  Contrast this situation to using a simple binomial to do
-prediction setting $\theta = 0.3$, the observed proportion of boys.
+outcomes. Contrast this situation to using the binomial directly to do
+prediction by setting $\theta = 0.3$, the observed proportion of
+boys.^[Inference with a single point estimate of one or more
+parameters is common in live, real-time applications, where the cost
+of averaging over the posterior may be prohibitive.]
 
 ```{r fig.cap = "Probability mass function for predictions made by plugging the proportion of boy births observed in the data, $\\theta^* = \\frac{y}{N} = 0.3$, into the sampling distribution, to yield $\\mbox{binomial}(\\tilde{y} \\mid \\tilde{N}, \\theta^*)$.  Compared to the full posterior taking into account estimation uncertinaty in $\\theta$, this plug-in estimate makes it seem very unlikely there will be more boys than girls born in the next 20 births."}
 
@@ -204,10 +240,78 @@ future data assuming the model is correct---they place too much
 certainty in the observed proportion of boys in a small sample.
 
 The full posterior automatically adjusts for the size of the sample.
+Consider the following plot, in which the same proportion of boys is
+provided (30%), but the sample size continues to grow (quadrupling
+each time).  
 
+```{r out.width = "100%", fig.width = 9, fig.asp=0.4, fig.cap = "Illustration of convergence of posterior to binomial prediction based on proportion of boys as number of observations $y$ and $N$ grows, with proportion $\\frac{y}{N}$ fixed.  The central limit theorem tells us that each quadrupling of the data cuts the uncertainty in parameter estimation in half until all that is left is the sampling uncertainty in the binomial, as represented in the final plot, where $\\theta = 0.3$ is fixed."}
 
+M <- 1000
 
-## Numerically stable simulation
+y <- 12
+N <- 40
+N_pred <- 20
+lp <- rep(NA, M)
+log_pred <- rep(NA, N_pred + 1)
+theta <- rbeta(M, y + 1, N - y + 1)
+for (y_pred in 0:N_pred) {
+  for (m in 1:M) {
+    lp[m] <- dbinom(y_pred, N_pred, theta[m], log = TRUE)
+  }
+  log_pred[y_pred + 1] <- log_sum_exp(lp) - log(M)
+}
+pp12_40_df <- data.frame(y_pred = 0:20, log_p = exp(log_pred))
+
+y <- 48
+N <- 160
+N_pred <- 20
+lp <- rep(NA, M)
+log_pred <- rep(NA, N_pred + 1)
+theta <- rbeta(M, y + 1, N - y + 1)
+for (y_pred in 0:N_pred) {
+  for (m in 1:M) {
+    lp[m] <- dbinom(y_pred, N_pred, theta[m], log = TRUE)
+  }
+  log_pred[y_pred + 1] <- log_sum_exp(lp) - log(M)
+}
+pp48_160_df <- data.frame(y_pred = 0:20, log_p = exp(log_pred))
+
+pp_full_df <- data.frame(y_pred = c(), log_p = c(), model = c())
+pp_full_df <- rbind(pp_full_df,
+                    data.frame(y_pred = pp3_10_df$y_pred, log_p = pp3_10_df$log_p,
+		               model = rep(paste('y = 3, N = 10'), 21)))
+pp_full_df <- rbind(pp_full_df,
+                    data.frame(y_pred = pp12_40_df$y_pred, log_p = pp12_40_df$log_p,
+		               model = rep(paste('y = 12, N = 40'), 21)))
+pp_full_df <- rbind(pp_full_df,
+                    data.frame(y_pred = pp48_160_df$y_pred, log_p = pp48_160_df$log_p,
+		               model = rep(paste('y = 48, N = 160'), 21)))
+pp_full_df <- rbind(pp_full_df,
+                    data.frame(y_pred = binom_df$y_pred, log_p = binom_df$log_p,
+		               model = rep('fix theta = 0.3', 21)))
+
+pp_full_plot <-
+  ggplot(pp_full_df, aes(y_pred, log_p)) +
+  facet_grid(cols = vars(model)) +
+#  facet_wrap( ~ model) +
+  geom_col(color='black', fill = '#ffffe8', size = 0.1) +
+  xlab(expression(widetilde(y))) +
+  ylab('probability') + 
+  ggtheme_tufte() +
+  theme(panel.spacing.x = unit(1, "lines"))
+pp_full_plot
+```
+
+As the data size grows, the posterior predictive distribution
+approaches the predictions derived from just plugging the proportion
+of boys observed (30%) in the sampling distribution. After 160
+observations, the posterior predictive distribution is only a percent
+or two away from the predictions that do not take into account
+estimation uncertainty. Whether that matters or not will depend on the
+application.^[If leveraged bets or lives are at stake, a 1%
+discrepancey in predictions can have enormous consequences.]
+
+## Numerically stable expectations on the log scale
 
 We often run into the problem of underflow when computing densities or
 probabilities.^[Underflow is the result of operations which produce
@@ -358,7 +462,7 @@ and underflow in intermediate calculations or in the final result.
 
 
 
-## Expectation form
+## Posterior predictive densities as expectations
 
 Working with expectations and conditional expectations is natural for
 posterior inference, but initially requires some mental gymnastics to
@@ -395,14 +499,15 @@ p_{\tilde{Y}\mid\Theta}(\tilde{y} \mid \Theta) \mid Y = y
 $$
 
 where $T$ is domain of integration for $\theta$, i.e., possible values
-for $\Theta$.  The twist is that the function whose expectation is
+for $\Theta$. The twist is that the function whose expectation is
 being taken is now a density $p(\tilde{y} \mid \theta)$ in which
 $\theta$ shows up as a conditioning variable for the data $\tilde{y}$
-being predicted.  The value of $\tilde{y}$ is not free in the
-expectation---it is fixed by the input to the function being defined,
+being predicted.
 
-
-Because it's averaging over a conditional density (the posterior), it
-works out to be a conditional expectation.^[Expectations average
-jointly over their free random variables, here just $\Theta$, because
-$\tilde{y}$ is bound by the function definition.]
+The trick to understanding expectations is in understanding which
+variables are bound---all other random variables are averaged out to
+define the expectation. The value of both the observed data $y$ and
+the data $\tilde{y}$ for which we are computing predictions are fixed
+by the function definition and are not free variables in the
+expectation.  The random variable $\theta$ is not bound anywhere, and
+hence it is averaged in the calculation.

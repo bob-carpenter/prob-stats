@@ -1,0 +1,49 @@
+# Floating Point Arithmetic
+
+Contemporary^[Contemporary being 2019 as of this writing.] computers
+use floating-point representations of real numbers and thus perform
+arithmetic on floating-point representations.
+
+## What is a floating point number?
+
+A *bit* is the smallest discrete representational unit in a
+computer---it takes on a value of 0 or 1.  ^[A *byte* consists of a
+sequence of 8 bits.  The natural computing unit is a *word*, the size
+of which iscomputer dependent, but most computers nowadays (it's still
+2019) use 64-bit, or 8-byte words.]  Floating point numbers are most
+commonly represented using 32 or 64 bits, which are known as *single
+precision* and *double precision* respectively.^[Modern machine
+learning representations go as low as 8 and high-precision
+calculations can use as many as 1024 or more.]
+
+A floating point number consists of a fixed number of bits for a
+*significand* $a$ and a fixed number of bits for the *exponent* $b$,
+and it represents the real number $a \times 2^b$.  The terminology
+arises because the significand determines the significant digits and
+the exponent determines where the decimal place goes.^[This "floating"
+of the decimal place gives the representation its name.]  The
+significand may be negative in order to represent negative values.
+The exponent may be negative in order to represent fractions.  Both
+the significand and exponent are represented using a single bit for a
+sign and the remaining bits for the value in binary representation.
+Standard double-precision (i.e., 64 bit) representations allocate 53
+bits for the significand and 11 bits for the exponent.^[The standard
+in question is IEEE 754-2008.  Zuras, D., Cowlishaw, M., Aiken, A.,
+Applegate, M., Bailey, D., Bass, S., Bhandarkar, D., Bhat, M., Bindel,
+D., Boldo, S. and Canon, S., 2008. IEEE standard for floating-point
+arithmetic. IEEE Standard 754-2008,
+1--70. doi:[10.1109/IEEESTD.2008.4610935](https://ieeexplore.ieee.org/document/4610935).]
+
+The standard also sets aside three special values, *not a number* for
+ill-defined results, e.g., dividing zero by zero, *positive infinity*
+for infinite results, e.g., dividing one by zero, and *negative
+infinity* for negative infinity, e.g., dividing negative one by zero.
+These are all specified to have the expected behavior with arithmetic
+and comparison operators and built-in functions.
+
+Floating point numbers are written in computer programs using
+*literals*, which can be integers such as `314`, floating point
+numbers such as `3.14`, and scientific notation such as `0.314e+1`.
+Scientific notation uses decimal notation, where `e+1` denotes
+multiplication by $10^1 = 10$.  That means `3.14` and `0.314e+1` are
+just alternative notations for the same number.
