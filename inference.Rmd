@@ -277,8 +277,10 @@ about births.  Nevertheless, it will suffice for this first analysis.
 
 ## The proportional posterior
 
-With a prior and sampling distribution, we have our full joint model
-in hand,
+With a prior and likelihood,^[Remember, the likelihood is just the
+sampling distribution $p_{Y \mid \Theta}(y \mid \theta)$ viewed as a
+function of $\theta$ for fixed $y$.] we have our full joint model in
+hand,
 
 $$
 p_{Y \mid \Theta}(y \mid N, \theta) \times p_{\Theta}(\theta)
@@ -310,7 +312,7 @@ $$
 
 Given the definitions of the relevant
 probability functions,^[
-For reference, these are the sampling distribution
+For reference, these are the likelihood
 $$
 \mbox{binomial}(y \mid N, \theta)
 \ \propto \
