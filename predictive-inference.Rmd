@@ -387,72 +387,7 @@ print 'log p(y_pred | y) = ' log_sum_exp(lp)
 
 
 
-## Logarithms of sums of exponentiated terms
 
-When we take a logarithm, it is well known that it converts
-multiplication into addition, in the sense that if we have $\log u$
-and $\log v$, we get $\log (u \times v)$ by addition,
-
-$$
-\log \left( u \times v \right)
-\ = \log u + \log v.
-$$
-
-But what if we have $\log u$ and $\log v$ and want to produce $\log (u
-+ v)$?  It works out to
-
-$$
-\log \left( u + v  \right)
-\ = \
-\log \left( \exp(\log u) + \exp(\log v) \right).
-$$
-
-In words, it takes the logarithm of the sum of exponentiations.  This
-may seem like a problematic amount of work to carry out addition, but
-it is in fact an opportunity.  By rearranging terms, we have
-
-$$
-\log (\exp(a) + \exp(b))
-\ = \
-\max(a, b) + \log (\exp(a - \max(a, b))
-                   + \exp(b - \max(a, b))).
-$$
-
-This may seem like even more work, but when we write it out in code,
-it's less daunting and serves the important purpose of preventing
-overflow or underflow.
-
-```
-log_sum_exp(u, v)
-  c = max(u, v)
-  return c + log(exp(u - c) + exp(v - c))
-```
-
-Because $c$ is computed as the maximum of $u$ and $v$, we know that $u
-- c \leq 0$ and $v - c \leq 0$.  As a result, the exponentiations will
-not overflow.  They might underflow to zero, but that doesn't cause a
-problem, because the maximum is preserved by being brought out front,
-with all of its precision intact.
-
-If we have a vector, it works the same way, only the vectorized
-pseudocode is neater.  If `u` is an input vector, then we can compute
-the log sum of exponentials as
-
-```
-log_sum_exp(u)
-  c = max(u)
-  return c + log(exp(u - c))
-```
-
-This is how we calculate the average of a sequence of values whose
-logarithms are known.
-
-```
-log_mean(log_u)
-  M = size(log_u)
-  c = max(log_u)
-  return -log(M) + c + log(exp(log_u - c))
-```
 
 Thus we can calculate posterior predictive densities on the log scale
 using log scale density calculations throughout to prevent overflow
