@@ -48,7 +48,7 @@ that
 $$\begin{array}{rcl}
 1 & = & \int_{-\infty}^{\infty} p(x) \mathrm{d}x
 \\[2pt]
-& \approx & \sum_{n = -\infty}^{\infty} p(x).
+& \approx & \sum_{x = -\infty}^{\infty} p(x).
 \end{array}
 $$]
 
@@ -313,9 +313,16 @@ z
 \right).
 $$
 
+The theorem can be generalized to variables that do not have the same
+distribution as long as they are independent and have finite
+expectations and variances.
 
-
-
+Many natural phenomena, such as adult human height in either sex, are
+the result of a number of relatively small, additive effects, the
+combination of which leads to normality no matter how the additive
+effects are distributed. Practically speaking, this is why the normal
+distribution makes sense as a representation of many natural
+phenomena.
 
 
 ## Maximum entropy distribution
@@ -351,3 +358,87 @@ $$
 $$
 
 ## Computational approximation
+
+
+## Lognormal distribution
+
+The normal distribution arises naturally as the the distribution of a
+random variable resulting from a sum of effects. What if effects are
+multiplicative rather than additive, so that it is the product,
+
+$$
+Y = V_1 \times \cdots \times V_N
+$$
+
+of positive effects $V_n > 0$. Because the effects $V_n$ are positive,
+we can work on the log scale, where
+
+$$
+\log Y = \log V_1 + \cdots \log V_N.
+$$
+
+In this case, $\log Y$ should have a roughly normal distribution,
+being the sum of $N$ additive terms. If $\log Y \sim
+\mbox{normal}(\mu, \sigma)$, then $Y$ has what is called a *lognormal
+distribution*. The lognormal density function can be calculated by
+accounting for the change of variables,^[To calculate the Jacobian for
+the change of variables, note that if $Z \sim \mbox{normal}(\mu,
+\sigma)$ and $Y = \exp(Z)$, then
+$$
+\begin{array}{rcl}
+p_Y(y \mid \mu, \sigma)
+& = &
+p_Z(\exp^{-1}(y) \mid \mu, \sigma)
+\times
+\left|
+\frac{\mathrm{d}}{\mathrm{d}y'} \exp^{-1}(y')
+\Bigg|_{y' = y}
+\right|
+\\[6pt]
+& = &
+\mbox{normal}(\log y \mid \mu, \sigma)
+\times
+\left|
+\frac{\mathrm{d}}{\mathrm{d}y'} \log y'
+\Bigg|_{y' = y}
+\right|
+\\[6pt]
+& = &
+\mbox{normal}(\log y \mid \mu, \sigma) \times \frac{1}{y}.
+\end{array}
+$$
+]
+so that 
+
+$$
+\begin{array}{rcl}
+\displaystyle
+p_Y(y \mid \mu, \sigma)
+& = &
+\displaystyle
+\mbox{lognormal}(y \mid \mu, \sigma)
+\\[6pt]
+& = &
+\displaystyle
+\frac{1}{y} \times \mbox{normal}(\log y \mid \mu, \sigma)
+\\[4pt]
+& = &
+\displaystyle
+\frac{1}{y}
+\, \frac{1}{\sqrt{2\pi}}
+\, \frac{1}{\sigma}
+\, \exp \left(
+- \frac{1}{2} \left( \frac{\log y - \mu}{\sigma} \right)^2 \right).
+\end{array}
+$$
+
+To see the heart of what's going on without the location and scale
+complicating matters, the kernel of the lognormal distribution 
+derived from the standard normal is just 
+
+$$
+\mbox{lognormal}(y \mid 0, 1)
+\ \propto \
+\frac{1}{y} \exp \left( -\frac{1}{2} \left( \log y \right)^2 \right).
+$$
+
