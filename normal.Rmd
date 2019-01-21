@@ -193,7 +193,7 @@ $$
 Dealing with the required change of variables for the inverse
 transform^[This inverse transform has its own name, the *z-transform*,
 and in general may be written as $$Z = \frac{Y -
-\mathbb{E}[Y]}{\mathrm{sd}[Y]}.$$ and used to standardize any random
+\mathbb{E}[Y]}{\mbox{sd}[Y]}.$$ and used to standardize any random
 variable $Y$ with a finite expectation and variance. The resulting
 variable $Z$ has $\mathbb{E}[Z] = 0$ and $\mbox{sd}[Z] = 1$ by
 construction.]
@@ -217,7 +217,7 @@ and
 $$
 p_Z(z) = \mbox{normal}(),
 $$
-from whcih the Jacobian calculation gives us
+from which the Jacobian calculation gives us
 $$
 \begin{array}{rcl}
 p_Y(y)
@@ -257,9 +257,7 @@ function is a product of three factors,
 $\mbox{normal}(z) = \exp(-\frac{1}{2} z^2)$, applied to the inverse of
 the location-scale transform, $\frac{y - \mu}{\sigma}$.
 * a normalizing factor of $\frac{1}{\sigma}$ that depends on the
-scale,^[This factor derives from the change-of-variables adjustment in
-the location-scale transform, whose inverse is $f^{-1}(y) = \frac{y -
-\mu}{\sigma}$.]
+scale,
 * a constant normalizing factor of $\frac{1}{\sqrt{2 \pi}}$, and
 
 
@@ -299,7 +297,9 @@ $$
 Z = \frac{1}{N} \sum_{n=1}^N Y_n.
 $$
 
-As $N \rightarrow \infty$, 
+As $N \rightarrow \infty$, the average has a normal distribution with
+the same location as the $Y_n$ and a scale reduced by a factor of
+$\sqrt{\frac{1}{\sigma}}$.
 
 $$
 \textstyle
