@@ -577,6 +577,9 @@ a 90% interval, we know roughly nine out of ten values will fall
 within it, and choosing a central interval gives us an idea of the
 central part of the distribution.
 
+
+## Estimating event probabilities
+
 To answer the question about whether boys are more prevalent than
 girls, we need to estimate $\mbox{Pr}[\theta > 0.5]$, which is
 straightforward with simulation. As usual, we just count the number of
@@ -634,3 +637,181 @@ binomial_post_plot3 <-
   theme(axis.text.y = element_blank())
 binomial_post_plot3
 ```
+
+## Laplace's data
+
+What happens if we use Laplace's data, rather than our small data set,
+which had roughly 110 thousand male births and 105 thousand female?
+Let's take some draws from the posterior $p(\theta \mid y, N)$ where
+$y = 110\,312$ boys out of $N = 110\,312 + 105\,287$ total births.
+We'll take $M = 1\,000\,000$ simulations $\theta^{(1)}, \ldots,
+\theta^{(M)}$ here because they are cheap and we would like low
+sampling error.
+
+```{r}
+set.seed(1234)
+M <- 1000000
+boys <- 110312
+girls <- 105287
+theta <- rbeta(M, boys + 1, girls + 1)
+
+laplace_df <- data.frame(theta = theta)
+laplace_plot <-
+  ggplot(laplace_df, aes(x = theta)) +
+  geom_histogram(bins = 50,
+                 color = 'black', size = 0.25, fill = '#ccccb6') +
+  scale_x_continuous(lim = c(0.5075, 0.5175),
+                     breaks = c(0.508, 0.510, 0.512, 0.514, 0.516),
+                     labels = c(".508", ".510", ".512", ".514", ".516")) +
+  xlab(expression(theta)) +
+  ylab("posterior draws") +
+  ggtheme_tufte()
+laplace_plot  
+```
+
+The mean of the posterior sample is approximately 0.511, or a slightly
+higher than 51% chance of a male birth.  The central 90% posterior
+interval calculated from quantiles of the sample is $(0.510, 0.513)$.
+
+What about the event probability that boy births are more likely than
+girl births, i.e., $\mbox{Pr}[\theta > 0.5]$?  If we make our usual
+calculation, taking draws $\theta^{(1)}, \ldots, \theta^{(M)}$ from
+the posterior and look at the proportion for which $\theta^{(m)} >
+0.5$, the result is 1.  No decimal places, just 1.  If we look at the
+draws, the minimum value of $\theta^{(m)}$ in $1\,000,000$ draws was
+approximately 0.506.  The proportion of draws for which $\theta^{(m)}
+> 0.5$ is thus 100%, which forms our estimate for $\mbox{Pr}[\theta >
+0.5]$.
+
+As we have seen before, simulation-based estimates provide
+probabilistic guarantees about absolute tolerances.  With $100\,000$
+draws, we are sure that the answer is 1.0000 to within plus or minus
+0.0001 or less.^[Tolerances can be calculated using the central limit
+theorem, which we will define properly when we introduce the normal
+distribution later.]  We know the answer must be strictly less
+than one.  Using some analytic techniques,^[The cumulataive
+distribution function of the posterior, which is known to be the beta
+distribution $$p(\theta \mid y, N) = \mbox{beta}(\theta \mid y + 1, N
+- y + 1).$$] the true estimate to within 27 decimal places is
+
+$$
+\mbox{Pr}[\theta > 0.5] = 1 - 10^{-27}.
+$$
+
+Thus Laplace was certain that the probability of a boy being born was
+higher than that of a girl being born.
+
+
+## Inference for and comparison of multiple variables
+
+The first example of Laplace's is simple in that it has only a single
+parameter of interest, $\theta$, the probability of a male birth.  Now
+we will consider a very similar model with two variables, so that we
+can do some posterior comparisons.  We will consider some simple
+review data for two New York City-based Mexican restaurants.  The
+first contender is Downtown Bakery II, an East Village Mexican
+restaurnat has $Y_1 = 114$ out of $N_1 = 235$ 5-star reviews on Yelp,
+La Delicias Mexicanas, in Spanish Harlem, has $Y_1 = 24$ out of $N_2 =
+51$ 5-start reviews.  Our question is, which is more likely to deliver
+a 5-star experience?  In terms of proportion of 5-star votes, they are
+close, with Downtown Bakery garnering 49% 5-star reviews and La
+Delicias only 47%.  Knowing how noisy binomial data is, this is too
+close to call.
+
+We'll model each restaurant independently for $n \in 1:2$ as
+
+$$
+Y_n \sim \mbox{binomial}(N, \Theta_n)
+$$
+
+with independent uniform priors for $n \in 1:2$ as
+
+$$
+\Theta_n \sim \mbox{uniform}(0, 1).
+$$
+
+We can now draw $\theta^{(1)}, \ldots, \theta^{(M)}$ simulations from
+the posterior $p_{\Theta \mid Y, N}(\theta \mid y, N)$ as usual.
+
+The main event is whether $\theta_1 > \theta_2$---we want to know if
+the probability of getting a five-star review is higher at Downtown
+Bakery than La Delicias.  All we need to do is look at the posterior
+mean of the indicator function $\mathrm{I}[\theta_1 > \theta_2]$.  The
+calculus gets more complicated---a double integral is now required
+because there are two variables.  The simulation-based estimate, on
+the other hand, proceeds as before, counting proportion of draws in
+which the event is simulated to occur.
+
+$$
+\begin{array}{rcl}
+\mbox{Pr}[\theta_1 > \theta_2 \mid y, N]
+& = &
+\int_0^1 \int_0^1
+\, \mathrm{I}[\theta_1 > \theta_2] \times p(\theta_1, \theta_2 \mid y, N)
+\, \mathrm{d} \theta_1 \, \mathrm{d} \theta_2
+\\[8pt]
+& \approx &
+\frac{1}{M} \sum_{m = 1}^M \mathrm{I}[\theta_1^{(m)} >
+\theta_2^{(m)}].
+\end{array}
+$$
+
+In pseudocode, this is just
+
+```
+success = 0
+for (m in 1:M)
+  draw theta(m) from posterior p(theta | y, N)
+  if (theta(m)[1] > theta(m)[2])
+    success += 1
+print 'Pr[theta[1] > theta[2] | y, M] = ' success / M
+```
+
+Let's run that with $M = 10\,000$ simulations and see what we get:
+
+```{r}
+M <- 10000
+y <- c(114, 24)
+N <- c(235, 51)
+theta1 <- rbeta(M, y[1] + 1, N[1] + 1)
+theta2 <- rbeta(M, y[2] + 1, N[2] + 1)
+printf('Pr[theta[1] > theta[2] | y, M] = %3.2f\n',
+       sum(theta1 > theta2) / M)
+```
+
+Only about a `r as.integer(100 * sum(theta1 > theta2) / M)`% chance
+that Downtown Bakery is the better bet.^[As much as this diner loves
+Downtown Bakery, the nod for food, ambience, and the existence of beer
+goes to La Delicias Mexicanas.]
+
+To get a sense of the posterior, we can construct a histogram of
+posterior draws of $\Delta = \Theta_1 - \Theta_2$.
+
+```{r fig.cap = 'Histogram of posterior differences between probabilty of Downtown Bakery getting a 5-star review ($\\theta_1$) and that of La Delicias Mexicanas getting one ($\\theta_2$).  The draws for which $\\delta > 0$ (equivalently, $\\theta_1 > \\theta_2$) are shaded darker.  The area of the darker region divided by the total area is the estimate of the probability that Downtown Bakery is more likely to get a 5-star review than La Delicias Mexicanas.'}
+
+delta <- theta1 - theta2
+delicias_df <- data.frame(delta = delta)
+
+delicias_plot <-
+  ggplot(delicias_df, aes(x = delta)) +
+  geom_histogram(bins = 30, boundary = 0, binwidth = 0.01,
+                 color = 'black', size = 0.25, fill = '#ffffe6') +
+  geom_histogram(data = subset(delicias_df, delta > 0),
+                 binwidth = 0.01, boundary = 0,
+                 color = 'black', size = 0.25, fill = '#ccccb6') +
+  xlab(expression(paste(delta, " = ", theta[1] - theta[2]))) +
+  ylab("posterior draws") +
+  ggtheme_tufte()
+delicias_plot
+```
+
+There is substantial uncertainty, and only 52% of the draws lie to the
+right of zero.  That is,
+
+$$\mbox{Pr}[\theta_1 > \theta_2]
+\ = \ \mbox{Pr}[\delta > 0]
+\ \approx \ 0.52.$$
+
+
+
+

@@ -439,6 +439,6 @@ derived from the standard normal is just
 $$
 \mbox{lognormal}(y \mid 0, 1)
 \ \propto \
-\frac{1}{y} \exp \left( -\frac{1}{2} \left( \log y \right)^2 \right).
+\frac{1}{y} \, \exp \left( -\frac{1}{2} \left( \log y \right)^2 \right).
 $$
 
