@@ -273,7 +273,7 @@ approaches a normal distribution. It goes even further and tells us
 which normal distribution, based on the expectations and variances.
 Let's state it mathematically as a proper theorem.
 
-**Central Limit Theorem** (Laplace 1812).
+*Central Limit Theorem* (Laplace 1812).
 Suppose
 
 $$
@@ -293,7 +293,7 @@ $$
 \mbox{sd}[Y_n] = \sigma.
 $$
 
-Define a new random variable
+Define the average of $Y$ as a new random variable
 
 $$
 Z = \frac{1}{N} \sum_{n=1}^N Y_n.
