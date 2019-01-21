@@ -14,5 +14,6 @@ rmd_files: [
   "rejection-sampling.Rmd",
   "predictive-inference.Rmd",
   "testing-prngs.Rmd",
-  "floating-point.Rmd"
+  "floating-point.Rmd",
+  "normal.Rmd"
 ]

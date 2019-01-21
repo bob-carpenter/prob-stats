@@ -270,7 +270,7 @@ p_Y(y) \ = \
 \end{cases}
 $$
 
-Games like *Monopoly* use a pair of six-sided dice and consider the sum of the results. That is, $Y_1$ and $Y_2$ are fair six-sided die rolls and $Z = Y_1 + Y_2$ is the result. Games like *Dungeons \& Dragons* use a trio of six-sided dice and consider the sum of the results. In that scenario, $Y_1, Y_2, Y_3$ are the results of fair six-sided die rolls and $Z = Y_1 + Y_2 + Y_3$. Dungeons and Dragons also uses four six-sided die of which the best 3 are summed to produce a result. Let's simulate some of these two approaches dice and see what the results look like based on $M = 100\,000$ simulations.^[The simulations are identical to before, only using `1:6` in the range of uniform variables.]
+Games like *Monopoly* use a pair of six-sided dice and consider the sum of the results. That is, $Y_1$ and $Y_2$ are fair six-sided die rolls and $Z = Y_1 + Y_2$ is the result. Games like *Dungeons \& Dragons* use a trio of six-sided dice and consider the sum of the results. In that scenario, $Y_1, Y_2, Y_3$ are the results of fair six-sided die rolls and $Z = Y_1 + Y_2 + Y_3$. Dungeons and Dragons also uses four six-sided die of which the best 3 are summed to produce a result. Let's simulate some of these approaches and see what the results look like based on $M = 100\,000$ simulations.^[The simulations are identical to before, only using `1:6` in the range of uniform variables.]
 
 ```{r fig.cap="Estimated $p_Y(y)$ for case of $Y$ being the sum of three six-sided dice (3d6) or the sum of the highest three of four six-sided dice (3 of 4d6)."}
 
