@@ -31,7 +31,7 @@ Load the bookdown library, set the working directory to the directory for the re
 ```
 $ library(bookdown)
 $ setwd('prob-stats')
-$ bookdown::render('index.Rmd')
+$ bookdown::render_book('index.Rmd')
 ```
 
 Rendering with just `index.Rmd` as an argument defers the style to the `index.Rmd` yaml header.
