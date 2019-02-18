@@ -15,5 +15,8 @@ rmd_files: [
   "predictive-inference.Rmd",
   "testing-prngs.Rmd",
   "floating-point.Rmd",
-  "normal.Rmd"
+  "normal.Rmd",
+  "mcmc.Rmd",
+  "calibration.Rmd",
+  "regression-mean.Rmd"
 ]

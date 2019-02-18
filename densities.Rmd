@@ -89,9 +89,9 @@ one plotted analytically.
 
 As with discrete parameters, the cumulative distribution function may
 be used to calculate interval probabilities, e.g.,^[With continuous
-variables, the interval probabilities are open below ($180 \lt
-\Theta$) and closed above ($\Theta \leq 270$), due to the definition
-of the cumulative distribution function as a closed upper bound
+variables, the interval probabilities are open below ($180 < \Theta$)
+and closed above ($\Theta \leq 270$), due to the definition of the
+cumulative distribution function as a closed upper bound
 ($F_{\Theta}(\theta) = \mbox{Pr}[\Theta \leq \theta]$).]
 
 $$

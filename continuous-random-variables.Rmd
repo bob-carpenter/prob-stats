@@ -29,7 +29,7 @@ the value of $\Theta$ is between 0 and 360^[The end points are the
 same, representing a complete rotation of 360 degrees; they are
 labeled as such in the plot.]
 
-```{r fig.cap = "A spinner resting at 36 degrees, or 10% of the way around the circle.  A fair spin might land anywhere between 0 and 360 degrees."}
+```{r fig.cap = "A spinner resting at 36 degrees, or ten percent of the way around the circle.  A fair spin might land anywhere between 0 and 360 degrees."}
 
 df_spinner <- data.frame(value = c("0-360 degrees"), prob = c(0.3))
 plot_spinner <-
@@ -53,16 +53,17 @@ plot_spinner
 ```
 
 What does fair mean for continuous probabilities?  At the least, we
-should be able to say that the probality of landing in any
-band is the same no matter where the band lies on the circle.  That
-is, landing between 0 and 36 degrees should be the same as landing
-between 200 and 236 degrees.  Also, because 36 degrees is one tenth of
-the way around the circle, the chance of landing in any 36 degree band
-has to be 10%.^[This is because the circle can be divided into ten
-bands to create exhaustive and exclusive intervals, the event
-probabilities of landing in which must be the same by fairness and
-must total one because they exhaust all possible outcomes.] We can
-express that in probability notation as
+should be able to say that the probality of landing in any band is the
+same no matter where the band lies on the circle.  That is, landing
+between 0 and 36 degrees should be the same as landing between 200 and
+236 degrees.  Also, because 36 degrees is one tenth of the way around
+the circle, the chance of landing in any 36 degree band has to be
+10%.^[A circle can be divided into ten bands of 36 degrees to create
+exhaustive and exclusive intervals, the event probabilities of landing
+in which must be the same by fairness and must total one because they
+exhaust all possible outcomes.]  We can express that in probability
+notation as
+
 
 $$
 \mbox{Pr}[0 \leq \Theta \leq 36]
@@ -86,8 +87,7 @@ $$
 \mbox{Pr}[\theta_1 \leq \Theta \leq \theta_2]
 = \frac{\theta_2 - \theta_1}{360}.
 $$
-for $0 \leq \theta_1 \leq \theta_2 \leq 360.$
-]
+for $0 \leq \theta_1 \leq \theta_2 \leq 360.$]
 For continuous random variables, outcomes do not have probability
 mass.  Instead, probability mass is assigned continuously based on the
 probability of a variable falling in a region.
@@ -158,6 +158,7 @@ unif_10_plot <-
 unif_10_plot
 ```
 
+
 The range of values from 0 to 1 is broken up into ten equally spaced
 bins, 0 to 0.1, 0.1 to 0.2, up to 0.9 to 1.0. Each bin is then drawn
 as a rectangle with a height proportional to the number of values that
@@ -190,7 +191,7 @@ for (N in 2^c(2, 4, 6, 8, 10, 12))
 
 plot_runif <-
   ggplot(df_runif, aes(y)) +
-  facet_grid(size ~ .) +
+  facet_wrap(size ~ .) +
   geom_histogram(binwidth = 0.1, center = 0.05, color = "black",
                  fill="#ffffe6", size = 0.25) +
   scale_x_continuous("y", breaks = seq(0, 1, 0.2), limits = c(0, 1),

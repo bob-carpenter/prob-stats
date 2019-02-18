@@ -351,7 +351,7 @@ $$
      \left( \log p(\tilde{y} \mid \theta^{(m)}) \right)
 \\[4pt]
 & = &
-\mbox{log_sum_exp}(\log p(\tilde{y} \mid \theta)) - \log M.
+\mbox{log\_sum\_exp}(\log p(\tilde{y} \mid \theta)) - \log M.
 \end{array}
 $$
 
@@ -368,7 +368,7 @@ $$
 \right).
 \\[8pt]
 & = &
-\mbox{log_sum_exp}(\log \mbox{binomial}(\tilde{y} \mid \tilde{N}, \theta)).
+\mbox{log\_sum\_exp}(\log \mbox{binomial}(\tilde{y} \mid \tilde{N}, \theta)).
 \end{array}
 $$
 

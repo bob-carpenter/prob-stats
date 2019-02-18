@@ -299,7 +299,7 @@ $$
 
 As $N \rightarrow \infty$, the average has a normal distribution with
 the same location as the $Y_n$ and a scale reduced by a factor of
-$\sqrt{\frac{1}{\sigma}}$.
+$\sqrt{\frac{1}{\sqrt{N}}}$.
 
 $$
 \textstyle
@@ -356,8 +356,6 @@ $$
 \approx
 \frac{1}{M} \, \sum_{m=1}^M \log p_Y\left( y^{(m)} \right).
 $$
-
-## Computational approximation
 
 
 ## Lognormal distribution
@@ -441,4 +439,97 @@ $$
 \ \propto \
 \frac{1}{y} \, \exp \left( -\frac{1}{2} \left( \log y \right)^2 \right).
 $$
+
+
+## Simulating from a normal distribution
+
+To simulate values of a normally distributed random variable
+
+$$
+Y \sim \mbox{normal}(\mu, \sigma),
+$$
+
+it suffices to simulate a standard normal
+variate
+
+$$
+Z \sim \mbox{normal}(0, 1)
+$$
+
+and let
+
+$$
+Y = \mu + \sigma \times Z.
+$$
+
+The simplest way to approximately generate from the normal
+distribution is to invoke the central limit theorem and generate
+enough draws from a uniform distribution that the result is roughly
+normal.  This relies on simulation, so it is neither accurate nor
+fast.^[It does correspond to Francis Galton's *quincunx*, a physical
+machine into which marbles are dropped to fall onto a grid of pegs
+which push them randomly to the right or the left.  This random walk
+produces distances after a number of steps that are roughly normally
+distributed.  The approximate improves as the number of random moves
+is increased.]
+
+A clever and efficient way to generate standard normal variates relies
+on solving a seemingly harder problem, generating two independent
+standard normal variates. By working with two independent normal
+variates $(X, Y)$, we can work in polar coordinates and generate an
+angle and radius $(\Theta, R)$, where
+
+$$
+X = R \times \cos \Theta
+$$
+
+and
+
+$$
+Y = R \times \sin \Theta.
+$$
+
+The other way around,
+
+$$
+R = \sqrt{X^2 + Y^2}
+$$
+
+and
+
+$$
+\Theta = \arctan \left( \frac{Y}{X} \right).
+$$
+
+Our strategy is to generate the polar coordinates $(\Theta, R)$ and
+transform them to $(X, Y)$ with independent standard normal
+distributions. We can generate a random angle uniformly in radians
+with
+
+$$
+\Theta \sim \mbox{uniform}(0, 2\pi).
+$$
+
+The tricky part is generating the radius, which we will do by
+simulating a uniform variate
+
+$$
+U \sim \mbox{uniform}(0, 1)
+$$
+
+and transforming it into
+
+$$
+R = \sqrt{-2 \log U}.
+$$
+
+This relies on a distribution and properties of sums of squared
+uniform variables we have not yet introduced.^[The technique hinges on
+the fact that $$X^2 + Y^2 \sim \mbox{chi\_squared(2)}$$ and if $$V \sim
+\mbox{uniform}(0, 1),$$ then $$-2 \log V \sim \mbox{chi\_squared}(2),$$
+so that for our normal variates, $$R = \sqrt{-2 \log V}$$.]
+
+
+
+
 

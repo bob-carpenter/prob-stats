@@ -24,8 +24,8 @@ number of live births, gathered from thirty departments of France
 between 1800 and 1802 was as follows.
 
 $$
-\begin{array}[r|r]
-{ } \mbox{sex} & \mbox{live births}
+\begin{array}{r|r}
+\mbox{sex} & \mbox{live births}
 \\ \hline
 \mbox{male} & 110\,312
 \\
@@ -85,13 +85,15 @@ they typically only approximate the full process being modeled in some
 way.  Even Newton's model, which is fabulously accurate at predictions
 at observable scales, is only an approximation to the finer-grained
 models of motion and gravity introduced by Albert Einstein.^[Einstein,
-Albert. 1907. On the relativity principle and the conclusions drawn
-from it. *Jahrbuch der Radioaktivitﬁt and Elektronik* 4:411--462.]
-which itself was only a special case of the more general theory of
-relativity.^[Einstein, Albert. 1916. The foundation of the general
-theory of relativity. *Annalen Phys.* 14:769--822.]  Each successive
-model is better than the last in that it's better at prediction, more
-general, or more elegant---science does not progress based on a single
+Albert. 1907. Über das Relativitätsprinzip und die aus demselben
+gezogenen Folgerungen. (English translation: On the relativity
+principle and the conclusions drawn from it.) *Jahrbuch der
+Radioaktivität und Elektronik* 4:411--462.]  which itself was only a
+special case of the more general theory of relativity.^[Einstein,
+Albert. 1916. The foundation of the general theory of
+relativity. *Annalen Phys.* 14:769--822.]  Each successive model is
+better than the last in that it's better at prediction, more general,
+or more elegant---science does not progress based on a single
 criterion for improving models.
 
 The reproductive process is complex, and many factors may impinge on
@@ -780,9 +782,9 @@ printf('Pr[theta[1] > theta[2] | y, M] = %3.2f\n',
 ```
 
 Only about a `r as.integer(100 * sum(theta1 > theta2) / M)`% chance
-that Downtown Bakery is the better bet.^[As much as this diner loves
-Downtown Bakery, the nod for food, ambience, and the existence of beer
-goes to La Delicias Mexicanas.]
+that Downtown Bakery is the better bet for a 5-star meal.^[As much as
+this diner loves Downtown Bakery, the nod for food, ambience, and the
+existence of beer goes to La Delicias Mexicanas.]
 
 To get a sense of the posterior, we can construct a histogram of
 posterior draws of $\Delta = \Theta_1 - \Theta_2$.
@@ -800,8 +802,9 @@ delicias_plot <-
                  binwidth = 0.01, boundary = 0,
                  color = 'black', size = 0.25, fill = '#ccccb6') +
   xlab(expression(paste(delta, " = ", theta[1] - theta[2]))) +
-  ylab("posterior draws") +
-  ggtheme_tufte()
+  ylab("posterior draw proportion") +
+  ggtheme_tufte() +
+  theme(axis.text.y = element_blank())
 delicias_plot
 ```
 

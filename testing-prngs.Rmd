@@ -336,26 +336,26 @@ $K$ such terms will be roughy a chi-squared distribution with $K - 1$
 degrees of freedom.^[This follows from the definition of the
 chi-squared distribution. Specifically, if $$Y_1, \ldots, Y_N \sim
 \mbox{normal}(0, 1),$$ then $$(Y_1^2 + \cdots + Y_K^2) \sim
-\mbox{chi_squared}(K - 1)$$ has a *chi-squared distribution* with $K -
-1$ degrees of freedom.  The subtraction of $E_k$ and division by
+\mbox{chi\_squared}(K - 1)$$ has a *chi-squared distribution* with $K
+- 1$ degrees of freedom.  The subtraction of $E_k$ and division by
 $\sqrt{E_k}$ normalizes the distribution so that approximately
 $$\frac{z_k - E_k}{\sqrt{E_k}} \sim \mbox{normal}(0, 1),$$ with the
 approximation being optimal when the probabilty of success on which
-the draws are based is 0.5.] That means that if the null hypothesis of
-the distribution of pseudorandom numbers being uniform is correct,
+the draws are based is 0.5.]  That means that if the null hypothesis
+of the distribution of pseudorandom numbers being uniform is correct,
 then we can set up the same kind of central hypothesis test as for the
 ibnomial test.  Specifically, we'll reject the null hypothesis that
 the pseudorandom number generator is behaving properly at significance
 level $\alpha$ if
 
 $$
-\mbox{chi_squared_cdf}(X_2, K - 1) < \frac{\alpha}{2}
+\mbox{chi\_squared\_cdf}(X_2, K - 1) < \frac{\alpha}{2}
 $$
 
 or if
 
 $$
-\mbox{chi_squared_cdf}(X_2, K - 1) > 1 - \frac{\alpha}{2}.
+\mbox{chi\_squared\_cdf}(X_2, K - 1) > 1 - \frac{\alpha}{2}.
 $$
 
 That is, we reject the null hypothesis at signifiance level $\alpha$

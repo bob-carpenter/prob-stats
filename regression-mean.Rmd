@@ -1,0 +1,100 @@
+# Regression to the Mean
+
+After a band puts out a great first album, it's often followed by a
+less great second album.  Bands seem to suffer from a kind of
+sophomore slump, in which they get worse after a first good effort.
+Although journalists and other onlookers like to make up explanations,
+we'll see that there's a good statistical reason that this should not
+be so surprising or need so much explanation.  They're just suffering
+what's known as regression to the mean.
+
+## Francis Galton and height
+
+In 1886, Francis Galton was the first to notice the phenomenon and
+give it a name, when he moved from studying seeds to people, and
+wrote,^[Galton, Francis. 1886. Regression towards mediocrity in
+hereditary stature.  *The Journal of the Anthropological Institute of
+Great Britain and Ireland*. 15:246--263.]
+
+> When Mid-Parents are taller than mediocrity, their Children tend to
+  be shorter than they.  When Mid Parents are shorter than mediocrity,
+  their Children tend to be taller than they.
+
+Translating to modern English, Galton was saying that tall parents are
+likely to have children shorter than they are and short parents likely
+to have children taller than themselves.  Galton called this
+"regression toward mediocrity," with "mediocrity" denoting the
+median.^[In the kinds of roughly symmetric distributions with which
+Galton was working, the mean and median are roughly the same.]
+
+Galton went further and identified the factor by which this regression
+occurred, with a greater difference occurring the larger the parents
+deviated above or below the median.
+
+
+## Binomial example
+
+We're going to use simulation to demonstrate what regression to the
+mean looks like in a controlled situation.  Let's suppose we have $N =
+500$ robot athletes, all of whom have exactly the same chance $\theta
+= 0.3$ of success.^[Imagine spiking serves, hitting baseballs, sinking
+putts, ringing horseshoes, bullseying darts, or curling stones next to
+a mark---the chance of success doesn't matter.]
+
+Now let's imagine we're going to simulate two seasons, $Y_1$ and
+$Y_2$, in which each athlete gets exactly $M = 50$ chances, and has a fixed
+$\theta = 0.3$ chance of success.  So that's
+
+$$
+Y_{k,n} \sim \mbox{binomial}(M, \theta)
+\ \ \ \mbox{for} \ k \in 1:2, n \in 1:N.
+$$
+
+The code is as simple as the sampling function,
+
+```
+for (k in 1:2)
+  for (n in 1:N)
+    y[k, n] = binomial_rng(M, theta)
+```
+
+Let's run that and take a look at the first year efforts, which we'll
+sort for convenient viewing,
+
+```{r}
+set.seed(1234)
+theta <- 0.3
+M <- 100
+N <- 500
+# y1 <- sort(rbinom(N, M, theta))
+# y2 <- rbinom(N, M, theta)
+y1 <- sort(rnorm(N))
+y2 <- rnorm(N)
+
+regression_mean_df <- data.frame(y1 = y1, y2 = y2)
+regression_mean_plot <-
+  ggplot(regression_mean_df, aes(x = y1, y = y2)) +
+  geom_point() + 
+  ggtheme_tufte()
+regression_mean_plot  
+```
+
+
+In the first
+season, each athlete will have 50 trials and the one with the most
+successes will be declared the winner.
+
+
+When a band puts out a great first album, it's often followed by a
+less great second album.  Bands seem to suffer the dreaded sophomore
+slump, where a second effort seems to pale
+
+.^[Used as an adjective, "sophomore" means the second of
+something.]
+
+A sophomore is second-year
+student in high school or college, whereas a sophormore album is a
+band's second album.]
+
+encounter what
+people call a "sophomore slump."

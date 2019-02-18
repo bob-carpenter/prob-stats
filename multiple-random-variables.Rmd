@@ -487,7 +487,9 @@ cum_d20_plot <-
 cum_d20_plot
 ```
 
-The plot is rendered as a line plot, though this isn't quite sensible
+** TODO(carpenter): get the right CDF plot and fix aspect ratio. **
+
+The plot is rendered as a point plot, though this isn't quite sensible
 for discrete distributions---the intermediate values are not real.
 It's easy to see that there's a 50% chance of rolling 5 or lower in a
 single die throw; with the best of 2 it's more like a 20% chance and
@@ -1099,7 +1101,6 @@ $$
 \mathbb{E}[Y]
 & = &
 \sum_{y \in 0:1} p_Y(y) \times y
-& = &
 \\[2pt]
 & = & \mathrm{Bernoulli}(0 \mid \theta) \times 0
       + \mathrm{Bernoulli}(1 \mid \theta) \times 1

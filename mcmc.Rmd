@@ -1,0 +1,22 @@
+# Markov Chain Monte Carlo
+
+*Monte Carlo methods*^[Monte Carlo methods are so-called because of
+the Monte Carlo Casino (shown below), located in the Principality of
+Monaco. <br /> &nbsp; <br /> ![](img/mc-casino.jpg) <span
+style="float:right; font-size:60%; color:#999999;">&copy; Z.graber,
+own work, CC-BY-SA 3.0</span>] use simulations of probabilistic
+processes to calculate numerical solutions to definite integrals in
+high dimensions.  
+
+## Markov chains
+
+A sequence of random variables $Y = Y_1, Y_2, \ldots $ forms a *Markov
+chain* if each element of the sequence is conditionally independent
+given the previous element,
+
+$$
+p(y_n \mid y_1, y_2, \ldots, y_{n-1})
+=
+p(y_n \mid y_{n-1}).
+$$
+
