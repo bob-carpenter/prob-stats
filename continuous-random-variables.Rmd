@@ -178,31 +178,29 @@ $${10 \choose 1} \times {10 \choose 5} \times \left(\frac{1}{10}\right)^5 \times
 \left(\frac{9}{10}\right)^5 \approx 0.015.$$]  As usual, we turn to
 repetition and sizing to see what's going on.
 
-```{r}
+```{r  fig.cap="Histograms for uniform(0, 1) samples of increasing sizes.  The proportion of draws falling into each bin becomes more uniform as the sample size increases.  With each sample plotted to the same height, the vertical count axis varies in scale among the plots."}
+
 set.seed(1234)
-df_runif <- data.frame()
-for (N in 2^c(2, 4, 6, 8, 10, 12))
-  df_runif <- rbind(df_runif,
-                    data.frame(y = runif(N),
-                               size = rep(N, N)))
-```
+df_unif <- data.frame()
+for (N in 2^c(2, 4, 6, 8, 10, 12)) {
+  df_unif <- rbind(df_unif,
+             data.frame(y = runif(N),
+                        size = rep(paste("N=", N), N)))
+}
 
-```{r fig.asp = 1.25, fig.cap="Histograms for uniform(0, 1) samples of increasing sizes.  The proportion of draws falling into each bin becomes more uniform as the sample size increases.  With each sample plotted to the same height, the vertical count axis varies in scale among the plots."}
-
-plot_runif <-
-  ggplot(df_runif, aes(y)) +
-  facet_wrap(size ~ .) +
-  geom_histogram(binwidth = 0.1, center = 0.05, color = "black",
-                 fill="#ffffe6", size = 0.25) +
-  scale_x_continuous("y", breaks = seq(0, 1, 0.2), limits = c(0, 1),
-                     expand = c(0, 0.02)) +
-  scale_y_continuous("proportion of draws", breaks = c(),
-                     expand = c(0.02, 0)) +
-  coord_fixed(ratio = 0.5) +
+plot <- ggplot(df_unif, aes(y)) +
+  facet_wrap(size ~ ., scales = "free") +
+  geom_histogram(binwidth = 0.1, center = 0.05, color = "black", fill="#ffffe6") +
+  scale_x_continuous("y", breaks = c(0, 0.5, 1), labels = c("0.0", "0.5", "1.0"), limits = c(0, 1), expand = c(0, 0.02)) +
+  scale_y_continuous("proportion of draws", breaks = c(), expand = c(0.02, 0)) +
+#  coord_fixed() +
   theme(panel.spacing.y = unit(24, "pt")) +
+  theme(panel.spacing.x = unit(24, "pt")) +
   ggtheme_tufte()
-plot_runif
+  theme(aspect.ratio = 0.5)
+plot
 ```
+
 
 ## Calculating $\pi$ via simulation
 
@@ -225,7 +223,7 @@ Simulations $x^{(m)}, y^{(m)}$ of these variables pick out a point on
 the plane within a square bounded by -1 and 1 in both dimensions. Here
 is a plot of the square in which the draws will fall. Also shown is a
 circle of unit radius inscribed within that square.  Draws may or may
-not fall within the circle.[Technically, the
+not fall within the circle.^[Technically, the
 bearer of area is a disc and the line around its border a circle.
 Mathematicians are picky because, topologically speaking, a disc has
 two dimensions whereas a circle has but one.]

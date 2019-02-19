@@ -3,7 +3,7 @@ knit: 'bookdown::render_book("index.Rmd", "tufte_html_book")'
 title: 'Probability and Statistics'
 subtitle: 'a simulation-based introduction'
 author: 'Bob Carpenter'
-date: '2018'
+date: '2019'
 output:
   bookdown::tufte_html_book:
     split_by: chapter

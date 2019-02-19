@@ -602,7 +602,7 @@ printf('estimated Pr[theta > 0.5] = %3.2f\n', sum(theta > 0.5) / M)
 
 Now let's overlay the median and central 90% interval.
 
-```{r fig.cap = "Histogram of $1\\,000\\,000$ draws from the posterior $$p(\\theta \\mid y, N) \\propto \\mbox{binomial}(y \\mid N, \\theta),$$ given $N = 10, y = 3$.  The median (50% quantile) is indicated with a dashed line and the boundaries of the central 90% interval (5% and 95% quantiles) are picked out with dotted lines.  The proportion of the total area shaded to the right of 0.5 represents the posterior probability that $\\theta > 0.5,$ which is about 11%."}
+```{r fig.cap = 'Histogram of $1\\,000\\,000$ draws from the posterior $$p(\\theta \\mid y, N) \\propto \\mbox{binomial}(y \\mid N, \\theta),$$ given $N = 10, y = 3$.  The median (50 percent quantile) is indicated with a dashed line and the boundaries of the central 90 percent interval (5 percent and 95 percent quantiles) are picked out with dotted lines.  The proportion of the total area shaded to the right of 0.5 represents the posterior probability that $\\theta > 0.5,$ which is about 11 percent.'}
 
 q05 <- quantile(binom_post_df2$theta, 0.05)
 q50 <- quantile(binom_post_df2$theta, 0.50)

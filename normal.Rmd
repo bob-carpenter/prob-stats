@@ -9,7 +9,7 @@ summam terminorum binomii*.]  With 10 trials and a probability of
 success of 0.9 in each trial, the distribution is clearly asymmetric
 (i.e., skewed).
 
-```{r fig.cap = 'Probability of number of successes in $N = 10$ independent trials, each with a 90% chance of success.  The result is $\\mbox{binomial}(y \\mid 10, 0.9)$ by construction. With only ten trials, the distribution is highly asymmetric, with skew (longer tails) to the left.'}
+```{r fig.cap = 'Probability of number of successes in $N = 10$ independent trials, each with a 90 percent chance of success.  The result is $\\mbox{binomial}(y \\mid 10, 0.9)$ by construction. With only ten trials, the distribution is highly asymmetric, with skew (longer tails) to the left.'}
 
 N <- 10
 x <- 0:10
@@ -27,7 +27,7 @@ binomial_limit_plot
 But when we increase the number of trials by a factor of 100 to
 $N = 1\,000$ without changing the 0.9 probability of success, the result is a nearly symmetric bell shape.
 
-```{r fig.cap = 'Probability of number of successes in $N = 1000$ independent trials, each with a 90% chance of success. The familiar bell-shaped curve arises as $N$ grows.'}
+```{r fig.cap = 'Probability of number of successes in $N = 1000$ independent trials, each with a 90 percent chance of success. The familiar bell-shaped curve arises as $N$ grows.'}
 
 x <- 860:940
 y <- dbinom(x, 1000, 0.9)

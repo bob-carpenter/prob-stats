@@ -219,7 +219,7 @@ vertical position $u^{(m)} \sim \mbox{uniform}(0, 5)$. The points
 whose value for $u$ falls below the density at the value for $\theta$
 are retained.
 
-```{r fig.cap = 'A simple instance of rejection sampling from a bounded $\\mbox{beta}(6.8, 1.2)$ distribution, whose density is shown as a solid line.  Points $(\\theta, u)$ are drawn uniformly from the rectangle, then accepted as a draw of $\\theta$ if $u$ falls below the density at $\\theta$.  The accepted draws are rendered as plus signs and the rejected ones as circles.  The acceptance rate here is roughly 20%.'}
+```{r fig.cap = 'A simple instance of rejection sampling from a bounded $\\mbox{beta}(6.8, 1.2)$ distribution, whose density is shown as a solid line.  Points $(\\theta, u)$ are drawn uniformly from the rectangle, then accepted as a draw of $\\theta$ if $u$ falls below the density at $\\theta$.  The accepted draws are rendered as plus signs and the rejected ones as circles.  The acceptance rate here is roughly 20 percent.'}
 
 M <- 500
 alpha <- 6.8
@@ -294,7 +294,7 @@ while (true)
 Let's run this algorithm for $M = 100\,000$ iterations and see what the
 histogram looks like.
 
-```{r, fig.cap="Histogram of $M = 100\\,000$ Draws from $\\mbox{beta}(6.8, 1.2)$ made via rejection sampling.  The true density is plotted over the histogram as a line.  The acceptance rate for draws was roughly 20%."}
+```{r, fig.cap="Histogram of $M = 100\\,000$ Draws from $\\mbox{beta}(6.8, 1.2)$ made via rejection sampling.  The true density is plotted over the histogram as a line.  The acceptance rate for draws was roughly 20 percent."}
 
 set.seed(1234)
 M <- 100000

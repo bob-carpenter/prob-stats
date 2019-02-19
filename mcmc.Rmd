@@ -10,9 +10,9 @@ high dimensions.
 
 ## Markov chains
 
-A sequence of random variables $Y = Y_1, Y_2, \ldots $ forms a *Markov
-chain* if each element of the sequence is conditionally independent
-given the previous element,
+A sequence of random variables $Y = Y_1, Y_2, \ldots$ forms a *Markov
+chain* if each elements  of the sequence is conditionally independent
+of the other elements given the previous element,
 
 $$
 p(y_n \mid y_1, y_2, \ldots, y_{n-1})
@@ -20,3 +20,196 @@ p(y_n \mid y_1, y_2, \ldots, y_{n-1})
 p(y_n \mid y_{n-1}).
 $$
 
+In all the examples of simulation we've seen up to now, each simulated
+draw was independent of the others.  In this chapter, we will consider
+sequences of draws that make up a Markov chain, which are potentially
+correlated (or anti-correlated) with each other.
+
+## Finite Markov chains
+
+The following function draws a Markov chain $y$ of length $M$ from the specified initial state $y_1$ given a transition matrix $\theta$ that indicates the probabilities $y_m$ given $y_{m-1}$.  The initial state is included in the final result $y = y_1, \ldots, y_M$.
+
+```{r}
+sample_chain <- function(M, init_state, theta, seed = 1234) {
+  set.seed(seed)
+  y <- c(init_state)
+  for (m in 2:M)
+    y[m] <- sample(x = 0:1, size = 1, prob = theta[y[m - 1] + 1, ])
+  return(y)
+}
+M <- 100
+```
+
+Here, `y[m - 1]` is the value in the previous iteration (`0` or `1`).  If `y[m - 1]` is `0`, then `theta[y[m - 1] + 1, ]` is the first row of `theta`;  if `y[m - 1]` is `1`, it is the second row.
+
+The base R function `sample()` draws a single value (`n = 1`) from the sequence `c(0, 1)`.
+
+
+## Independent draws
+
+```{r, engine="tikz", fig.ext="pdf", fig.width=1.5, fig.cap="State diagram for independent draws."}
+\begin{tikzpicture}[->, auto, node distance=1.75cm, font=\footnotesize]
+\node[circle,draw,semithick] (A) {{\bf 0}};
+\node[circle,draw,semithick] (B) [right of=A] {{\bf 1}};
+\path (A) edge [bend left] node {0.5} (B);
+\path (B) edge [bend left] node {0.5} (A);
+\path (A) edge [loop above] node {0.5} (A);
+\path (B) edge [loop above] node {0.5} (B);
+\end{tikzpicture}
+```
+
+This transition diagram has two nodes representing outputs, which are labeled $0$ and $1$.  The edges are labeled with the probability of a transition.  For example, the edge from $0$ to $1$ labeled $0.5$ indicates that
+
+$$
+\mbox{Pr}[y_m = 1 \mid y_{m - 1} = 0] \ = \ 0.5.
+$$
+
+Because the transition probabilities are the same out of each state, $y_n$ and $y_{n-1}$ are independent, i.e.,
+
+$$
+p(y_m) \ = \ p(y_m \mid y_{m - 1}) \ = \ 0.5.
+$$
+
+```{r}
+y <- sample_chain(M, 1, matrix(c(0.5, 0.5,
+                                   0.5, 0.5), 2, 2))
+```
+
+
+```{r fig.height=2, fig.cap = "Traceplot of chain with independent draws."}
+traceplot_bool <- function (y) {
+  df <- data.frame(iteration = 1:length(y), draw = y)
+  plot <- ggplot(df, aes(x = iteration, y = draw)) +
+    geom_line(aes(y = y)) +
+    scale_x_continuous("iteration", breaks = c(0, 50, 100), expand = c(0, 0)) +
+    scale_y_continuous("y", breaks = c(0, 1), expand = c(0.2, 0)) +
+    ggtheme_tufte()
+  return(plot)
+}
+traceplot_bool(y)
+```
+
+```{r}
+y
+```
+
+
+## Correlated draws
+
+```{r, engine='tikz', fig.ext="pdf", fig.width=1.5, fig.cap = "State diagram for correlated draws."}
+\begin{tikzpicture}[->, auto, node distance=1.75cm, font=\footnotesize]
+\node[circle,draw,semithick] (A) {{\bf 0}};
+\node[circle,draw,semithick] (B) [right of=A] {{\bf 1}};
+\path (A) edge [bend left] node {0.1} (B);
+\path (B) edge [bend left] node {0.1} (A);
+\path (A) edge [loop above] node {0.9} (A);
+\path (B) edge [loop above] node {0.9} (B);
+\end{tikzpicture}
+```
+
+To generate correlated draws, the transition matrix favors remaining in the current state over transitioning to a new state.  In this particular case,
+
+$$
+p(y_{m} | y_{m-1}) =
+\begin{cases}
+0.9 & \mbox{if } y_m = y_{m-1}
+\\[4pt]
+0.1 & \mbox{otherwise}
+\end{cases}
+$$
+
+
+```{r}
+y <- sample_chain(M, 1, matrix(c(0.9, 0.1,
+                                 0.1, 0.9), 2, 2))
+```
+
+```{r fig.height=2, fig.cap = "Traceplot for chain with correlated draws."}
+traceplot_bool(y)
+```
+
+```{r}
+y
+```
+
+As expected with correlated draws, there are long runs of the same value being produced in the chain.  This leads to poor mixing and thus higher MCMC standard errors for the same number of iterations.
+
+## Anticorrelated draws
+
+```{r, engine='tikz', fig.ext="pdf", fig.width = 3, fig.cap="State diagram for anticorrelated draws."}
+\begin{tikzpicture}[->, auto, node distance=1.75cm, font=\footnotesize]
+\node[circle,draw,semithick] (A) {{\bf 0}};
+\node[circle,draw,semithick] (B) [right of=A] {{\bf 1}};
+\path (A) edge [bend left] node {0.9} (B);
+\path (B) edge [bend left] node {0.9} (A);
+\path (A) edge [loop above] node {0.1} (A);
+\path (B) edge [loop above] node {0.1} (B);
+\end{tikzpicture}
+```
+
+To generate anticorrelated draws, the transition matrix favors remaining in the current state over transitioning to a new state.  In this particular case,
+
+$$
+p(y_{m} | y_{m-1}) =
+\begin{cases}
+0.1 & \mbox{if } y_m = y_{m-1}
+\\[4pt]
+0.9 & \mbox{otherwise}
+\end{cases}
+$$
+
+```{r  fig.cap="Traceplot of chain with correlated draws."}
+y <- sample_chain(M, 1, matrix(c(0.1, 0.9,
+                                 0.9, 0.1), 2, 2))
+```
+
+
+```{r fig.cap="Traceplot of chain with anticorrelated draws."}
+traceplot_bool(y)
+```
+
+```{r}
+y
+```
+
+The draws form a dramatic sawtooth pattern as as they alternate between zero and one.
+
+Now let's see how quickly they converge in a side-by-side comparison.  A single
+chain is enough to illustrate the dramatic differences.
+
+```{r}
+M <- 1e4
+y_corr <- cumsum(sample_chain(M, 1, corr_trans, seed = 1234)) / (1:M)
+y_ind <- cumsum(sample_chain(M, 1, ind_trans, seed = 1234)) / (1:M)
+y_anti <- cumsum(sample_chain(M, 1, anti_trans, seed = 1234)) / (1:M)
+```
+
+```{r fig.cap = "Correlated draws."}
+mcmc_corr_plot <- ggplot(data.frame(y = y_corr, x = 1:M), aes(x = x, y = y)) +
+  geom_line() +
+  geom_hline(yintercept = 0.5, color = "red") +
+  scale_x_log10(lim = c(10, M), breaks = c(1e1, 1e2, 1e3, 1e4)) +
+  scale_y_continuous(lim = c(.25, .75)) +
+  ggtheme_tufte()
+mcmc_corr_plot
+```
+
+```{r fig.cap = "Independent draws."}
+mcmc_ind_plot <- ggplot(data.frame(y = y_ind, x = 1:M), aes(x = x, y = y)) +
+  geom_line() +
+  geom_hline(yintercept = 0.5, color = "red") +
+  scale_x_log10(lim = c(10, M), breaks = c(1e1, 1e2, 1e3, 1e4)) +
+  scale_y_continuous(lim = c(.25, .75)) +
+  ggtheme_tufte()
+mcmc_ind_plot
+```
+
+```{r fig.cap = "Anticorrelated draws."}
+mcmc_anti_plot <- ggplot(data.frame(y = y_anti, x = 1:M), aes(x = x, y = y)) +
+  geom_line() +
+  geom_hline(yintercept = 0.5, color = "red") +
+  scale_x_log10(lim = c(10, M), breaks = c(1e1, 1e2, 1e3, 1e4)) +
+  scale_y_continuous(lim = c(.25, .75)) +
+  ggtheme_tufte()
+mcmc_anti_plot
+```

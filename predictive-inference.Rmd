@@ -182,7 +182,7 @@ the next twenty observations and calculate the probability for each
 possible $\tilde{y} \in 0:\tilde{N}$.  Then we'll plot them in a bar
 chart to inspect the distribution.
 
-```{r fig.cap = "Probablity mass function for the posterior predictive distribution of the number of boys $\\tilde{y}$ in a subsequent group of $\\tilde{N} = 20$ births based on observing 3 boys in 10 births with no prior information.  Although it is peaked near the 30% level observed in the data, it would not be that surprising to see more boys than girls in the next 20 births."}
+```{r fig.cap = 'Probablity mass function for the posterior predictive distribution of the number of boys, $\\theta^{*} = \\frac{y}{N} = 0.3$, into the sampling distribution, to yield $\\mbox{binomial}(\\tilde{y} \\mid \\tilde{N}, \\theta^{*})$.  Compared to the full posterior taking into account estimation uncertinaty in $\\theta$, this plug-in estimate makes it seem very unlikely there will be more boys than girls born in the next 20 births.'}
 
 set.seed(1234)
 log_sum_exp <- function(u) max(u) + log(sum(exp(u - max(u))))
@@ -218,7 +218,7 @@ boys.^[Inference with a single point estimate of one or more
 parameters is common in live, real-time applications, where the cost
 of averaging over the posterior may be prohibitive.]
 
-```{r fig.cap = "Probability mass function for predictions made by plugging the proportion of boy births observed in the data, $\\theta^* = \\frac{y}{N} = 0.3$, into the sampling distribution, to yield $\\mbox{binomial}(\\tilde{y} \\mid \\tilde{N}, \\theta^*)$.  Compared to the full posterior taking into account estimation uncertinaty in $\\theta$, this plug-in estimate makes it seem very unlikely there will be more boys than girls born in the next 20 births."}
+```{r fig.cap = 'Probability mass function for predictions made by plugging the proportion of boy births observed in the data  $\\tilde{y}$ in a subsequent group of $\\tilde{N} = 20$ births based on observing 3 boys in 10 births with no prior information.  Although it is peaked near the 30 percent level observed in the data, it would not be that surprising to see more boys than girls in the next 20 births.'}
 
 binom_df <- data.frame(y_pred = 0:20, log_p = dbinom(0:20, 20, 0.3))
 binom_plot <-
@@ -244,7 +244,7 @@ Consider the following plot, in which the same proportion of boys is
 provided (30%), but the sample size continues to grow (quadrupling
 each time).  
 
-```{r out.width = "100%", fig.width = 9, fig.asp=0.4, fig.cap = "Illustration of convergence of posterior to binomial prediction based on proportion of boys as number of observations $y$ and $N$ grows, with proportion $\\frac{y}{N}$ fixed.  The central limit theorem tells us that each quadrupling of the data cuts the uncertainty in parameter estimation in half until all that is left is the sampling uncertainty in the binomial, as represented in the final plot, where $\\theta = 0.3$ is fixed."}
+```{r out.width = "100%", fig.width = 9, fig.asp=0.4, fig.cap = 'Illustration of convergence of posterior to binomial prediction based on proportion of boys as number of observations $y$ and $N$ grows, with proportion $\\frac{y}{N}$ fixed.  The central limit theorem tells us that each quadrupling of the data cuts the uncertainty in parameter estimation in half until all that is left is the sampling uncertainty in the binomial, as represented in the final plot, where $\\theta = 0.3$ is fixed.'}
 
 M <- 1000
 
