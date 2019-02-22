@@ -3,22 +3,22 @@
 library(ggplot2)
 library(knitr)
 knitr::opts_chunk$set(
-  dev.args = list(bg = '#FFFFF8'),
   cache = TRUE,
   collapse = TRUE,
+  echo = FALSE,
+  include = TRUE,
+  message = FALSE,
+  tidy = FALSE,
+  warning = FALSE,
   comment = "  ",
+  dev.args = list(bg = '#FFFFF8'),
   dev = "png",
   dpi = 300,
-  echo = TRUE,
   fig.align = "center",
   fig.width = 7,
   fig.asp = 0.618,
   fig.show = "hold",
-  include = TRUE,
-  message = FALSE,
-  out.width = "70%",
-  tidy = FALSE,
-  warning = FALSE
+  out.width = "70%"
 )
 library(reshape)
 library(rstan)
