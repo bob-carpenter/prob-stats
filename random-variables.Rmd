@@ -653,10 +653,7 @@ Plotting both the number of simulations and the absolute error on the
 log scale reveals the rate at which the error decreases with more
 draws.
 
-```{r fig.cap="The log of the absolute error. With both axes on the log scale, the slope of the relationship between the number of draws and estimation error is revealed. The blue line is drawn at one standard deviation and the blue line at 
-
-The central limit theorem predicts for each $M$ that $68\\%$ percent of the estimates will be below the blue line and $95\\%$ percent below the red line."}
-
+```{r fig.cap="The log of the absolute error. With both axes on the log scale, the slope of the relationship between the number of draws and estimation error is revealed. The blue line is drawn at the 95% quantile of estimates and one at the 68% quantile."}
 #   commented out bits plot the clt version
 #   geom_line(data = data.frame(x = c(1e4, 1e6),
 #                               y = 2 * c(.5 / sqrt(1e4), .5 / sqrt(1e6))),
@@ -667,18 +664,23 @@ The central limit theorem predicts for each $M$ that $68\\%$ percent of the esti
 #             aes(x = x, y = y, group = NA),
 #             color = "blue") +
 
-
 fudge <- 1e-5
 x <- 0.5 * (1:100)
 log_abs_err_plot <- ggplot(df2, aes(x = M, y = err_hat_E_Y + fudge, group=r)) +
   geom_line(alpha=0.15) +
-  geom_line(data = data.frame(Ms = Ms, sd = sd),
+  geom_point(data = data.frame(Ms = Ms, sd = sd),
             aes(x = Ms, y = sd),
             color = "blue", group = NA, size = 2) +
   geom_point(data = data.frame(Ms = Ms, sd2 = 2 * sd),
             aes(x = Ms, y = sd2),
             color = "red", group = NA, size = 2) +
-  scale_x_log10(limits=c(1e4, 1e6),
+  geom_line(data = data.frame(Ms = Ms, sd = sd),
+            aes(x = Ms, y = sd),
+            color = "blue", group = NA) +
+  geom_line(data = data.frame(Ms = Ms, sd2 = 2 * sd),
+            aes(x = Ms, y = sd2),
+            color = "red", group = NA) +
+  scale_x_log10(limits=c(.9 * 1e4, 1e6 * 1.1),
                 breaks=10^(4:6),
                 labels=c("10,000", "100,000", "1,000,000")) +
   scale_y_log10(limits = c(0.8e-4, 2e-2),
