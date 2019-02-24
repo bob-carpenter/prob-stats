@@ -174,7 +174,7 @@ still has a 30% chance of success and an expected number of successes
 equal to 15 in 50 attempts.  Thus we expect an improvement of 5
 successes in the second season.  Similarly a robot with 18 successes
 in the first season is expected to decline in the second season by 3
-successes.  We can summarize the expecte decline in a plot.
+successes.  We can summarize the expected decline with a plot.
 
 ```{r fig.cap = "Expected change in performance in second season based on first season performance for robots with 30 percent chance of success in 50 attempts. The horizontal dotted line is at zero, or no change year over year, and the veritical line is at the expected number of successes.  Any robot with fewer than the expected number of successes is expected to improve with no treatment, whereas one with more than the expexted number of successes is expected to decline."}
 
