@@ -1,0 +1,574 @@
+# Discrete Markov Chains
+
+## Random processes
+
+A finite sequence of random variables is said to be a random vector.
+An infinite sequence
+
+$$
+Y = Y_1, Y_2, \ldots
+$$
+
+of random variables is said to be a *random process*.^[We consider
+only discrete random processes where the set of indexes is the
+counting numbers.]  A trivial example is a sequence of independent
+Bernoulli trials in which each $Y_t$ is drawn independently according
+to $Y_t \sim \mbox{bernoulli}(\theta)$.^[Such a sequence is called a
+*Bernoulli process.*]
+
+In this chapter, we will restrict attention to discrete random
+processes in which each of the $Y_t$ is a discrete random variable
+taking on the same range of values.
+
+
+## Finite Markov chains
+
+A random process $Y$ is said to be a *Markov chain* if each element is
+generated conditioned on only the previous element, so that
+
+$$
+p_{Y_{t + 1} \mid Y_1, \ldots, Y_t}(y_{t + 1} \mid y_1, \ldots, y_t)
+\ = \
+p_{Y_{t + 1} \mid Y_t}(y_{t + 1} \mid y_t)
+$$
+
+holds for all $y_1, \ldots, y_{t + 1}$.  In this chapter, we only
+consider Markov chains in which the $Y_t$ are discrete random
+variables.  Specifically, we'll resitrct attention to where the values
+are integers, i.e., $Y_t \in \mathbb{Z}$.  Many of the Markov chains
+we consider are finite, taking up to $N$ distinct values, i.e., $Y_t
+\in 1:N$.
+
+The Bernoulli process discussed in the previous section is a trivial
+example of a finite Markov chain.  Each value is generated
+independently, so $p_{Y_{t+1} \mid Y_t}(y \mid y') = p_{Y_{t+1}}(y)$
+for all $y'$.
+
+## Drunkard's walk
+
+The so-called *drunkard's walk* is a non-trivial Markov chain which
+starts with value 0 and moves randomly right one step on the number
+line with probability $\theta$ and left one step with probability $1 -
+\theta$.  The initial value is required to be zero,
+          
+$$
+p_{Y_1}(y_1) \ = \ 1 \ \mbox{ if } \ y_1 = 0.
+$$
+
+Subsequent values are generating with probability $\theta$ of adding
+one and probability $1 - \theta$ of subtracting one,
+
+$$
+p_{Y_{t+1} \mid Y_t}(y_{t+1} \mid y_t)
+\ = \
+\begin{cases}
+\theta & \mbox{if } \ y_{t + 1} = y_t + 1, \mbox{and}
+\\[4pt]
+1 - \theta & \mbox{if } \ y_{t + 1} = y_t - 1.
+\end{cases}
+$$
+
+Another way to formulate the drunkard's walk is by setting $Y_1 = 0$
+and setting subsequent values to 
+
+$$
+Y_{t+1} = Y_t + 2 \times Z_t - 1$.
+$$
+
+where $Z_t \sim \mbox{bernoulli}(\theta).$ Formulated this way, the
+drunkard's walk $Y$ is a transform of the Bernoulli process $Z$.  We
+can simulate drunkard's walks for $\theta = 0.5$ and $\theta = 0.6$
+and see the trend over time.
+
+```
+y[1] = 0
+for (m in 2:M)
+  z[m] = bernoulli_rng(theta)
+  y[m] = y[m - 1] + (z[m] ? 1 : -1) 
+```
+
+We'll simulate from both processes for $M = 1000$ steps and plot.
+
+```{r fig.cap = "Drunkard's walks of 10,000 steps with equal chance of going left or right (blue) versus a sixty percent chance of going left (red).  The dotted line is drawn at the starting point. As time progresses, the biased random walk drifts further and further from its starting point."}
+
+set.seed(1234)
+M <- 10000
+z1 <- rbinom(M, 1, 0.5)
+z2 <- rbinom(M, 1, 0.6)
+y1 <- cumsum(2 * z1 - 1)
+y2 <- cumsum(2 * z2 - 1)
+
+drunkards_df <-
+  data.frame(x = c(1:M, 1:M),
+             y = c(y1, y2),
+             drunkard = c(rep("50% up / 50% down", M),
+                          rep("60% up / 40% down", M)))
+
+drunkards_plot <-
+  ggplot(drunkards_df,
+         aes(x = x, y = y, group = drunkard)) +
+  geom_line() +
+  geom_hline(yintercept = 0, linetype = "dotted") +
+  facet_wrap(. ~ drunkard) +
+  scale_x_log10(breaks = c(1, 10, 100, 1000, 10000)) +
+  xlab("time") +
+  ylab("position") +
+  ggtheme_tufte() +
+  theme(panel.spacing.x = unit(4, "lines"))
+drunkards_plot
+```
+
+For the balanced drunkard, the expected drift per step is zero as
+there is equal chance of going in either direction. After 10\,000
+steps, the expected position of the balanced drunkard remains the
+origin.^[Contrary to common language usage, the expected position
+being the origin after $10\,000$ steps does not imply that we should
+expect the drunkard to be at the origin. It is in fact very unlikely
+that the drunkard is at the origin after $10\,000$ steps, as it
+requires exactly $5\,000$ upward steps, the probability of which is
+$\mbox{binomial}(5\,000 \mid 10\,000, 0.5) = 0.008.$] For the
+unbalanced drunkard, the expected drift per step is $0.6 \times 1 +
+0.4 \times -1 = 0.2$. Thus after 10\,000 steps, the drunkard's
+expected position is $0.2 \times 10\,000 = 2\,000.$
+
+## Fish in the stream
+
+Suppose a person is ice fishing for perch and pike, and notes that if
+they catch a perch, it is 95% likely that the next fish they catch is
+a perch, whereas if they catch a pike, it is 20% likely the next fish
+they catch is a pike.^[This is a thinly reskinned version of the
+classic exercise involving cars and trucks from Ross, S.M.,
+2014. *Introduction to Probability Models.* Tenth edition. Academic
+Press. Exercise 30, page 279.] We'll treat the sequence of fish types
+as a random process $Y = Y_1, Y_2, \ldots$ with values
+
+$$
+Y_t \ = \
+\begin{cases}
+1 & \mbox{if fish $t$ is a pike, and}
+\\[4pt]
+2 & \mbox{if fish $t$ is a perch.}
+\end{cases}
+$$
+
+The sequence $Y$ forms a Markov chain with transition probabilities
+
+$$
+\begin{array}{rcl}
+\mbox{Pr}[Y_{t + 1} = 1 \mid Y_t = 1] & = & 0.20
+\\[4pt]
+\mbox{Pr}[Y_{t + 1} = 1 \mid Y_t = 2] & = & 0.05
+\end{array}
+$$
+
+Let's simulate some fishing. The species with which we start does not
+matter in the long run, so we can just uniformly draw the species of
+the first fish,
+
+$$
+\mbox{Pr}[Y_1 = 1] = 0.5.
+$$
+
+The approach is the same as that of the drunkard's walk, only now we
+will report the overall proportion of pike.^[With some sleight of hand
+here for compatiblity with Bernoulli variates and to facilitate
+computing proportions, we have recoded perch as having value 0 rather
+than 2.]
+
+```
+y[1] = bernoulli_rng(0.5)
+for (t in 2:T)
+  y[t] = bernoulli_rng(y[t - 1] = 1 ? 0.2 : 0.05)
+print 'simulated proportion of pike = ' sum(y) / M
+```
+
+Now let's assume the fish are really running, and run a few simulated
+chains until $T = 10\,000$.
+
+```{r}
+set.seed(1234)
+T <- 10000
+y <- rep(NA, M)
+for (k in 1:5) {
+  y[1] <- rbinom(1, 1, 0.5)
+  for (t in 2:T) {
+    y[t] <- rbinom(1, 1, ifelse(y[t - 1] == 1, 0.2, 0.05))
+  }
+  printf("simulated proportion of pike = %4.3f\n", sum(y) / T)
+}
+```
+
+The proportion of pike is roughly 0.06. Let's run for 1\,000\,000
+iterations to get a bit more precision, first starting from 0, then
+starting from 1.
+
+```{r}
+set.seed(1234)
+T <- 1e6
+y <- rep(NA, M)
+for (k in 0:1) {
+  y[1] <- k
+  for (t in 2:T) {
+    y[t] <- rbinom(1, 1, ifelse(y[t - 1] == 1, 0.2, 0.05))
+  }
+  printf("simulated proporiton of pike = %4.3f\n", sum(y) / T)
+}
+```
+
+When we run long enough, the identity of the initial fish doesn't
+matter up to a few decimal places. There is always a slight biasing
+effect, but it goes to zero in the limit.^[We will state this and
+other theorems more precisely in the chapter on Markov chain Monte
+Carlo.] The bias is apparent when we run only 100 time steps.  Here
+are average estimates of the proportion of pike assuming the first
+observed fish is a pike and a total of only 20 fish are observed;  the
+same number is reported with a perch as the first fish.
+
+```{r}
+M <- 1000
+T <- 20
+prop_pike <- rep(NA, M)
+pike <- rep(NA, T)
+
+for (m in 1:M) {
+  pike[1] <- 1
+  for (t in 2:T)
+    pike[t] <- rbinom(1, 1, ifelse(pike[t - 1], 0.2, 0.05))
+  prop_pike[m] <- sum(pike) / T
+}
+printf("starting from pike: mean estimated pike proportion = %3.2f",
+       mean(prop_pike))
+
+for (m in 1:M) {
+  pike[1] <- 0
+  for (t in 2:T)
+    pike[t] <- rbinom(1, 1, ifelse(pike[t - 1], 0.2, 0.05))
+  prop_pike[m] <- sum(pike) / T
+}
+printf("starting from perch: mean estimated pike proportion = %3.2f",
+       mean(prop_pike))
+```
+
+Now there is a huge gap between the estimates.^[The estimates settle
+down around $T = 1\,000$ in this example.]
+
+
+## Stationary transition matrices
+
+In the last section, we assumed transitions
+
+$$
+\begin{array}{rcl}
+\mbox{Pr}[Y_{t + 1} = 1 \mid Y_t = 1] & = & 0.20
+\\[4pt]
+\mbox{Pr}[Y_{t + 1} = 1 \mid Y_t = 0] & = & 0.05
+\end{array}
+$$
+
+and after simulation, found that over a long run of fish,
+
+$$
+\mbox{Pr}[Y_t = 1] \approx 0.059.
+$$
+
+This solution has the property that it's a fixed point of the
+transition probabilities.  To make this go down a bit easier, let's
+introduce some simpler notation,
+
+$$
+\pi_k = \mbox{Pr}[Y_t = k].
+$$
+
+and
+
+$$
+\theta_{k,k'} = \mbox{Pr}[Y_{t + 1} = k' \mid Y_t = k].
+$$
+
+In the fish example, we have
+
+$$
+\pi = (.059, 1 - 0.059)
+$$
+
+and
+
+$$
+\theta =
+\begin{bmatrix}
+0.2 & 0.8 \\
+0.05 & 0.95
+\end{bmatrix}.
+$$
+
+The transition matrix can be represented graphically with nodes for
+the values and arrows for the directed transitions.^[This is a pun in
+the sense that a mathematical graph is a collection of nodes and
+edges.] The fact that the rows of the matrix sum to one is reflected
+in the outgoing edges having probabilities that sum to one.
+
+```{r, engine="tikz", fig.ext="pdf", out.width="35%", fig.cap="State diagram for finite Markov chain generating sequences of fishes."}
+\begin{tikzpicture}[->, auto, node distance=2cm, font=\footnotesize]
+\node[circle,draw,semithick] (A) {1:pike};
+\node[circle,draw,semithick] (B) [right of=A] {2:perch};
+\path (A) edge [bend left] node {0.80} (B);
+\path (B) edge [bend left] node {0.05} (A);
+\path (A) edge [loop above] node {0.20} (A);
+\path (B) edge [loop above] node {0.95} (B);
+\end{tikzpicture}
+```
+
+The vector $\pi$ is a fixed point of the transition matrix $\theta$ in
+the sense that the probability of a pike, $\pi_1$, is equal to the
+probability of catching a pike times the probability of catching a
+pike after a pike, plus the probability of catching a perch times the
+probability of catching a pike after a perch. In symbols and plugging
+in numbers from our example, that's^[In matrix notation, taking $\pi$
+to be a row vector and $\theta$ to be a stochastic matrix,
+stationarity is expressed succintly as $$\pi = \theta \, \pi.$$]
+
+$$
+\begin{array}{rccc}
+\pi_1
+& = &
+\pi_1 \times \theta_{1, 1}
+& + &
+\pi_0 \times \theta_{0, 1}
+\\[6pt]
+0.059
+& = &
+0.059 \times 0.20
+& + &
+(1 - 0.059) \times 0.05.
+\end{array}
+$$
+
+## Gambler's Ruin
+
+Another classic problem which may be understood in the context of a
+discrete Markov chain is the gambler's ruin. Suppose a gambler sits
+down to bet with a pile of $N$ chips and is playing a game which costs
+one chip to play and returns one chip with a probability of
+$\theta$.^[The original formulation of the problem, involving two
+gamblers playing each other with finite stakes, was analyzed in
+Christiaan Huygens. 1657. *Van Rekeningh in Spelen van Geluck.* Here
+we assume one player is the bank with an unlimited stake.] The gambler
+is not allowed to go into debt, so if the gambler's fortune ever sinks
+to zero, it remains that way in perpetuity. The results of the bets at
+times $t = 1, 2, \ldots$ can be modeled as an independent and
+identically distributed random process $Z = Z_1, Z_2, \ldots$ with
+
+$$
+Z_t \sim \mbox{bernoulli}(\theta).
+$$
+
+As usual, a successful bet is represented by $Z_t = 1$ and an
+unsuccessful one by $Z_t = 0$.  The gambler's fortune can now be
+defined recursively as a time series $Y = Y_1, Y_2,
+\ldots$ in which the initial value is given by
+
+$$
+Y_1 = N
+$$
+
+with subsequent values defined recursively by
+
+$$
+Y_{n + 1}
+\ = \
+\begin{cases}
+0 & \mbox{if} \ Y_n = 0, \ \mbox{and}
+\\[4pt]
+Y_n + Z_n & \mbox{if} \ Y_n > 0.
+\end{cases}
+$$
+
+Broken down into the language of Markov chains, we have an initial
+distribution concentrating all of its mass at the single point $N$,
+with mass function
+
+$$
+p_{Y_1}(N) = 1.
+$$
+
+Each subsequent variable's probability mass function is given by
+
+$$
+p_{Y_{t + 1} \mid Y_t}(y_{t + 1} \mid y_t)
+\ = \
+\begin{cases}
+\theta & \mbox{if} \ y_{t + 1} = y_t + 1
+\\[4pt]
+1 - \theta & \mbox{if} \ y_{t + 1} = y_t - 1.
+\end{cases}
+$$
+
+These mass functions are all identical in that $p_{Y_{t+n+1} \mid Y_{t
++ n}} = p_{Y_{t + 1} \mid Y_t}.$  In other words, $Y$ is a
+time-homogeneous Markov chain.
+
+We are interested in two questions pertaining to the gambler. First,
+what is their expected fortune at each time $t$? Second, what is the
+probability that they have fortune zero at time $t$.^[A gambler whose
+fortune goes to zero is said to be *ruined.*]  Both of these
+calculations have simple simulation-based estimates.
+
+Let's start with expected fortune and look out $T = 100$ steps.
+Suppose the chance of success on any given bet is $\theta$ and their
+initial fortune is $N$. The simulation of the gambler's fortune is
+just a straightforward coding of the time series.
+
+```
+y[1] = N
+for (t in 2:T)
+  z[t] = bernoulli_rng(theta)
+  y[t] = y[t - 1] + (z[t] ? 1 : -1)
+```
+
+Now if we simulate that entire process $M$ times, we can calculate
+the expected fortune as an average at each time $t \in 1:T$.
+
+```
+for (m in 1:M)
+  y(m)[t] = N
+  for (t in 2:T)
+    z(m)[t] = bernoulli_rng(theta)
+    y(m)[t] = y(m)[t - 1] + (z[t] ? 1 : -1)
+for (t in 1:T)
+  expected_fortune[t] = mean(y(1:M)[t])
+```
+
+Let's run $M = 10\,000$ simulations for $T = 50$ starting with a stake
+of $N = 5$ with several values of $\theta$ and plot the expected
+fortunes.
+
+```{r fig.cap = "Expected returns for gambler starting with stake $N$ and having a $\\theta$ chance at each time point of increasing their fortune by 1 and a $1 - \\theta$ chance of reducing their fortune by 1.  The horizontal dotted line is at the initial fortune and the dashed line is at zero."}
+
+set.seed(1234)
+N <- 5
+T <- 50
+M <- 10000
+Theta <- c(0.4, 0.5, 0.6)
+
+df_ruin <- data.frame(x = c(), y = c(), theta = c())
+for (theta in Theta) {
+  y <- matrix(NA, M, T)
+  for (m in 1:M) {
+    y[m, 1] <- N
+    for (t in 2:T) {
+      if (y[m, t - 1] == 0) {
+        y[m, t] <- 0
+      } else {
+        y[m, t] <- y[m, t - 1] + ifelse(rbinom(1, 1, theta), 1, -1)
+      }
+    }    
+  }
+  expected_fortune <- rep(NA, T)
+  for (t in 1:T) {
+    expected_fortune[t] <- mean(y[1:M, t])
+  }  
+  df_ruin <- rbind(df_ruin,
+                   data.frame(x = 1:T,  y = expected_fortune,
+                              theta = rep(paste("theta = ", theta), T)))
+}
+
+plot_ruin <-
+  ggplot(df_ruin, aes(x = x, y = y, group = theta)) +
+  geom_line() +
+  geom_hline(yintercept = 5, linetype = 'dotted', size = 0.5) +
+  geom_hline(yintercept = 0, linetype = 'dashed', size = 0.5) +
+  facet_wrap(. ~ theta) +
+  scale_x_continuous(breaks = c(1, 25, 50)) +
+  scale_y_continuous(breaks = c(0, 5, 10, 15)) +
+  xlab("time") +
+  ylab("expected fortune") +
+  ggtheme_tufte() +
+  theme(panel.spacing.x = unit(4, "lines"))
+plot_ruin  
+```
+
+Next, we'll tackle the problem of estimating the probability that a
+gambler has been run out of money at time $t$. In symbols, we are
+going to use simulations $y^{(1)}, \ldots, y^{(M)}$ of the gambler's
+time series, 
+
+$$
+\begin{array}{rcl}
+\mbox{Pr}[Y_t = 0]
+& = &
+\mathbb{E}\left[ \mathrm{I}\left[ Y_t = 0 \right] \right].
+\\[6pt]
+& \approx &
+\displaystyle
+\frac{1}{M} \sum_{m = 1}^M \, \mathrm{I}\left[ y_t^{(m)} = 0 \right].
+\end{array}
+$$
+
+This last term can be directly calculated by adding the indicator
+variables to the calculations before.
+
+```
+for (m in 1:M)
+  y(m)[t] = N
+  for (t in 2:T)
+    z(m)[t] = bernoulli_rng(theta)
+    y(m)[t] = y(m)[t - 1] + (z[t] ? 1 : -1)
+    ruined(m)[t] = (y(m)[t] == 0)
+for (t in 1:T)
+  estimated_pr_ruin[t] = mean(ruined(1:M)[t])
+```
+
+So let's run that and plot the probability of ruin for the same three
+choices of $\theta$, using $M = 5\,000$ simulations.  But this time,
+we'll run for $T = 200$ time steps.
+
+```{r fig.cap = 'Probability of running out of money for a gambler starting with stake $N$ and having a $\\theta$ chance at each time point of increasing their fortune by 1 and a $1 - \\theta$ chance of reducing their fortune by 1.  The horizontal dotted line is at 100%.'}
+
+set.seed(1234)
+N <- 5
+T <- 200
+M <- 5000
+Theta <- c(0.4, 0.5, 0.6)
+
+df_expect_ruin <- data.frame(x = c(), y = c(), theta = c())
+for (theta in Theta) {
+  y <- matrix(NA, M, T)
+  for (m in 1:M) {
+    y[m, 1] <- N
+    for (t in 2:T) {
+      if (y[m, t - 1] == 0) {
+        y[m, t] <- 0
+      } else {
+        y[m, t] <- y[m, t - 1] + ifelse(rbinom(1, 1, theta), 1, -1)
+      }
+    }    
+  }
+  pr_ruin <- rep(NA, T)
+  for (t in 1:T) {
+    pr_ruin[t] <- mean(y[1:M, t] == 0)
+  }  
+  df_expect_ruin <-
+    rbind(df_expect_ruin,
+          data.frame(x = 1:T,  y = pr_ruin,
+                     theta = rep(paste("theta = ", theta), T)))
+}
+
+plot_expect_ruin <-
+  ggplot(df_expect_ruin, aes(x = x, y = y, group = theta)) +
+  geom_line() +
+  geom_hline(yintercept = 1, linetype = 'dotted', size = 0.5) +
+  facet_wrap(. ~ theta) +
+  scale_x_continuous(breaks = c(1, 100, 200)) +
+  scale_y_continuous(lim = c(0, 1),
+                     breaks = c(0, 0.25, 0.5, 0.75, 1),
+		     labels = c("0", "1/4", "1/2", "3/4", "1")) +
+  xlab("time") +
+  ylab("probability of ruin") +
+  ggtheme_tufte() +
+  theme(panel.spacing.x = unit(4, "lines"))
+plot_expect_ruin  
+```
+
+Even in a fair game, after 50 bets, there's nearly a 50% chance that
+a gambler starting with a stake of 5 is ruined; this probabiltiy goes
+up to nearly 75% after 200 bets.

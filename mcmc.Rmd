@@ -4,9 +4,24 @@
 the Monte Carlo Casino (shown below), located in the Principality of
 Monaco. <br /> &nbsp; <br /> ![](img/mc-casino.jpg) <span
 style="float:right; font-size:60%; color:#999999;">&copy; Z.graber,
-own work, CC-BY-SA 3.0</span>] use simulations of probabilistic
-processes to calculate numerical solutions to definite integrals in
-high dimensions.  
+own work, CC-BY-SA 3.0</span>] are just methods that use simulations
+of probabilistic processes to calculate numerical solutions to
+definite integrals, usually in high dimensions.  We have seen numerous
+examples in earlier chapters, mostly involving the estimation of
+expectations, including event probabilities and parameter estimates.
+In all of the examples we have seen, we have been able to generate
+independent simulation draws.^[The advantage is that the central limit
+theorem applies as is to independent draws.]
+
+For most statistical models of applied interest, no methods exist for
+taking independent draws from the posterior.  In many cases, we can
+take 
+
+The best we can do is
+take a sequence of draws from the posterior that are correlated with
+one another.  The most common way for doing that is by generating
+the draws from a Markov chain whose elements are correlatedequilibrium distribution is that
+of the target.
 
 ## Markov chains
 
@@ -23,7 +38,7 @@ $$
 In all the examples of simulation we've seen up to now, each simulated
 draw was independent of the others.  In this chapter, we will consider
 sequences of draws that make up a Markov chain, which are potentially
-correlated (or anti-correlated) with each other.
+correlated (or anti-correlated) as a sequence.
 
 ## Finite Markov chains
 
@@ -47,7 +62,9 @@ The base R function `sample()` draws a single value (`n = 1`) from the sequence 
 
 ## Independent draws
 
-```{r, engine="tikz", fig.ext="pdf", fig.width=1.5, fig.cap="State diagram for independent draws."}
+The state diagram indicates that if the previous draw was
+
+```{r, engine="tikz", fig.ext="pdf", out.width="25%", fig.cap="State diagram for finite Markov chain generating independent draws."}
 \begin{tikzpicture}[->, auto, node distance=1.75cm, font=\footnotesize]
 \node[circle,draw,semithick] (A) {{\bf 0}};
 \node[circle,draw,semithick] (B) [right of=A] {{\bf 1}};
