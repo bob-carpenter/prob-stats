@@ -572,3 +572,89 @@ plot_expect_ruin
 Even in a fair game, after 50 bets, there's nearly a 50% chance that
 a gambler starting with a stake of 5 is ruined; this probabiltiy goes
 up to nearly 75% after 200 bets.
+
+## Ehrenfest's Urns
+
+Suppose we have two urns, with a total of $N$ balls distributed
+between them.  At each time step, a ball is chosen uniformly at random
+from among the balls in both urns and moved to the other urn.  This
+defines a Markov chain $Y$ where
+
+$$
+p_{Y_{t+1} \mid Y_t}(y_{t+1} \mid y_t)
+\ = \
+\begin{cases}
+\displaystyle \frac{y_t}{N}
+& \mbox{if } \ y_{t + 1} = y_t - 1, \ \mbox{and}
+\\[6pt]
+\displaystyle 1 - \frac{y_t}{N}
+& \mbox{if } \ y_{t + 1} = y_t + 1.
+\end{cases}
+$$
+
+The transition probabilities make sure that the value of $Y_t$ remains
+between 0 and $N$.  For example,
+
+$$
+\mbox{Pr}[Y_{t + 1} = 1 \mid Y_t = 0] = 1
+$$
+
+because $1 - \frac{y_t}{N} = 1$. Similarly, if $Y_t = N$, then
+$Y_{t+1} = N - 1$.
+
+What happens to the distibution of $Y_t$ long term? It's easy to
+compute by simulation of a single long chain:^[We've used a function
+borrowed from R here called `table`, defined by $$\mbox{table}(y, A,
+B)[n] = \sum_{t=1}^T \mbox{I}[y_t = n]$$ for $n \in A:B$. For example, if $$y =
+(0, 1, 2, 1, 1, 3, 2, 2, 1),$$ then $$\mbox{table}(y, 0, 4) = (1, 4,
+3, 1, 0),$$ because there is one 0, four 1s, three 2s, a single 3, and
+no 4s among the values of $y$.]
+
+```
+y[1] = floor(N / 2)
+for (t in 2:T)
+  z[t] = bernoulli_rng(y[t - 1] / N)
+  y[t] = y[t - 1] + (z[t] ? -1 : +1)
+p_Y_t_hat = table(y, 0, N) / T
+```
+
+Let's run that with $N = 10$ and $T = 100\,000$ and display the
+results as a bar plot.
+
+```{r fig.cap = 'Long-term distribution of number of balls in the first urn of the Ehrenfest model in which $N$ balls are distributed between two urns, then at each time step, a ball is chosen uniformly at random move to the other urn.  The simulation is based on total of $T = 100\\,000$ steps with $N = 10$ balls, starting with 5 balls in the first urn. The points on the top of the bars are positioned at the mass defined by the binomial distribution, $\\mbox{binomial}(Y_t \\mid 10, 0.5)$.'}
+
+set.seed(1234)
+N <- 10
+T <- 1e5
+y <- rep(NA, T)
+y[1] <- 5
+for (t in 2:T) {
+  z_t = rbinom(1, 1, y[t - 1] / N)
+  y[t] <- y[t - 1] + ifelse(z_t, -1, 1)
+}
+# p_Y_t_hat = table(y) / T
+
+ehrenfest_df <- data.frame(x = 1:T, y = y)
+
+ehrenfest_plot <-
+  ggplot(ehrenfest_df, aes(y)) +
+  geom_bar(color = 'black', fill = '#ffffe8', size = 0.2) +
+  geom_point(data = data.frame(x = 0:10, y = T * dbinom(0:10, 10, 0.5)),
+             aes(x = x, y = y),
+	     size = 3, alpha = 0.5) +
+  scale_x_continuous(breaks = c(0, 2, 4, 6, 8, 10)) +
+  scale_y_continuous(breaks = (0:5) * 5000, labels = (0:5) * 0.05) +
+  xlab(expression(Y[t])) +
+  ylab("proportion") +
+  ggtheme_tufte()
+ehrenfest_plot  
+```
+
+The distribution of $Y_t$ values is the binomial distribution, as
+shown by the agreement between the points (the binomial probability
+mass function) and the bars (the empirical proportion $Y_t$ spent in
+each state).^[In the Markov chain Monte Carlo chapter later in the
+book, we will see how to construct a Markov chain whose long-term
+frequency distribution matches any given target distribution.]
+
+
