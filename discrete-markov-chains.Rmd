@@ -72,7 +72,7 @@ Another way to formulate the drunkard's walk is by setting $Y_1 = 0$
 and setting subsequent values to 
 
 $$
-Y_{t+1} = Y_t + 2 \times Z_t - 1$.
+Y_{t+1} = Y_t + 2 \times Z_t - 1.
 $$
 
 where $Z_t \sim \mbox{bernoulli}(\theta).$ Formulated this way, the
@@ -576,9 +576,16 @@ up to nearly 75% after 200 bets.
 ## Ehrenfest's Urns
 
 Suppose we have two urns, with a total of $N$ balls distributed
-between them.  At each time step, a ball is chosen uniformly at random
-from among the balls in both urns and moved to the other urn.  This
-defines a Markov chain $Y$ where
+between them. At each time step, a ball is chosen uniformly at random
+from among the balls in both urns and moved to the other urn.^[This
+model was originally introduced as an example of entropy and
+equilibrium in P. Ehrenfest and T. Ehrenfest. 1906. Über eine Aufgabe
+aus der Wahrscheinlichkeitsrechnung, die mit der kinetischen Deutung
+der Entropievermehrung zusammenhängt.
+*Mathematisch-Naturwissenschaftliche Blätter* No. 11 and 12.]
+
+The process defines a Markov chain $Y$ where transitions are governed
+by
 
 $$
 p_{Y_{t+1} \mid Y_t}(y_{t+1} \mid y_t)
@@ -658,3 +665,157 @@ book, we will see how to construct a Markov chain whose long-term
 frequency distribution matches any given target distribution.]
 
 
+## Page Rank and the random surfer
+
+Pagerank,^[Page, L., Brin, S., Motwani, R. and Winograd, T., 1999. The
+PageRank citation ranking: Bringing order to the web. Stanford InfoLab
+Technical Report. Section 2.5 Random Surfer Model.] the innovation
+behind the original Google search engine ranking system, can be
+modeled in terms of a random web surfer whose behavior determines a
+Markov chain.  The web is modeled as a set of pages, each of which has
+a set of outgoing links to other pages.  When viewing a particular
+page, our random surfer chooses the next page to visit by
+
+* if the current page has outgoing links, then with probability
+$\lambda$, choose the next page uniformly at random among the outgoing
+links, 
+
+* otherwise (with probability $1 - \lambda$), choose the next page to
+visit uniformly at random among all web pages.
+
+Translating this into the language of random variables, let $Y = Y_1,
+Y_2, \ldots$ be the sequence of web pages visited. Our goal now is to
+define the transition function probabilistically so that we may
+simulate the random surfer. Let $L_i \subseteq 1:N$ be the set of
+outgoing links from page $i$; each page may have any number of
+outgoing links from 0 to $N$.
+
+The process $Y$ is most easily described in terms of an auxiliary
+process $Z = Z_1, Z_2, \ldots$ where $Z_t$ represents
+
+the decision whether to jump to a link from the current page. We
+define $Z$ by setting $Z_t = 0$ if the page $Y_t$ has no
+outgoing links, and otherwise setting
+
+$$
+Z_t \sim \mbox{bernoulli}(\lambda).
+$$
+
+If $Z_t = 1$, we can generate $Y_{t+1}$ uniformly from the links
+$L_{Y_t}$ from page $Y_t$,
+
+$$
+Y_{t + 1} \sim \mbox{uniform}\left( L_{Y_t} \right).
+$$
+
+If $Z_t = 0$, we simply choose a web page uniformly at random from
+among all $N$ pages,
+
+$$
+Y_{t+1} \sim \mbox{uniform}(1:N).
+$$
+
+This sequence is easy to simulate with `L[n]` denoting the outgoing
+links from page `n`.  We start from a page `y[1]` chosen uniformly at
+random among all the pages.  Then we just simulate subsequent pages
+according to the process described above.
+
+```
+y[1] <- uniform_rng(1:N)
+for (t in 2:T)
+  last_page = y[t - 1]
+  out_links = L[last_page]
+  z[t] <- empty(out_links) ? 0 : bernoulli_rng(lambda)
+  y[t] <- uniform(z[t] ? out_links : (1:N))
+```
+
+Suppose we have the following graph.
+
+```{r, engine="tikz", fig.ext="pdf", out.width="50%", fig.cap="A simplified web.  Each node represents a web page and each edge is a directed link from one page to another web page."}
+\begin{tikzpicture}[->, auto, node distance=2cm, font=\footnotesize]
+\node[circle,draw,semithick] (A) {1};
+\node[circle,draw,semithick] (B) [above right of=A] {2};
+\node[circle,draw,semithick] (C) [below left of=A] {3};
+\node[circle,draw,semithick] (D) [below right of=A] {4};
+\node[circle,draw,semithick] (E) [right of=D] {5};
+\node[circle,draw,semithick] (F) [below left of=C] {6};
+\node[circle,draw,semithick] (G) [below of=C] {7};
+\node[circle,draw,semithick] (H) [below right of=C] {8};
+\node[circle,draw,semithick] (I) [below of=G] {9};
+\node[circle,draw,semithick] (J) [below of=H] {10};
+\node[circle,draw,semithick] (K) [below of=D] {11};
+\node[circle,draw,semithick] (L) [below right of=D] {12};
+\path (A) edge [bend left] node {} (B);
+\path (B) edge [bend left] node {} (A);
+\path (C) edge [] node {} (A);
+\path (A) edge [bend left] node {} (D);
+\path (D) edge [bend left] node {} (A);
+\path (F) edge [] node {} (C);
+\path (G) edge [] node {} (C);
+\path (H) edge [] node {} (C);
+\path (G) edge [] node {} (I);
+\path (J) edge [] node {} (H);
+\path (D) edge [] node {} (K);
+\path (D) edge [] node {} (L);
+\end{tikzpicture}
+```
+
+We can simulate $T = 100\,000$ page visits using the algorithm shown
+above and display the proportion of time spent on each page.
+
+```{r fig.cap = "Proportion of time spent on each page by a random surfer taking $T = 100\,000$ page views starting from a random page with a web structured as in the previous diagram."
+L = matrix(0, 12, 12)
+L[1, c(2, 4)] = 1
+L[2, c(1)] = 1
+L[3, c(1)] = 1
+L[4, c(1, 11, 12)] = 1
+L[5, c()] = 1
+L[6, c(3)] = 1
+L[7, c(3, 9)] = 1
+L[8, c(3)] = 1
+L[9, c()] = 1
+L[10, c(8)] = 1
+L[11, c()] = 1
+L[12, c()] = 1
+
+lambda <- 0.90
+theta <- matrix(NA, 12, 12)
+for (i in 1:12) {
+  if (sum(L[i, ]) == 0) {
+    theta[i, ] <- rep(1/12, 12)
+  } else {
+    theta[i, ] <- lambda * L[i, ] / sum(L[i, ]) +
+                  (1 - lambda) * rep(1 / 12, 12)
+  }
+}  
+
+set.seed(1234)
+T <- 1e5
+y <- rep(NA, T)
+y[1] <- sample(1:12, 1)
+for (t in 2:T) {
+  y[t] <- sample(1:12, 1, prob = theta[y[t - 1], ])
+}
+
+visited = table(y)
+
+pagerank_df <- data.frame(x = 1:T, y = y)
+
+pagerank_plot <-
+  ggplot(pagerank_df, aes(y)) +
+  geom_bar(color = 'black', fill = '#ffffe8', size = 0.2) +
+  scale_x_continuous(breaks = 1:12) +
+  scale_y_continuous(breaks = c(0, 0.1, 0.2, 0.3) * T,
+                     labels = c(0, 0.1, 0.2, 0.3)) +
+  xlab("page") +
+  ylab("rank (proportion of time on page)") +
+  ggtheme_tufte()
+pagerank_plot  
+```
+
+Page 1 is the most central hub. Pages 5, 6, 7, and 10 have no links
+coming into them and can only be visited by random chance, so all
+should have the same chance of being visited by the random surfer.
+Pages 11 and 12 are symmetric, and indeed have the same probability.
+There is a slight difference between the views of page 9 and 10 in
+that it possible ot get to 9 from 7, but 10 is only visited by chance.
