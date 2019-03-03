@@ -50,7 +50,7 @@ The so-called *drunkard's walk* is a non-trivial Markov chain which
 starts with value 0 and moves randomly right one step on the number
 line with probability $\theta$ and left one step with probability $1 -
 \theta$.  The initial value is required to be zero,
-          
+
 $$
 p_{Y_1}(y_1) \ = \ 1 \ \mbox{ if } \ y_1 = 0.
 $$
@@ -69,7 +69,7 @@ p_{Y_{t+1} \mid Y_t}(y_{t+1} \mid y_t)
 $$
 
 Another way to formulate the drunkard's walk is by setting $Y_1 = 0$
-and setting subsequent values to 
+and setting subsequent values to
 
 $$
 Y_{t+1} = Y_t + 2 \times Z_t - 1.
@@ -84,7 +84,7 @@ and see the trend over time.
 y[1] = 0
 for (m in 2:M)
   z[m] = bernoulli_rng(theta)
-  y[m] = y[m - 1] + (z[m] ? 1 : -1) 
+  y[m] = y[m - 1] + (z[m] ? 1 : -1)
 ```
 
 We'll simulate from both processes for $M = 1000$ steps and plot.
@@ -161,19 +161,30 @@ $$
 \end{array}
 $$
 
-Let's simulate some fishing. The species with which we start does not
-matter in the long run, so we can just uniformly draw the species of
-the first fish,
+The easiest way to visual a Markov chain with only a few states is as
+a state transition diagram.  In the case of the pike and perch, the
+transition diagram is as follows.
 
-$$
-\mbox{Pr}[Y_1 = 1] = 0.5.
-$$
+```{r, engine="tikz", fig.ext="pdf", out.width="35%", fig.cap="State diagram for finite Markov chain generating sequences of fishes. The last fish observed determines the current state and the arrows indicate transition probabilities to the next fish observed."}
+\begin{tikzpicture}[->, auto, node distance=2cm, font=\footnotesize]
+\node[circle,draw,semithick] (A) {1:pike};
+\node[circle,draw,semithick] (B) [right of=A] {2:perch};
+\path (A) edge [bend left] node {0.80} (B);
+\path (B) edge [bend left] node {0.05} (A);
+\path (A) edge [loop above] node {0.20} (A);
+\path (B) edge [loop above] node {0.95} (B);
+\end{tikzpicture}
+```
 
-The approach is the same as that of the drunkard's walk, only now we
-will report the overall proportion of pike.^[With some sleight of hand
-here for compatiblity with Bernoulli variates and to facilitate
-computing proportions, we have recoded perch as having value 0 rather
-than 2.]
+Like all such transition graphs, the probabilities on the edges going
+out of a node must sum to one.
+
+Let's simulate some fishing. The approach is the same as that of the
+drunkard's walk, only now we will report the overall proportion of
+pike.^[With some sleight of hand here for compatiblity with Bernoulli
+variates and to facilitate computing proportions, we have recoded
+perch as having value 0 rather than 2.] We will start with a random
+fish drawn according to $\mbox{bernoulli(1/2)}$.
 
 ```
 y[1] = bernoulli_rng(0.5)
@@ -198,150 +209,8 @@ for (k in 1:5) {
 }
 ```
 
-The proportion of pike is roughly 0.06. Let's run for 1\,000\,000
-iterations to get a bit more precision, first starting from 0, then
-starting from 1.
+The proportion of pike is roughly 0.06.
 
-```{r}
-set.seed(1234)
-T <- 1e6
-y <- rep(NA, M)
-for (k in 0:1) {
-  y[1] <- k
-  for (t in 2:T) {
-    y[t] <- rbinom(1, 1, ifelse(y[t - 1] == 1, 0.2, 0.05))
-  }
-  printf("simulated proporiton of pike = %4.3f\n", sum(y) / T)
-}
-```
-
-When we run long enough, the identity of the initial fish doesn't
-matter up to a few decimal places. There is always a slight biasing
-effect, but it goes to zero in the limit.^[We will state this and
-other theorems more precisely in the chapter on Markov chain Monte
-Carlo.] The bias is apparent when we run only 100 time steps.  Here
-are average estimates of the proportion of pike assuming the first
-observed fish is a pike and a total of only 20 fish are observed;  the
-same number is reported with a perch as the first fish.
-
-```{r}
-M <- 1000
-T <- 20
-prop_pike <- rep(NA, M)
-pike <- rep(NA, T)
-
-for (m in 1:M) {
-  pike[1] <- 1
-  for (t in 2:T)
-    pike[t] <- rbinom(1, 1, ifelse(pike[t - 1], 0.2, 0.05))
-  prop_pike[m] <- sum(pike) / T
-}
-printf("starting from pike: mean estimated pike proportion = %3.2f",
-       mean(prop_pike))
-
-for (m in 1:M) {
-  pike[1] <- 0
-  for (t in 2:T)
-    pike[t] <- rbinom(1, 1, ifelse(pike[t - 1], 0.2, 0.05))
-  prop_pike[m] <- sum(pike) / T
-}
-printf("starting from perch: mean estimated pike proportion = %3.2f",
-       mean(prop_pike))
-```
-
-Now there is a huge gap between the estimates.^[The estimates settle
-down around $T = 1\,000$ in this example.]
-
-
-## Stationary transition matrices
-
-In the last section, we assumed transitions
-
-$$
-\begin{array}{rcl}
-\mbox{Pr}[Y_{t + 1} = 1 \mid Y_t = 1] & = & 0.20
-\\[4pt]
-\mbox{Pr}[Y_{t + 1} = 1 \mid Y_t = 0] & = & 0.05
-\end{array}
-$$
-
-and after simulation, found that over a long run of fish,
-
-$$
-\mbox{Pr}[Y_t = 1] \approx 0.059.
-$$
-
-This solution has the property that it's a fixed point of the
-transition probabilities.  To make this go down a bit easier, let's
-introduce some simpler notation,
-
-$$
-\pi_k = \mbox{Pr}[Y_t = k].
-$$
-
-and
-
-$$
-\theta_{k,k'} = \mbox{Pr}[Y_{t + 1} = k' \mid Y_t = k].
-$$
-
-In the fish example, we have
-
-$$
-\pi = (.059, 1 - 0.059)
-$$
-
-and
-
-$$
-\theta =
-\begin{bmatrix}
-0.2 & 0.8 \\
-0.05 & 0.95
-\end{bmatrix}.
-$$
-
-The transition matrix can be represented graphically with nodes for
-the values and arrows for the directed transitions.^[This is a pun in
-the sense that a mathematical graph is a collection of nodes and
-edges.] The fact that the rows of the matrix sum to one is reflected
-in the outgoing edges having probabilities that sum to one.
-
-```{r, engine="tikz", fig.ext="pdf", out.width="35%", fig.cap="State diagram for finite Markov chain generating sequences of fishes."}
-\begin{tikzpicture}[->, auto, node distance=2cm, font=\footnotesize]
-\node[circle,draw,semithick] (A) {1:pike};
-\node[circle,draw,semithick] (B) [right of=A] {2:perch};
-\path (A) edge [bend left] node {0.80} (B);
-\path (B) edge [bend left] node {0.05} (A);
-\path (A) edge [loop above] node {0.20} (A);
-\path (B) edge [loop above] node {0.95} (B);
-\end{tikzpicture}
-```
-
-The vector $\pi$ is a fixed point of the transition matrix $\theta$ in
-the sense that the probability of a pike, $\pi_1$, is equal to the
-probability of catching a pike times the probability of catching a
-pike after a pike, plus the probability of catching a perch times the
-probability of catching a pike after a perch. In symbols and plugging
-in numbers from our example, that's^[In matrix notation, taking $\pi$
-to be a row vector and $\theta$ to be a stochastic matrix,
-stationarity is expressed succintly as $$\pi = \theta \, \pi.$$]
-
-$$
-\begin{array}{rccc}
-\pi_1
-& = &
-\pi_1 \times \theta_{1, 1}
-& + &
-\pi_0 \times \theta_{0, 1}
-\\[6pt]
-0.059
-& = &
-0.059 \times 0.20
-& + &
-(1 - 0.059) \times 0.05.
-\end{array}
-$$
 
 ## Gambler's Ruin
 
@@ -461,12 +330,12 @@ for (theta in Theta) {
       } else {
         y[m, t] <- y[m, t - 1] + ifelse(rbinom(1, 1, theta), 1, -1)
       }
-    }    
+    }
   }
   expected_fortune <- rep(NA, T)
   for (t in 1:T) {
     expected_fortune[t] <- mean(y[1:M, t])
-  }  
+  }
   df_ruin <- rbind(df_ruin,
                    data.frame(x = 1:T,  y = expected_fortune,
                               theta = rep(paste("theta = ", theta), T)))
@@ -484,13 +353,13 @@ plot_ruin <-
   ylab("expected fortune") +
   ggtheme_tufte() +
   theme(panel.spacing.x = unit(4, "lines"))
-plot_ruin  
+plot_ruin
 ```
 
 Next, we'll tackle the problem of estimating the probability that a
 gambler has been run out of money at time $t$. In symbols, we are
 going to use simulations $y^{(1)}, \ldots, y^{(M)}$ of the gambler's
-time series, 
+time series,
 
 $$
 \begin{array}{rcl}
@@ -541,12 +410,12 @@ for (theta in Theta) {
       } else {
         y[m, t] <- y[m, t - 1] + ifelse(rbinom(1, 1, theta), 1, -1)
       }
-    }    
+    }
   }
   pr_ruin <- rep(NA, T)
   for (t in 1:T) {
     pr_ruin[t] <- mean(y[1:M, t] == 0)
-  }  
+  }
   df_expect_ruin <-
     rbind(df_expect_ruin,
           data.frame(x = 1:T,  y = pr_ruin,
@@ -566,7 +435,7 @@ plot_expect_ruin <-
   ylab("probability of ruin") +
   ggtheme_tufte() +
   theme(panel.spacing.x = unit(4, "lines"))
-plot_expect_ruin  
+plot_expect_ruin
 ```
 
 Even in a fair game, after 50 bets, there's nearly a 50% chance that
@@ -654,7 +523,7 @@ ehrenfest_plot <-
   xlab(expression(Y[t])) +
   ylab("proportion") +
   ggtheme_tufte()
-ehrenfest_plot  
+ehrenfest_plot
 ```
 
 The distribution of $Y_t$ values is the binomial distribution, as
@@ -678,7 +547,7 @@ page, our random surfer chooses the next page to visit by
 
 * if the current page has outgoing links, then with probability
 $\lambda$, choose the next page uniformly at random among the outgoing
-links, 
+links,
 
 * otherwise (with probability $1 - \lambda$), choose the next page to
 visit uniformly at random among all web pages.
@@ -763,7 +632,7 @@ Suppose we have the following graph.
 We can simulate $T = 100\,000$ page visits using the algorithm shown
 above and display the proportion of time spent on each page.
 
-```{r fig.cap = "Proportion of time spent on each page by a random surfer taking $T = 100\,000$ page views starting from a random page with a web structured as in the previous diagram."
+```{r fig.cap = "Proportion of time spent on each page by a random surfer taking $T = 100\\,000$ page views starting from a random page with a web structured as in the previous diagram."}
 L = matrix(0, 12, 12)
 L[1, c(2, 4)] = 1
 L[2, c(1)] = 1
@@ -787,7 +656,7 @@ for (i in 1:12) {
     theta[i, ] <- lambda * L[i, ] / sum(L[i, ]) +
                   (1 - lambda) * rep(1 / 12, 12)
   }
-}  
+}
 
 set.seed(1234)
 T <- 1e5
@@ -810,7 +679,7 @@ pagerank_plot <-
   xlab("page") +
   ylab("rank (proportion of time on page)") +
   ggtheme_tufte()
-pagerank_plot  
+pagerank_plot
 ```
 
 Page 1 is the most central hub. Pages 5, 6, 7, and 10 have no links
@@ -819,3 +688,261 @@ should have the same chance of being visited by the random surfer.
 Pages 11 and 12 are symmetric, and indeed have the same probability.
 There is a slight difference between the views of page 9 and 10 in
 that it possible ot get to 9 from 7, but 10 is only visited by chance.
+
+
+## Queueing
+
+Suppose we have a checkout line at a store (that is open 24 hours a
+day, 7 days a week) and a single clerk. The store has a queue, where
+customers line up for service. The queue begins empty. Each hour a
+random number of customers arrive and a random number of customers are
+served.  Unserved customers remain in the queue until they are served.
+
+To make this concrete, suppose we let $U_t \in 0, 1, \ldots$ be the
+number of customers that arrive during hour $t$ and that it has a
+binomial distribution,
+
+$$
+U_t \sim \mbox{binomial}(1000, 0.005).
+$$
+
+Just to provide some idea of what this looks like, here are 20
+simulated values,
+
+```{r}
+M <- 20
+y <- rbinom(M, 1000, 0.005)
+for (m in 1:M)
+  printf("%2.0f ", y[m])
+```
+
+We can think of this as 1000 potential customers, each of which has a
+half percent chance of deciding to go to the store any hour. If we
+repeat, the mean number of arrivals is 5 and the standard deviation is
+2.2.
+
+Let's suppose that a cleark can serve up to $V_t$ customers per hour,
+determined by the clerk's rate $\phi$,
+
+$$
+V_t \sim \mbox{binomial}(1000, \phi).
+$$
+
+If $\phi < 0.005,$ there is likely to be trouble.  The clerk
+won't be able to keep up on average.
+
+The simulation code just follows the definitions.
+
+```
+queue[1] = 0
+for (t in 2:T)
+  arrive[t] = binomial_rng(1000, 0.005)
+  serve[t] = binomial_rng(1000, phi)
+  queue[t] = max(0, queue[t - 1] + arrive[t] - serve[t])
+```
+
+The `max(0, ...)` is to make sure the queue never gets negative. If
+the number served is greater than the total number of arrivals and
+customers in the queue, the queue starts empty the next time step.
+
+Let's try different values of $\phi$, the average server rate, and
+plot two weeks of service.^[$24 \mbox{hours/day} \ \times 14 \
+\mbox{days} = 336 \mbox{hours}$]
+
+```{r fig.cap = 'Multiple simulations of queue size versus time for a queue with $\\mbox{binomial}(1000, 0.005)$ customers arriving per hour (an average of 5), and a maximum of $\\mbox{binomial}(1000, \\phi)$ customers served per hour, plotted for various $\\phi$ (as indicated in the row labels).'}
+
+queue_df <- data.frame(t = c(), queue = c(), run = c(), phi = c())
+
+set.seed(1234)
+T <- 14 * 24
+run <- 1
+queue <- rep(NA, T)
+for (m in 1:50) {
+  for (phi in c(0.005, 0.0055, 0.006, 0.01)) {
+    queue[1] <- 0
+    for (t in 2:T) {
+      arrived <- rbinom(1, 1000, 0.005)
+      served <- rbinom(1, 1000, phi)
+      queue[t] <- max(0, queue[t - 1] + arrived - served)
+    }
+    queue_df <-
+      rbind(queue_df,
+            data.frame(t = 1:T, queue = queue,
+                       run = rep(run, T),
+		       phi = rep(paste("phi = ", phi), T)))
+    run <- run + 1
+  }
+}
+
+queue_plot <-
+  ggplot(queue_df, aes(x = t, y = queue, group = run)) +
+  geom_line(alpha = 0.2, size = 0.2) +
+  facet_wrap(. ~ phi) +  # facet_grid(rows = vars(phi)) +
+  scale_x_continuous(breaks = c(1, 100, 200, 300)) +
+  scale_y_continuous(breaks = c(0, 50, 100, 150)) +
+  xlab("hours open") +
+  ylab("queue size") +
+  ggtheme_tufte() +
+  theme(panel.spacing.y = unit(4, "lines")) +
+  theme(legend.position = "none")
+queue_plot
+```
+
+As can be seen in the plot, the queue not growing out of control is very sensitive to the average service rate per hour.  At an average rate of five cusotmers served per hour (matching the average customer intake), the queue quickly grows out of control.  With as few as five and a half customers served per hour, on average, it becomes stable long term; with seven customers served per hour, things settle down considerably.  When the queue goes up to 50 people, as it does with $\phi = 0.0055$, wait times are over ten hours.  Because of the cumulative nature of queues, a high server capacity is required to deal with spikes in customer arrival.
+
+## Stationary distributions
+
+In the example on fishes, where 1 represented a pike and 0 a perch, we
+assumed the Markov process $Y$ was governed by
+
+$$
+\begin{array}{rcl}
+\mbox{Pr}[Y_{t + 1} = 1 \mid Y_t = 1] & = & 0.20
+\\[4pt]
+\mbox{Pr}[Y_{t + 1} = 1 \mid Y_t = 0] & = & 0.05
+\end{array}
+$$
+
+Rewriting as a probability mass function,
+
+$$
+p_{Y_{t + 1} \mid Y_t}(j \mid i) = \theta_{i, j},
+$$
+
+where $\theta_{i, j}$ is the probabiltiy of a transtion to state $j$
+given that the process is in state $j$.  For the pike and perch
+example,
+
+$$
+\begin{array}{rcl}
+\theta_{1, 1} & = & 0.20
+\\
+\theta_{1, 2} & = & 0.80
+\\ \hline
+\theta_{2, 1} & = & 0.05
+\\
+\theta_{2, 2} & = & 0.95.
+\end{array}
+$$
+
+These numbers are normally displayed in the form of a *transition
+matrix*, which records the transitions out of each state as a row,
+with the column indicating the target state,
+
+$$
+\theta =
+\begin{bmatrix}
+0.20 & 0.80 \\
+0.05 & 0.95
+\end{bmatrix}
+$$
+
+The first row of this transition matrix is $(0.20, 0.80)$ and the
+second row of which is $(0.05, 0.95)$.^[Transition matrices for Markov
+chains are called *stochastic matrices*, because they have
+non-negative entries with rows that sum to one.] Rows of transition
+matrices will always have non-negative entries and sum to one.^[Such
+rows are known as *unit simplexes* and matrices in which every row is
+a unit simplex is said to be a *stochastic matrix.* Transition
+matrices for finite-state Markov chains are always stochastic
+matrices.]
+
+Now let's take a really long run of the chain with $T = 1\,000\,000$
+fish to get a precise estimate of the long-run proportion of pike.
+
+```{r}
+set.seed(1234)
+T <- 1e6
+y <- rep(NA, M)
+for (k in 0:1) {
+  y[1] <- k
+  for (t in 2:T) {
+    y[t] <- rbinom(1, 1, ifelse(y[t - 1] == 1, 0.2, 0.05))
+  }
+  printf("initial state = %1f; simulated proportion of pike = %4.3f\n",
+         k, sum(y) / T)
+}
+```
+
+The initial state doesn't seem to matter. That's because the rate of
+5.9% pike forms what is known as a stationary distribution. More
+formally, let $\pi = (0.059, 1 - 0.059)$ and note that^[In matrix
+notation, if $\pi$ is considered a row vector, then $$\pi = \theta \, \pi.$$]
+
+$$
+\pi_i = \sum_{j = 1}^2 \pi_j \times \theta_{j, i}.
+$$
+
+If $\pi$ satisfies this formula, then it is said to be the *stationary
+distribution* for $\theta.$
+
+A Markov chain is said to be *stationary* if
+
+$$
+p_{Y_t, \ldots, Y_{t + n}}(u_1, \ldots, u_n)
+\ = \
+p_{Y_{t + m}, \ldots, Y_{t + m + n}}(u_1, \ldots, u_n)
+$$
+
+holds for all $n,$ $m,$ and $u_1, \ldots, u_n$. In a stationary time
+series, a sequence $u_1, \ldots, u_n$ has the same probability (or
+density) at every point in time.
+
+If a Markov chain has a stationary distribution $\pi$ and the initial
+distribution of $Y_1$ is also $\pi$, then it is stationary.
+
+## Convergence of non-stationary Markov chains
+
+In practice, none of the Markov chains we employ in calculations will
+be stationary for the simple reason that we don't know the stationary
+distribution ahead of time and thus cannot draw $Y_1$ from it.^[In the
+finite case, we actually can calculate it either through simulation or
+as the eigenvector of the transition matrix with eigenvalue one (which
+is guaranteed to exist). An eigenvector of a matrix is a row vector
+$\pi$ such that $$c \times \pi = \theta \, \pi,$$ where $c$ is the
+eigenvalue. This is why Google's PageRank algorithm is sometimes
+jokingly referred to as "billion dollar eigenvector." One way to
+calculate the relevant eigenvector of a stochastic matrix is by
+raising it to a power, starting from any non-degenerate initial
+simplex vector $\lambda$, $$\lim_{n \rightarrow \infty} \lambda \,
+\theta^n = \pi.$$ Each $$\theta^n = \underbrace{\theta \times \theta
+\times \cdots \times \theta}_{\textstyle n \ \mbox{times}}$$ is a transition
+matrix corresponding to taking $n$ steps in the original transition
+matrix $\theta$.]
+
+But,
+all of the Markov chains we will employ will have the property that
+when run long enough, the distribution of elements in the chain will
+approach the stationary distribution. In symbols, this means that if
+we have a Markov chain for which $\pi$ is a stationary distribution,
+then
+
+$$
+\lim_{t \rightarrow \infty} \
+p_{Y_t}(u)
+\rightarrow
+\mbox{categorical}(u \mid \pi).
+$$
+
+Given a single simulation
+
+$$
+y^{(1)}
+\ = \
+y^{(1)}_1, y^{(1)}_2, \ldots, y^{(1)}_T
+$$
+
+we estimate $\pi$ using the frequencies in the simulated chain
+$y^{(1)}$.  As usual, each entry $\pi_i$ is just the proportion of
+simulated values that are equal to $i$.
+
+$$
+\hat{\pi}_i
+=
+\frac{1}{T} \sum_{t = 1}^T \mathrm{I}[y_t^{(1)} = i]
+$$
+
+
+What we need to know is conditions under which a Markov chain will
+"forget" its initial state after many steps and converge to the
+stationary distribution.
