@@ -33,7 +33,6 @@ library(tufte)
 
 printf <- function(pattern, ...) {
   cat(sprintf(pattern, ...))
-#  cat(sprintf(paste("#", pattern), ...))
 }
 
 print_file <- function(file) {

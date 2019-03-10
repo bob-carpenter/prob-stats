@@ -15,7 +15,7 @@ theorem applies as is to independent draws.]
 
 For most statistical models of applied interest, no methods exist for
 taking independent draws from the posterior.  In many cases, we can
-take 
+take
 
 The best we can do is
 take a sequence of draws from the posterior that are correlated with
@@ -200,7 +200,7 @@ corr_trans <- matrix(c(0.1, 0.9,
 ind_trans <- matrix(c(0.5, 0.5,
                       0.5, 0.5), 2, 2)
 anti_trans <- matrix(c(0.9, 0.1,
-                       0.1, 0.9), 2, 2)		       
+                       0.1, 0.9), 2, 2)
 M <- 1e4
 y_corr <- cumsum(sample_chain(M, 1, corr_trans, seed = 1234)) / (1:M)
 y_ind <- cumsum(sample_chain(M, 1, ind_trans, seed = 1234)) / (1:M)

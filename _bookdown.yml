@@ -8,6 +8,8 @@ rmd_files: [
   "multiple-random-variables.Rmd",
   "expectations.Rmd",
   "joint.Rmd",
+  "finite-markov-chains.Rmd",
+  "stationary-markov-chains.Rmd",
   "discrete-markov-chains.Rmd",
   "continuous-random-variables.Rmd",
   "densities.Rmd",
