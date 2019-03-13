@@ -633,10 +633,10 @@ $$
 $$
 
 Reversibility is sufficient for establishing the existence of a
-stationary distribution.^[ If a discrete Markov chain is reversible with
-respect to $\pi$, then $\pi$ is also the unique stationary
-distribution of the Markov chain. Markov chains can have stationary
-distributions without being reversible.^[The reducible chains we saw
-earlier are examples with stationary distributions that are not
+stationary distribution.^[If a discrete Markov chain is reversible
+with respect to $\pi$, then $\pi$ is also the unique stationary
+distribution of the Markov chain.]  Markov chains can have stationary
+distributions without being reversible.^[The reducible chains with we
+saw earlier are examples with stationary distributions that are not
 reversible.]  But all of the Markov chains we consider for practical
 applications will turn out to be reversible.

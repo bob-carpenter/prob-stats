@@ -21,10 +21,10 @@ output:
 
 This book provides a short, accessible introduction to *applied*
 probabilistic modeling and statistical inference.^[Application areas
-include the physical, biological and social sciences, engineering,
-business and finance, education, government, and sport---anywhere
-there is data from which we want to draw conclusions or make
-decisions.]
+include the physical sciences, biological sciences, social sciences,
+engineering, health and medicine, business and finance, education,
+government, and sport and leisure---anywhere there is data from which
+we want to draw conclusions or make decisions.]
 
 
 ## Goal {-}

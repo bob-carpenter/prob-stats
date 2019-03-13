@@ -1,238 +1,270 @@
-# Markov Chain Monte Carlo
+# Markov Chain Monte Carlo Methods
+
+## Monte Carlo Methods
 
 *Monte Carlo methods*^[Monte Carlo methods are so-called because of
 the Monte Carlo Casino (shown below), located in the Principality of
 Monaco. <br /> &nbsp; <br /> ![](img/mc-casino.jpg) <span
 style="float:right; font-size:60%; color:#999999;">&copy; Z.graber,
-own work, CC-BY-SA 3.0</span>] are just methods that use simulations
-of probabilistic processes to calculate numerical solutions to
-definite integrals, usually in high dimensions.  We have seen numerous
-examples in earlier chapters, mostly involving the estimation of
-expectations, including event probabilities and parameter estimates.
-In all of the examples we have seen, we have been able to generate
-independent simulation draws.^[The advantage is that the central limit
-theorem applies as is to independent draws.]
+own work, CC-BY-SA 3.0</span>] simply use simulation to calculate
+numerical solutions to definite integrals, usually in high
+dimensions.^[The book could've been subtitled "A Monte Carlo
+approach," but like putting "Bayesian" before "statistics", it's
+needlessly obscure nomenclature.]  We have seen numerous examples in
+earlier chapters.
 
-For most statistical models of applied interest, no methods exist for
-taking independent draws from the posterior.  In many cases, we can
-take
+When we can simulate a sample of independent draws $\theta =
+\theta^{(1)}, \ldots, \theta^{(M)}$ according to the posterior
+$p(\theta \mid y)$, we can use them to calculate parameter estimates,
+event probabilities, and other expectations.  The convergence of such
+estimates is governed by the central limit theorem and proceeds at an
+expected error rate of $\mathcal{O}(\frac{1}{\sqrt{M}}).$^[The
+reduction in error is all relative to the scale of the quantity being
+sampled.]  This rate is manageable in most circumstances, but cannot
+be used for high precision applications because the number of
+iterations required for a given number of decimals of precision grows
+exponentially.^[Each additional decimal digit requires the error to be
+reduced by a factor of 10, and thus requires 100 times as much
+computation, because $\frac{1}{\sqrt{100}} = \frac{1}{10}$.]
 
-The best we can do is
-take a sequence of draws from the posterior that are correlated with
-one another.  The most common way for doing that is by generating
-the draws from a Markov chain whose elements are correlatedequilibrium distribution is that
-of the target.
+## Markov chain Monte Carlo methods
 
-## Markov chains
+For most statistical models we want to fit for applications, no
+methods exist for taking independent draws from the posterior.  What
+we can do in most cases is create a Markov chain $\theta =
+\theta^{(1)}, \ldots, \theta^{(M)}$ of draws, the stationary
+distribution of which is the posterior $p(\theta \mid y)$ of
+interest. We then use the elements of the chain $\theta$ to estimate
+expectations and quantiles in the same way as the independent sample
+from the posterior.  This is the basis of Markov chain Monte Carlo
+(MCMC) methods.
 
-A sequence of random variables $Y = Y_1, Y_2, \ldots$ forms a *Markov
-chain* if each elements  of the sequence is conditionally independent
-of the other elements given the previous element,
+As we saw in the chapter on finite Markov chains, the rate of
+convergence varies depending on how much each draw $\theta^{(m + 1)}$
+depends on the previous draw $\theta^{(m)}$.^[If the $\theta^{(m)}$
+are independent, the central limit theorem governs the convergence.]
 
-$$
-p(y_n \mid y_1, y_2, \ldots, y_{n-1})
-=
-p(y_n \mid y_{n-1}).
-$$
+## Continuous-state Markov chains
 
-In all the examples of simulation we've seen up to now, each simulated
-draw was independent of the others.  In this chapter, we will consider
-sequences of draws that make up a Markov chain, which are potentially
-correlated (or anti-correlated) as a sequence.
-
-## Finite Markov chains
-
-The following function draws a Markov chain $y$ of length $M$ from the specified initial state $y_1$ given a transition matrix $\theta$ that indicates the probabilities $y_m$ given $y_{m-1}$.  The initial state is included in the final result $y = y_1, \ldots, y_M$.
-
-```{r}
-sample_chain <- function(M, init_state, theta, seed = 1234) {
-  set.seed(seed)
-  y <- c(init_state)
-  for (m in 2:M)
-    y[m] <- sample(x = 0:1, size = 1, prob = theta[y[m - 1] + 1, ])
-  return(y)
-}
-M <- 100
-```
-
-Here, `y[m - 1]` is the value in the previous iteration (`0` or `1`).  If `y[m - 1]` is `0`, then `theta[y[m - 1] + 1, ]` is the first row of `theta`;  if `y[m - 1]` is `1`, it is the second row.
-
-The base R function `sample()` draws a single value (`n = 1`) from the sequence `c(0, 1)`.
-
-
-## Independent draws
-
-The state diagram indicates that if the previous draw was
-
-```{r, engine="tikz", fig.ext="pdf", out.width="25%", fig.cap="State diagram for finite Markov chain generating independent draws."}
-\begin{tikzpicture}[->, auto, node distance=1.75cm, font=\footnotesize]
-\node[circle,draw,semithick] (A) {{\bf 0}};
-\node[circle,draw,semithick] (B) [right of=A] {{\bf 1}};
-\path (A) edge [bend left] node {0.5} (B);
-\path (B) edge [bend left] node {0.5} (A);
-\path (A) edge [loop above] node {0.5} (A);
-\path (B) edge [loop above] node {0.5} (B);
-\end{tikzpicture}
-```
-
-This transition diagram has two nodes representing outputs, which are labeled $0$ and $1$.  The edges are labeled with the probability of a transition.  For example, the edge from $0$ to $1$ labeled $0.5$ indicates that
+The definitions we have already made for Markov chains apply to chains
+with continuous values.  A random process $Y = Y_1, Y_2, \ldots, $ has
+discrete time steps but may have discrete or continuous values or even
+multivariate values, which may themselves be discrete, continuous, or
+a mixture of the two.  Such a process is a *Markov chain* if for all
+$t$, and all states $y_1, \ldots, y_{t+1}$,
 
 $$
-\mbox{Pr}[y_m = 1 \mid y_{m - 1} = 0] \ = \ 0.5.
+p_{Y_{t+1} \mid Y_t}(y_{t+1} \mid y_t)
+\ = \
+p_{Y_{t+1} \mid Y_t, Y_{t-1}, \ldots, Y_1}(y_{t+1} \mid y_t, y_{t-1}, \ldots, y_1).
 $$
 
-Because the transition probabilities are the same out of each state, $y_n$ and $y_{n-1}$ are independent, i.e.,
+We are also assuming that our Markov chains are *time homogeneous* in
+that the conditional probability distribution of the next state is
+always the same.  That means that for all $t'$, the conditional
+distribution of the next element at $t$ is the same as that at $t'$,
 
 $$
-p(y_m) \ = \ p(y_m \mid y_{m - 1}) \ = \ 0.5.
+p_{Y_{t+1} \mid Y_t}
+\ = \
+p_{Y_{t' + 1} \mid Y_{t'}}.
 $$
 
-```{r}
-y <- sample_chain(M, 1, matrix(c(0.5, 0.5,
-                                   0.5, 0.5), 2, 2))
-```
+All of the Markov chains we will consider will have transitions that
+are time homogeneous.
+
+To simplify notation, we will write
+$p_t$ for $p_{Y_{t+1} \mid Y_t}$
 
 
-```{r fig.height=2, fig.cap = "Traceplot of chain with independent draws."}
-traceplot_bool <- function (y) {
-  df <- data.frame(iteration = 1:length(y), draw = y)
-  plot <- ggplot(df, aes(x = iteration, y = draw)) +
-    geom_line(aes(y = y)) +
-    scale_x_continuous("iteration", breaks = c(0, 50, 100), expand = c(0, 0)) +
-    scale_y_continuous("y", breaks = c(0, 1), expand = c(0.2, 0)) +
-    ggtheme_tufte()
-  return(plot)
-}
-traceplot_bool(y)
-```
+## Stationary distributions
 
-```{r}
-y
-```
-
-
-## Correlated draws
-
-```{r, engine='tikz', fig.ext="pdf", fig.width=1.5, fig.cap = "State diagram for correlated draws."}
-\begin{tikzpicture}[->, auto, node distance=1.75cm, font=\footnotesize]
-\node[circle,draw,semithick] (A) {{\bf 0}};
-\node[circle,draw,semithick] (B) [right of=A] {{\bf 1}};
-\path (A) edge [bend left] node {0.1} (B);
-\path (B) edge [bend left] node {0.1} (A);
-\path (A) edge [loop above] node {0.9} (A);
-\path (B) edge [loop above] node {0.9} (B);
-\end{tikzpicture}
-```
-
-To generate correlated draws, the transition matrix favors remaining in the current state over transitioning to a new state.  In this particular case,
+Let's look at univariate continuous Markov chains first.  Such a chain
+has real-valued states $Y_t \in \mathbb{R}$.  Let
 
 $$
-p(y_{m} | y_{m-1}) =
-\begin{cases}
-0.9 & \mbox{if } y_m = y_{m-1}
+\tau(u, v) = p_{Y_{t+1} \mid Y_{t}}(v \mid u)
+$$
+
+be the conditional distribution of the next state $v$ if the current
+state is $u$, where $u, v \in \mathbb{R}$.  We will call $\tau$ the
+transition distribution of the chain.
+
+A density function $\pi(u)$ for $u \in \mathbb{R}$ is the density
+function of the *stationary distribution* for transition function
+$\tau(u, v)$ if
+
+$$
+\pi(u)
+\ = \
+\int_{\mathbb{R}}
+\, \pi(v) \times \tau(v, u)
+\, \mathrm{d}v.
+$$
+
+In words, $\pi$ is a stationary density if its value at a point $u$ is
+the the average transition probability $\tau(v, u)$, where the average
+is weighted by the stationary density of $v$.
+
+In order to sample from the posterior of a model with posterior
+density $p(\theta \mid y)$ with parameters $\theta$ conditioned on
+observed data $y$, we will construct Markov chains for which
+
+$$
+\pi(\theta) = p(\theta \mid y).
+$$
+
+We can also think of continuous Markov chains in terms of volumes.  No
+matter how the space is partitioned into disjoint volumes, the
+probabilities of being in a volume and transitioning between volumes
+defines a discrete Markov chain.^[The stationary probability of a
+volume $U \subseteq \mathbb{R}^N$ is just $$\pi(U) = \int_U \pi(u)
+\mathrm{d}u.$$ and the probability of transitioning to volume $V
+\subseteq \mathbb{R}^N$ conditioned on being at state $u \in
+\mathbb{R}^N$ is given by $$\tau(u, V) = \int_V \pi(v) \tau(u, v)
+\mathrm{d}v.$$]
+
+## Reversibility
+
+The notion of reversibility extends to continuous chains, where $\tau$
+is said to be *reversible* with respect to $\pi$ if for all $u, v$,
+
+$$
+\pi(u) \times \tau(u, v) = \pi(v) \times \tau(v, u).
+$$
+
+If the transition function of a Markov chain is reversible with
+respect to $\pi$, then $\pi$ is the stationary distribution for the
+chain.  The other way around, not every transition function with a
+stationary distribution is reversible.
+
+## Periodic chains
+
+Continuous chains may exhibit periodicity just like discrete chains.
+The idea is that it revisits volumes in a predictable way.  For
+example, consider a chain where the space has been divided into four
+non-overlapping regions $A, B, C, D$, and where
+
+$$
+\begin{array}{rcl}
+\mbox{Pr}[Y_{t+1} \in B \mid Y_t \in A] & = & 1
 \\[4pt]
-0.1 & \mbox{otherwise}
-\end{cases}
-$$
-
-
-```{r}
-y <- sample_chain(M, 1, matrix(c(0.9, 0.1,
-                                 0.1, 0.9), 2, 2))
-```
-
-```{r fig.height=2, fig.cap = "Traceplot for chain with correlated draws."}
-traceplot_bool(y)
-```
-
-```{r}
-y
-```
-
-As expected with correlated draws, there are long runs of the same value being produced in the chain.  This leads to poor mixing and thus higher MCMC standard errors for the same number of iterations.
-
-## Anticorrelated draws
-
-```{r, engine='tikz', fig.ext="pdf", fig.width = 3, fig.cap="State diagram for anticorrelated draws."}
-\begin{tikzpicture}[->, auto, node distance=1.75cm, font=\footnotesize]
-\node[circle,draw,semithick] (A) {{\bf 0}};
-\node[circle,draw,semithick] (B) [right of=A] {{\bf 1}};
-\path (A) edge [bend left] node {0.9} (B);
-\path (B) edge [bend left] node {0.9} (A);
-\path (A) edge [loop above] node {0.1} (A);
-\path (B) edge [loop above] node {0.1} (B);
-\end{tikzpicture}
-```
-
-To generate anticorrelated draws, the transition matrix favors remaining in the current state over transitioning to a new state.  In this particular case,
-
-$$
-p(y_{m} | y_{m-1}) =
-\begin{cases}
-0.1 & \mbox{if } y_m = y_{m-1}
+\mbox{Pr}[Y_{t+1} \in C \mid Y_t \in B] & = & 1
 \\[4pt]
-0.9 & \mbox{otherwise}
-\end{cases}
+\mbox{Pr}[Y_{t+1} \in D \mid Y_t \in C] & = & 1
+\\[4pt]
+\mbox{Pr}[Y_{t+1} \in A \mid Y_t \in D] & = & 1
+\end{array}
 $$
 
-```{r  fig.cap="Traceplot of chain with correlated draws."}
-y <- sample_chain(M, 1, matrix(c(0.1, 0.9,
-                                 0.9, 0.1), 2, 2))
+We can easily simulate such a chain by taking $A, B, C, D$ to be unit
+boxes in each quadrant of the real plane, starting in the positive
+(upper right) quadrant and moving clockwise.  The Markov chain may be
+simulated as.
+
+```
+y[1] <- (uniform_rng(0, 1), uniform_rng(0, 1))
+for (t in 2:T)
+  if (y[t - 1] in A)
+    y[t] = uniform_rng(B)
+  else if (y[t - 1] in B)
+    y[t] = uniform_rng(C)
+  else if (y[t - 1] in C)
+    y[t] = uniform_rng(D)
+  else
+    y[t] = uniform_rng(A)
 ```
 
+Let's plot that for $T = 20$ steps.
 
-```{r fig.cap="Traceplot of chain with anticorrelated draws."}
-traceplot_bool(y)
+```{r fig.cap = "Plot of 20 steps of a periodic continuous Markov chain.  Each value is drawn from a unit quadrant starting from the upper right (positive) quadrant and proceeding in a clockwise order."}
+period_df <- data.frame(x = c(), y = c(), t = c())
+
+t <- 1
+set.seed(1234)
+for (k in 1:5) {
+  period_df <- rbind(period_df,
+                     data.frame(x = runif(1, 0, 1), y = runif(1, 0, 1),
+		                t = t),
+                     data.frame(x = runif(1, 0, 1), y = runif(1, -1, 0),
+		                t = t + 1),
+                     data.frame(x = runif(1, -1, 0), y = runif(1, -1, 0),
+		                t = t + 2),
+                     data.frame(x = runif(1, -1, 0), y = runif(1, 0, 1),
+		                t = t + 3))
+  t <- t + 4
+}
+
+period_plot <-
+  ggplot(period_df, aes(x = x, y = y, color = t)) +
+  geom_path(size = 0.2, arrow = arrow(angle = 10, length = unit(0.125, "inches"))) +
+  geom_point(size = 0.3) +
+  geom_vline(xintercept = 0, linetype = "dotted") +
+  geom_hline(yintercept = 0, linetype = "dotted") +
+  scale_x_continuous(lim = c(-1.1, 1.1), breaks = c()) +
+  scale_y_continuous(lim = c(-1.1, 1.1), breaks = c()) +
+  xlab(expression(y[1])) +
+  ylab(expression(y[2])) +
+  annotate("text", label = "A", x = 0.9, y = 0.9) +
+  annotate("text", label = "B", x = 0.9, y = -0.9) +
+  annotate("text", label = "C", x = -0.9, y = -0.9) +
+  annotate("text", label = "D", x = -0.9, y = 0.9) +
+  ggtheme_tufte() +
+  theme(legend.position = "none")
+period_plot
 ```
 
-```{r}
-y
-```
+We say that a Markov chain $Y = Y_1, Y_2, \ldots$ is *periodic* if
+there are volumes $A_1, \ldots, A_K \subseteq \mathbb{R}^N$ such that
+the chain moves deterministically from $A_1$ to $A_2$ to $A_3$ and
+finally from $A_K$ back to $A_1$.  In symbols, a chain is defined to
+be periodic if
 
-The draws form a dramatic sawtooth pattern as as they alternate between zero and one.
+$$
+\mbox{Pr}[Y_{t + 1} \in A_{k + 1} \mid Y_t \in A_k] = 1
+\ \mbox{if} \ 1 \leq k < K
+$$
 
-Now let's see how quickly they converge in a side-by-side comparison.  A single
-chain is enough to illustrate the dramatic differences.
+and
 
-```{r}
-corr_trans <- matrix(c(0.1, 0.9,
-                       0.9, 0.1), 2, 2)
-ind_trans <- matrix(c(0.5, 0.5,
-                      0.5, 0.5), 2, 2)
-anti_trans <- matrix(c(0.9, 0.1,
-                       0.1, 0.9), 2, 2)
-M <- 1e4
-y_corr <- cumsum(sample_chain(M, 1, corr_trans, seed = 1234)) / (1:M)
-y_ind <- cumsum(sample_chain(M, 1, ind_trans, seed = 1234)) / (1:M)
-y_anti <- cumsum(sample_chain(M, 1, anti_trans, seed = 1234)) / (1:M)
-```
+$$
+\mbox{Pr}[Y_{t + 1} \in A_1 \mid Y_t \in A_K] = 1.
+$$
 
-```{r fig.cap = "Correlated draws."}
-mcmc_corr_plot <- ggplot(data.frame(y = y_corr, x = 1:M), aes(x = x, y = y)) +
-  geom_line() +
-  geom_hline(yintercept = 0.5, color = "red") +
-  scale_x_log10(lim = c(10, M), breaks = c(1e1, 1e2, 1e3, 1e4)) +
-  scale_y_continuous(lim = c(.25, .75)) +
-  ggtheme_tufte()
-mcmc_corr_plot
-```
+## Irreducibility
 
-```{r fig.cap = "Independent draws."}
-mcmc_ind_plot <- ggplot(data.frame(y = y_ind, x = 1:M), aes(x = x, y = y)) +
-  geom_line() +
-  geom_hline(yintercept = 0.5, color = "red") +
-  scale_x_log10(lim = c(10, M), breaks = c(1e1, 1e2, 1e3, 1e4)) +
-  scale_y_continuous(lim = c(.25, .75)) +
-  ggtheme_tufte()
-mcmc_ind_plot
-```
+Roughly speaking, a Markov chain on a continuous space is
+$irreducible$ if every subset of nonzero volume has a positive
+probability of eventually being visited from any other point in the
+space.^[In general, a set $A \subseteq \mathbb{R}^N$ has hypervolume
+$$\mbox{vol}(A) =  \int_{\mathbb{R}^N} \mathrm{I}[u \in A] \, \mathrm{d}u.$$]
 
-```{r fig.cap = "Anticorrelated draws."}
-mcmc_anti_plot <- ggplot(data.frame(y = y_anti, x = 1:M), aes(x = x, y = y)) +
-  geom_line() +
-  geom_hline(yintercept = 0.5, color = "red") +
-  scale_x_log10(lim = c(10, M), breaks = c(1e1, 1e2, 1e3, 1e4)) +
-  scale_y_continuous(lim = c(.25, .75)) +
-  ggtheme_tufte()
-mcmc_anti_plot
-```
+## Ergodicity
+
+A Markov chain is *ergodic* if it is aperiodic and irreducible.
+Ergodicity is important because it ensures that we converge to the
+stationary distribution if there is one.
+
+**Fundamental theorem of Markov chain Monte Carlo**.  If the discrete
+time, time-homogeneous Markov chain $Y = Y_1, Y_2, \ldots$ with $Y_t
+\in \mathbb{R}^N$ is ergodic and has stationary distribution $\pi$,
+then
+
+$$
+\lim_{t \rightarrow \infty}
+\mbox{Pr}[Y_t \in A \mid Y_1 = y]
+\ = \
+\int_{\mathbb{R}^N} \mathrm{I}[y \in A] \times \pi(y) \, \mathrm{d}y.
+$$
+
+Furthermore, for well-behaved functions $f$,^[The well-behavedness
+required here is convergence of the absolute expectation,
+$$\int_{\mathbb{R}^N} \left| f(y) \right| \times \pi(y) \ \mathrm{d}y <
+\infty.$$]
+
+$$
+\lim_{T \rightarrow \infty}
+\frac{1}{T} \sum_{t=1}^T \, f(Y_t)
+\ = \
+\int_{\mathbb{R}^N} f(u) \times \pi(u) \, \mathrm{d}u.
+$$
