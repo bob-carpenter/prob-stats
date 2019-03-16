@@ -234,10 +234,15 @@ $$
 ## Irreducibility
 
 Roughly speaking, a Markov chain on a continuous space is
-$irreducible$ if every subset of nonzero volume has a positive
+*irreducible* if every subset of nonzero volume has a positive
 probability of eventually being visited from any other point in the
 space.^[In general, a set $A \subseteq \mathbb{R}^N$ has hypervolume
-$$\mbox{vol}(A) =  \int_{\mathbb{R}^N} \mathrm{I}[u \in A] \, \mathrm{d}u.$$]
+$$\mbox{vol}(A)
+\ = \
+\int_A 1 \, \mathrm{d}u
+\ = \
+\int_{\mathbb{R}^N} \mathrm{I}[u \in A] \, \mathrm{d}u.$$]
+
 
 ## Ergodicity
 

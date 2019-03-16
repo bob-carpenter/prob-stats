@@ -19,7 +19,8 @@ rmd_files: [
   "testing-prngs.Rmd",
   "floating-point.Rmd",
   "normal.Rmd",
-  "mcmc.Rmd",
   "calibration.Rmd",
-  "regression-mean.Rmd"
+  "regression-mean.Rmd",
+  "mcmc.Rmd",
+  "metropolis.Rmd"
 ]
