@@ -94,3 +94,57 @@ for m in 2:M
   else
     theta(m + 1) = theta(m)
 ```
+
+Because we are working with densities that may be in high dimensions,
+we need to be careful of arithmetic underflow in computation and work
+on the log scale.  All this requires is carrying out the acceptance
+test on the log scale.  Because both sides of the equality are
+positive and the logarithm function is monotonic, we can just take the
+log of both sides and define
+
+```
+  accept = log(u) < log(p(theta(m) + epsilon) / p(theta(m)))
+```
+
+In practice, we may only know the density up to an additive constant.
+We'll only be able to compute $\log q(\theta)$, where
+
+$$
+\log q(\theta) = \log p(\theta) + \mbox{const}.
+$$
+
+for some unknown constant that doesn't depend on $\theta$.
+Conveniently, we do not get in trouble with negative arguments to
+logarithms because the constants cancel out,
+
+$$
+\begin{array}{rcl}
+\left( \log p\!\left(\theta^{(m)} + \epsilon\right) + \mbox{const} \right)
+- \left( \log p\!\left(\theta^{(m)}\right) + \mbox{const} \right)
+& = &
+\log p\!\left(\theta^{(m)} + \epsilon\right) - \log p\!\left(\theta^{(m)}\right)
+\\[8pt]
+& = &
+\log \frac{\textstyle p\!\left(\theta^{(m)} + \epsilon\right)}
+          {\textstyle p\!\left(\theta^{(m)}\right)}.
+\end{array}
+$$
+
+## Metropolis example
+
+As an example, we can start with a two-dimensional density in which
+the parameters $\theta = (\theta_1, \theta_2)$ are positively correlated,^[The
+distribution is bivariate normal with unit scale and 0.9 correlation,
+i.e.,
+$$p(\theta)
+\ = \
+\mbox{multi-normal}\left(\theta \ \Bigg| \ 0, \, \left[ \begin{array}{cc} 1 & 0.9 \\ 0.9 &
+1 \end{array} \right]\right).$$]
+
+$$
+\log p(\theta)
+= -2.6 \times \theta_1^2
+\ - \ 2.6 \times \theta_2^2
+\ + \ 4.7 \times \theta_1 \theta_2
++ \mbox{const.}
+$$
