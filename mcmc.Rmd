@@ -239,7 +239,7 @@ probability of eventually being visited from any other point in the
 space.^[In general, a set $A \subseteq \mathbb{R}^N$ has hypervolume
 $$\mbox{vol}(A)
 \ = \
-\int_A 1 \, \mathrm{d}u
+\int_A 1 \, \mbox{d}u
 \ = \
 \int_{\mathbb{R}^N} \mathrm{I}[u \in A] \, \mathrm{d}u.$$]
 

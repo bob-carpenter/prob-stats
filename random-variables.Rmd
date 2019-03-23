@@ -647,7 +647,7 @@ for (j in 1:J) {
   z <- rbinom(M_max, 1, 0.5)
   for (n in 1:N) {
     ys[n, j] <- abs(mean(z[1:Ms[n]]) - 0.5)
-  }    
+  }
 }
 mean <- rep(NA, N)
 sd <- rep(NA, N)
@@ -668,7 +668,7 @@ Plotting both the number of simulations and the absolute error on the
 log scale reveals the rate at which the error decreases with more
 draws.
 
-```{r fig.cap="Absolute error versus number of simulation draws for 100 simulated sequences of $M = 1\\,000\\,000$ draws. The blue line is at the 68% quantile and the red line at the 95% quantile of these draws.  The relationship between the log number of draws and log error is revealed to be linear."}
+```{r fig.cap="Absolute error versus number of simulation draws for 100 simulated sequences of $M = 1\\,000\\,000$ draws. The blue line is at the 68 percent quantile and the red line at the 95 percent quantile of these draws.  The relationship between the log number of draws and log error is revealed to be linear."}
 #   commented out bits plot the clt version
 #   geom_line(data = data.frame(x = c(1e4, 1e6),
 #                               y = 2 * c(.5 / sqrt(1e4), .5 / sqrt(1e6))),
@@ -683,7 +683,7 @@ fudge <- 1e-6
 x <- 0.5 * (1:100)
 log_abs_err_plot <- ggplot(df2, aes(x = M, y = err_hat_E_Y + fudge, group=r)) +
   geom_line(alpha=0.15) +
-  geom_line(data = data.frame(Ms = Ms, quantile = quant_68), 
+  geom_line(data = data.frame(Ms = Ms, quantile = quant_68),
             aes(x = Ms, y = quantile, group = NA),
             color = "blue", size = 0.5) +
   geom_line(data = data.frame(Ms = Ms, quantile = quant_95),
@@ -705,7 +705,7 @@ We can read two points $(x_1, y_1)$ and $(x_2, y_2)$ off of the graph for $x_1 =
 
 ```{r}
 printf("x[1], y[1] = %7.f, %6.5f\nx[2], y[2] = %7.f, %6.5f",
-       Ms[3], quant_68[3], 
+       Ms[3], quant_68[3],
        Ms[5], quant_68[5])
 ```
 
@@ -713,11 +713,11 @@ which gives us the following values on the log scale
 
 ```{r}
 printf("log x[1], log y[1] = %5.2f, %4.2f\nlog x[2], log y[2] = %5.2f, %4.2f",
-       log(Ms[3]), log(quant_68[3]), 
+       log(Ms[3]), log(quant_68[3]),
        log(Ms[5]), log(quant_68[5]))
 ```
 
-Using the log scale values, the estimated slope of the reduction in quantile bounds is 
+Using the log scale values, the estimated slope of the reduction in quantile bounds is
 
 ```{r}
 printf("estimated slope\n(log y[2] - log y[1])\n / (log x[2] - log x[1])  =  %3.2f",

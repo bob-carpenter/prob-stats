@@ -1,4 +1,4 @@
-# Metropolis Algorithm
+# Random Walk Metropolis
 
 The Metropolis algorithm is a general purpose technique to sample from
 an arbitrary target density.^[We are particularly interested in
@@ -88,17 +88,24 @@ for m in 2:M
   for (n in 1:N)
     epsilon[n] = normal_rng(0, sigma)
   u = uniform_rng(0, 1)
-  accept = u < p(theta(m) + epsilon) / p(theta(m))
-  if (accept)
+  accept(m) = u < p(theta(m) + epsilon) / p(theta(m))
+  if (accept(m))
     theta(m + 1) = theta(m) + epsilon
   else
     theta(m + 1) = theta(m)
+accept_rate = sum(accept) / (M - 1)
 ```
 
-Because we are working with densities that may be in high dimensions,
-we need to be careful of arithmetic underflow in computation and work
-on the log scale.  All this requires is carrying out the acceptance
-test on the log scale.  Because both sides of the equality are
+The final step in the computation calculates the *acceptance rate*,
+which is the proportion of proposed jumps that were accepted in the
+particular execution of the algorithm.^[This rate will vary based on
+the random number generator.]
+
+Because we may be working in high dimensions and with big data sets,
+we need to be careful to avoid arithmetic underflow by carrying out
+all computation on the log scale.  Specifically, we assume that rather
+than a function to compute `p()`, we are given a function to compute
+`log p()`.  Because both sides of the acceptance test inequality are
 positive and the logarithm function is monotonic, we can just take the
 log of both sides and define
 
@@ -106,16 +113,16 @@ log of both sides and define
   accept = log(u) < log(p(theta(m) + epsilon) / p(theta(m)))
 ```
 
-In practice, we may only know the density up to an additive constant.
-We'll only be able to compute $\log q(\theta)$, where
+In practice, we may only know the density up to an additive
+constant.  We'll only be able to compute $\log q(\theta)$, where
 
 $$
 \log q(\theta) = \log p(\theta) + \mbox{const}.
 $$
 
 for some unknown constant that doesn't depend on $\theta$.
-Conveniently, we do not get in trouble with negative arguments to
-logarithms because the constants cancel out,
+Although unregularized densities may be negative, we don't get in
+trouble with negative logarithms because the constants cancel out,
 
 $$
 \begin{array}{rcl}
@@ -132,19 +139,132 @@ $$
 
 ## Metropolis example
 
-As an example, we can start with a two-dimensional density in which
-the parameters $\theta = (\theta_1, \theta_2)$ are positively correlated,^[The
-distribution is bivariate normal with unit scale and 0.9 correlation,
-i.e.,
-$$p(\theta)
-\ = \
-\mbox{multi-normal}\left(\theta \ \Bigg| \ 0, \, \left[ \begin{array}{cc} 1 & 0.9 \\ 0.9 &
-1 \end{array} \right]\right).$$]
-
+As an example, we can start with a two-dimensional density $p(\theta)$
+in which the values $\theta = (\theta_1, \theta_2)$ are positively
+correlated,^[The distribution is bivariate normal located at the
+origin, with unit scale and 0.9 correlation, i.e., with covariance
+matrix
 $$
+\Sigma
+\ = \
+\begin{bmatrix}
+1 & 0.9
+\\
+0.9 & 1
+\end{bmatrix}
+$$
+and density
+$$
+\begin{array}{rcl}
 \log p(\theta)
-= -2.6 \times \theta_1^2
+& = &
+\log \, \mbox{multi-normal}\!\left(\theta \ \Big| \ 0, \, \Sigma\right)
+\\[4pt]
+& \propto &
+-\frac{1}{2} \, \theta^{\top} \, \Sigma^{-1} \, \theta
+\ + \ \mbox{const}
+\\[4pt]
+& \approx & -2.6 \times \theta_1^2
 \ - \ 2.6 \times \theta_2^2
 \ + \ 4.7 \times \theta_1 \theta_2
 + \mbox{const.}
+\end{array}
 $$
+]
+
+$$
+\log p(\theta)
+= -2.6 \, \theta_1^2
+\ - \ 2.6 \, \theta_2^2
+\ + \ 4.7 \, \theta_1 \, \theta_2
++ \mbox{const.}
+$$
+
+
+Let's see what we get when taking draws using the Metropolis
+algorithm.  First, let's try $\sigma \in 0.125, 0.25, 0.5$ and start at
+$\theta(1) = (0, 0).$^[$(0, 0)$ is coincidentally the point at which
+the example density is maximized.  This requires escaping from the
+point of maximum log density.]
+
+```{r}
+random_walk_metropolis <- function(lpdf, theta0, sigma, M) {
+  D <- length(theta0)
+  accept <- 0
+  theta_draws <- matrix(NA, M, D)
+  theta_draws[1, ] <- theta0
+  theta_last <- theta0
+  theta_last_lpdf <- lpdf(theta0)
+  for (m in 2:M) {
+    epsilon <- rnorm(D, 0, sigma)
+    theta_star <- theta_last + epsilon
+    theta_star_lpdf <- lpdf(theta_star)
+    u <- runif(1)
+    if (log(u) < (theta_star_lpdf - theta_last_lpdf)) {
+      theta_draws[m, ] <- theta_star
+      theta_last <- theta_star
+      theta_last_lpdf <- theta_star_lpdf
+      accept <- accept + 1
+    } else {
+      theta_draws[m, ] <- theta_last
+    }
+  }
+  print(sprintf("accept rate = %3.2f", accept / M))
+  theta_draws
+}
+
+binorm_lpdf <- function(theta) {
+  - 2.6 * theta[1]^2 - 2.6 * theta[2]^2 + 4.7 * theta[1] * theta[2]
+}
+
+binorm_df <- data.frame(x = c(), theta = c(), dim = c(), sigma = c())
+set.seed(1234)
+M <- 1000
+theta0 <- c(0, 0)
+for (sigma in c(0.0625, 0.25, 1, 4, 16)) {
+  theta_sim <- random_walk_metropolis(binorm_lpdf, theta0, sigma, M)
+  binorm_df <-
+    rbind(binorm_df,
+          data.frame(x = c(1:M, 1:M),
+                     theta = c(theta_sim[ , 1], theta_sim[ , 2]),
+                     dim = c(rep("d = 1", M), rep("d = 2", M)),
+                     sigma = rep(paste("sigma = ", sigma), 2 * M)))
+}
+
+binorm_draws_plot <-
+  ggplot(binorm_df, aes(x = x, y = theta)) +
+  facet_grid(sigma ~ dim) +
+  geom_line(size = 0.5) +
+  scale_x_continuous(breaks = c(0, 500, 1000)) +
+  scale_y_continuous(breaks = c(-2, 0, 2)) +
+  xlab("t") +
+  ylab(expression(theta[d])) +
+  ggtheme_tufte()
+binorm_draws_plot
+```
+
+Here's a scatterplot of independent draws.^[Because it's bivariate
+normal, we can cheat and use off-the-shelf algorithms to generate
+independent draws.]
+
+```{r fig.cap = "Scatterplot of draws from a bivariate normal with unit scale and correlation 0.9."}
+M <- 1e4
+mu <- c(0, 0)
+Sigma <- matrix(c(1, 0.9,
+                  0.9, 1), 2, 2, byrow = TRUE)
+x <- mvrnorm(M, mu, Sigma)
+
+norm2d_scatter_plot <-
+  ggplot(data = data.frame(x1 = x[ , 1], x2 = x[ , 2]),
+         aes(x = x1, y = x2)) +
+  geom_point(size = 0.15, alpha = 0.2) +
+  scale_x_continuous(lim = c(-4, 4), breaks = c(-4, -2, 0, 2, 4),
+                     expand = c(0, 0)) +
+  scale_y_continuous(lim = c(-4, 4), breaks = c(-4, -2, 0, 2, 4),
+                     expand = c(0, 0)) +
+  xlab(expression(theta[1])) +
+  ylab(expression(theta[2])) +
+  coord_fixed() +
+  ggtheme_tufte()
+norm2d_scatter_plot
+```
