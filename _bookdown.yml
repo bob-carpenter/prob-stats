@@ -22,5 +22,7 @@ rmd_files: [
   "calibration.Rmd",
   "regression-mean.Rmd",
   "mcmc.Rmd",
-  "metropolis.Rmd"
+  "metropolis.Rmd",
+  "mcmc-convergence.Rmd",
+  "exponential.Rmd"
 ]

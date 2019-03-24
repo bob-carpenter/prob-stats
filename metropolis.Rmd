@@ -209,7 +209,6 @@ random_walk_metropolis <- function(lpdf, theta0, sigma, M) {
       theta_draws[m, ] <- theta_last
     }
   }
-  print(sprintf("accept rate = %3.2f", accept / M))
   theta_draws
 }
 

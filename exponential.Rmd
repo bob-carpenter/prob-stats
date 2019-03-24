@@ -1,0 +1,190 @@
+# Exponential and Poisson Distributions
+
+In this chapter, we'll see how the exponential distribution can be
+used to model the waiting time between events.  For example, waiting
+times might be used to model the time between salmon swimming
+upstream, the rate at which a user sends text messages, or the time
+between neutrinos arriving at a particle detector.
+
+The Poisson distribution arises as the number of events in a fixed
+period of time, such as the number of salmon per hour or number of
+messages per day.^[We also consider generalizations to spatial and
+volumetric processes, such as the number of graffiti tags in given
+area of a city or the number of whales in a volume of the ocean.
+These may even be combined to model, say, the number of whales in a
+volume of the ocean in a given month.]
+
+
+## The Exponential distribution
+
+The exponential distribution can be used to model the waiting time
+between events under two idealized assumptions.  The first assumption
+is that the arrival process is homogeneous in time.  No matter the
+time of day or night, arrivals happen at the same rate.^[Obviously,
+this is too limiting for many applications, such as anything to do
+with human or animal activity; in such cases, these simple processes
+are used as building blocks in more complex spatio-temporal models.]
+The second assumption is that the times between successive events is
+independent.  It doesn't matter if it's been an hour since the last
+text message was sent or if one was just sent ten seconds ago, the
+probability another message will arrive in the next minute is the
+same.  In other words, the expected waiting time for the next arrival
+doesn't change based on how long you've already been waiting.
+
+A distribution of arrival times satisfying these properties is the
+exponential distribution.  If $Y \sim \mbox{exponential}(1)$ has a standard
+exponential distribution, then its density has a particularly simple
+form^[We can work backward from this density to the definite integral
+$$\int_0^{\infty} \exp(-y) = 1.$$]
+
+$$
+p_Y(y) = \exp(-y).
+$$
+
+For example, let's plot a few simulations of arrivals where the
+waiting time between arrivals is distributed according to a standard
+exponential distribution.^[We will circle back and explain how to
+generate exponential variates shortly.]
+
+We can simulate a sequence of arrivals by first generating waiting
+times and then defining the arrivals as the cumulative waiting
+time.^[The cumulative sum function is defined by $$cum\\_sum(v)_n =
+\sum_{i = 1}^n v_i.$$ We consider the exponential RNG function later.]
+
+```
+for (n in 1:N)
+  w[n] = exponential_rng(1)
+a = cum_sum(w)
+```
+
+Plotting a $M = 4$ draws for $N = 10$ arrivals pro
+
+```{r fig.asp = 0.35, fig.cap = "Four simulations of the first ten arrivals arrivals (lettered a through d) in a process with a standard exponential waiting time between arrivals, $w_n \\sim \\mbox{exp}(1)$."}
+
+set.seed(1234)
+names <- c("a", "b", "c", "d")
+M <- length(names)
+arrival_df <- data.frame(u = c(), y = c(), run = c())
+for (m in 1:M) {
+  N <- 10
+  z <- rexp(N)
+  u <- cumsum(z)
+  arrival_df <- rbind(arrival_df,
+                      data.frame(u = u, y = rep(0, N), run = rep(names[m], N)))
+}
+
+arrival_plot <-
+    ggplot(arrival_df, aes(x = u, y = y)) +
+    scale_x_continuous(lim = c(0, max(c(15, arrival_df$y))),
+                       breaks = c(0, 5, 10, 15)) +
+    scale_y_continuous(lim = c(-1, 9)) +
+    geom_hline(yintercept = 0, linetype = "dashed", size = 0.5) +
+    geom_point(size = 2) +
+  facet_grid(run ~ .) +
+  xlab("time") +
+  ylab("arrivals") +
+  ggtheme_tufte() +
+  theme(axis.text.y = element_blank(), axis.ticks.y = element_blank())
+arrival_plot
+```
+
+## Scaled exponential
+
+As with any continuous distribution, the exponential may be scaled.
+As with scaling the normal distribution, this simply stretches or
+shrinks the distribution without changing its basic shape.  In the
+normal distribution, the scale parameter $\sigma$ multiplies a
+standard normal variate to get a scale $\sigma$ variate.  Instead of
+multiplying a standard exponential variate by a scale, it is
+traditional to divide it by a rate (an inverse scale).
+
+If $U \sim \mbox{exponential}(1)$ is a standard exponential variable,
+then $Y = U / \lambda$ is an exponential variable with rate $\lambda$
+(i.e., with scale $1 / \lambda$), for which we write $Y \sim
+\mbox{exponential}(\lambda)$, and have the following^[This is a
+straightforward derivation using the usual Jacobian formula, for which
+the adjustment for the inverse transform is $$\Big| \,
+\frac{\mathrm{d}}{\mathrm{d} y} \lambda \times y \, \Big| =
+\lambda.$$]
+
+$$
+\begin{array}{rcl}
+p_Y(y \mid \lambda)
+& = &
+\lambda \times p_U\left( \lambda \times y \right)
+\\[6pt]
+& = &
+\lambda \times \exp \left(\lambda \times - y \right).
+\end{array}
+$$
+
+## Memorylessness of exponential waiting times
+
+Suppose we simulate a sequence standard exponential waiting times,
+$W_1, \ldots, W_N \sim \mbox{exponential}(1).$  Now what if we look at
+the distribution of all of the $W$ and compare it to the distribution
+of just those $W > 1$ and those $W > 2.5$.  To make sure we have the
+same number of draws so the histograms are scaled, we'll take 1000 of
+each situations by using simple rejection sampling.
+
+```
+for (m in 1:M)
+  w[m] = -1
+  while (w[m] < min)
+    w[m] = exponential_rng(1)
+```
+
+Let's plot histograms of $10\,000$ draws for $\mbox{min} = 0, 1, 2.5$.
+
+```{r fig.asp = 0.4, fig.cap = "Plot of $10\\,000$ draws from the standard exponential distribution (left) and discarding all draws below 1 (center) or 2.5 (right).  Each histogram is the same, just shifted.  This illustrates the memoryless of the exponential distribution as a model of waiting times---no matter how long you have already waited, the remaining wait time distribution is the same."}
+
+exp_min <- function(lb, M) {
+  y <- rep(NA, M)
+  for (m in 1:M) {
+    y[m] <- -1
+    while (y[m] < lb) {
+      y[m] <- rexp(1)
+    }
+  }
+  y
+}
+
+M <- 100000
+memoryless_df <-
+  data.frame(y = c(exp_min(0, M), exp_min(1, M), exp_min(2.5, M)),
+             lb = c(rep("min 0", M), rep("min 1", M), rep("min 2.5", M)))
+
+memoryless_plot <-
+  ggplot(memoryless_df, aes(x = y)) +
+  geom_histogram(color = "black", fill = "white", binwidth = 0.5, boundary = 1) +
+  facet_wrap(vars(lb)) +
+  scale_x_continuous(lim = c(0, 10), breaks = c(0, 5, 10)) +
+  ylab("count") +
+  ggtheme_tufte() +
+  theme(panel.spacing.x = unit(1, "lines")) +
+  theme(axis.text.y = element_blank(), axis.ticks.y = element_blank())
+memoryless_plot
+```
+
+The resulting histograms are almost identical because each condition
+has exactly the same distribution shifted over by the amount of wait
+time already experienced.
+
+We can characterize this property in terms of the probability density
+function.  If $Y \sim \mbox{exponential}(\lambda)$, for some fixed
+$\lambda$, then for any fixed $c > 0$, we have
+
+$$
+p_Y(y \mid \lambda)
+\ \propto \
+p_Y(y + c \mid \lambda).
+$$
+
+
+
+
+## The Poisson distribution
+
+The Poisson distribution is a discrete distribution over counts
+$\mathbb{N} = 0, 1, 2, \ldots$ which can be described as the number of
+events that occur in a given time interval.
