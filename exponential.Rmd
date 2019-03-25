@@ -46,40 +46,58 @@ waiting time between arrivals is distributed according to a standard
 exponential distribution.^[We will circle back and explain how to
 generate exponential variates shortly.]
 
-We can simulate a sequence of arrivals by first generating waiting
-times and then defining the arrivals as the cumulative waiting
-time.^[The cumulative sum function is defined by $$cum\\_sum(v)_n =
-\sum_{i = 1}^n v_i.$$ We consider the exponential RNG function later.]
+We can simulate a sequence of arrivals during $\lambda$ time units,
+assuming the waiting time between arrivals is distributed as standard
+exponential.  We start at time $t = 0$ and continue adding the waiting
+times $w_n \sim \mbox{exponential}(1)$ until we pass a time $\lambda$,
+at which point we return the arrival times we have accumulated.^[The
+loop notation `1:infinity` is meant to indicate that `n` is
+unbounded.  Such "forever" loops must be broken with internal logic
+such as the return in this case.]
 
 ```
-for (n in 1:N)
+t = 0
+for n in 1:infinity
   w[n] = exponential_rng(1)
-a = cum_sum(w)
+  t += w[n]
+  if (t > lambda)
+    return y
+  y[n] = t
 ```
 
-Plotting a $M = 4$ draws for $N = 10$ arrivals pro
+Let's look at four realizations of this process up to time $\lambda = 10$.
 
-```{r fig.asp = 0.35, fig.cap = "Four simulations of the first ten arrivals arrivals (lettered a through d) in a process with a standard exponential waiting time between arrivals, $w_n \\sim \\mbox{exp}(1)$."}
+```{r fig.asp = 0.35, fig.cap = "Four simulations of the first $\\lambda = 10$ time units of an arrival process where waiting times are distributed as $\\mbox{exponential}(1)$."}
+
+gen_arrivals <- function(lambda) {
+  y <- c()
+  t <- 0
+  while (TRUE) {
+    t <- t + rexp(1)
+    if (t > lambda) return(y)
+    y[length(y) + 1] <- t
+    n <- n + 1
+  }
+}
 
 set.seed(1234)
 names <- c("a", "b", "c", "d")
 M <- length(names)
+lambda <- 10
 arrival_df <- data.frame(u = c(), y = c(), run = c())
 for (m in 1:M) {
-  N <- 10
-  z <- rexp(N)
-  u <- cumsum(z)
+  x <- gen_arrivals(lambda)
+  n <- length(x)
   arrival_df <- rbind(arrival_df,
-                      data.frame(u = u, y = rep(0, N), run = rep(names[m], N)))
+                      data.frame(x = x, y = rep(0, n), run = rep(names[m], n)))
 }
 
 arrival_plot <-
-    ggplot(arrival_df, aes(x = u, y = y)) +
-    scale_x_continuous(lim = c(0, max(c(15, arrival_df$y))),
-                       breaks = c(0, 5, 10, 15)) +
+    ggplot(arrival_df, aes(x = x, y = y)) +
+    scale_x_continuous(lim = c(0, 10), breaks = c(0, 5, 10)) +
     scale_y_continuous(lim = c(-1, 9)) +
-    geom_hline(yintercept = 0, linetype = "dashed", size = 0.5) +
-    geom_point(size = 2) +
+    geom_hline(yintercept = 0, linetype = "dashed", size = 0.25) +
+    geom_point(size = 1) +
   facet_grid(run ~ .) +
   xlab("time") +
   ylab("arrivals") +
@@ -87,6 +105,8 @@ arrival_plot <-
   theme(axis.text.y = element_blank(), axis.ticks.y = element_blank())
 arrival_plot
 ```
+
+A different number of arrivals occur in the different simulations.
 
 ## Scaled exponential
 
@@ -117,6 +137,66 @@ p_Y(y \mid \lambda)
 \lambda \times \exp \left(\lambda \times - y \right).
 \end{array}
 $$
+
+
+## Simulating from the exponential distribution
+
+Simulating a standard exponential variate is straightforward because
+of the simple form of the cumulative distribution function.  If $Y
+\sim \mbox{exponential}(1)$, then the probability density function is
+$p_Y(y) = \exp(-y)$ and the cumulative distribution function $F_Y :
+[0, \infty) \rightarrow [0, 1)$ is given by
+
+$$
+\begin{array}{rcl}
+F_Y(y) & = & \int_0^y \exp(-v') \mbox{d}v
+\\[4pt]
+& = & 1 - \exp(-y).
+\end{array}
+$$
+
+This function is easily inverted to produce the inverse cumulative
+distribution function, $F_y^{-1}:[0,1) \rightarrow [0, \infty)$,
+
+$$
+F_Y^{-1}(u) = - \log (1 - u).
+$$
+
+If we take $U \sim \mbox{uniform}(0,1)$, then
+
+$$
+F_Y^{-1}(u) \sim \mbox{exponential}(1).
+$$
+
+This is a very general trick for distributions for which we can
+compute the inverse cumulative distribution function.  We first saw
+this used to generate logistic variates by log-odds transforming
+uniform variates.^[The log-odds function, written $\mbox{logit}(u)$,
+is the inverse cumulative distribution function for the standard
+logistic distribution.]
+
+The pseudocode follows the math, so we can generate standard
+exponential variates as follows.
+
+```
+u <- uniform(0, 1)
+y <- -log(1 - u)
+```
+
+It is traditional here to replace the term $\log 1 - u$ with the term
+$\log u$ because if $u \sim \mbox{uniform}(0,1)$, then we also know $1
+- u \sim \mbox{uniform}(0,1)$.  We can then generalize to the
+nonstandard exponential with rate (i.e., inverse scale) $\lambda$ by
+dividing.  This gives us the following exponential distribution
+pseudorandom number generator.
+
+```
+exponential_rng(lambda)
+  u <- uniform(0, 1)
+  y <- -log(u) / lambda
+  return y
+```
+
 
 ## Memorylessness of exponential waiting times
 
@@ -156,7 +236,8 @@ memoryless_df <-
 
 memoryless_plot <-
   ggplot(memoryless_df, aes(x = y)) +
-  geom_histogram(color = "black", fill = "white", binwidth = 0.5, boundary = 1) +
+  geom_histogram(color = "black", fill = "#F8F8F0",
+                 binwidth = 0.5, boundary = 1) +
   facet_wrap(vars(lb)) +
   scale_x_continuous(lim = c(0, 10), breaks = c(0, 5, 10)) +
   ylab("count") +
@@ -182,9 +263,105 @@ $$
 
 
 
-
 ## The Poisson distribution
 
 The Poisson distribution is a discrete distribution over counts
-$\mathbb{N} = 0, 1, 2, \ldots$ which can be described as the number of
-events that occur in a given time interval.
+$\mathbb{N} = 0, 1, 2, \ldots$ which can be defined as the number of
+arrivals that occur in a fixed unit $\lambda$ of time when the
+waiting times $w_n$ between arrivals are independently standard exponential
+distributed, $w_n \sim \mbox{exponential}(1).$
+
+If $Y \sim \mbox{Poisson}(\lambda)$, then we can simulate values of
+$Y$ as follows.
+
+```
+poisson_rng(lambda)
+  t = 0
+  y = 0
+  while (true)
+    w = exponential_rng(1)
+    t += w
+    if (t > lambda)
+      return y
+    else
+      y += 1
+```
+
+We start at time $t = 0$, with $y = 0$ arrivals, then continue
+simulating arrivals until we have past the total time $\lambda$, at
+which point we report the number of arrivals we have seen before the
+arrival that put us past time $\lambda.$
+
+We can use this simulator to estimate the expectation and variance of
+a variable $Y \sim \mbox{Poisson}(\lambda)$, as follows
+
+```
+for (m in 1:M)
+  y[m] = poisson_rng(lambda)
+print 'estimated E[Y] = ' mean(y)
+print 'estimated var[Y] = ' variance(y)
+```
+
+```{r}
+poisson_rng <- function(lambda) {
+  t <- 0
+  y <- 0
+  while (TRUE) {
+    w <- rexp(1)
+    t <- t + w
+    if (t > lambda) return(y)
+    y <- y + 1
+  }
+}
+
+lambda <- 10
+for (m in 1:M)
+  y[m] <- poisson_rng(lambda)
+printf("estimated E[Y] = %4.2f\n", mean(y))
+printf("estimated var[Y] = %4.2f\n", var(y))
+```
+
+## Poisson as limit of binomials
+
+Another way to arrive at the Poisson distribution is as the limit of a
+sequence of binomial distributions.  A random variable with a Poisson
+distribution is unbounded in that any value may arise.^[All but a few
+values will be wildly improbable, but still possible.]  A binomial
+variable on the other hand takes on values between 0 and $N$ for some
+fixed $N$.  But if we let that the total count $N$ grows without bound
+while keeping the expected value at $\lambda$, the binomial approaches
+the Poisson distribution,
+
+$$
+\mbox{Poisson}(y \mid \lambda)
+= \lim_{N \rightarrow \infty} \mbox{binomial}(N, \lambda / N).
+$$
+
+We can see what the binomial approximation looks like through
+simulation.  We'll simulate $\mbox{binomial}(N, 5.5 / N)$ for various
+$N$ and compare with $\mbox{Poisson}(5.5)$.
+
+```{r fig.cap = "Histograms of $1\\,000\\,000$ draws for a $\\mbox{Poisson}(5.5)$ and successively larger $N$ binomial approximations."}
+binom_poisson_df <- data.frame(y = c(), N = c())
+lambda <- 5.5
+M <- 1000000
+for (N in c(8, 16, 32, 64, 128, 256, 512)) {
+  binom_poisson_df <-
+    rbind(binom_poisson_df,
+          data.frame(y = rbinom(M, N, lambda / N),
+                     N = rep(sprintf("binomial(%d)", N), M)))
+}
+binom_poisson_df <-
+  rbind(binom_poisson_df,
+        data.frame(y = rpois(M, lambda), N = rep("Poisson")))
+
+binom_poisson_plot <-
+  ggplot(binom_poisson_df, aes(x = y)) +
+  geom_bar(aes(y), colour = "black", fill = "#F8F8F0", size = 0.2) +
+  facet_wrap(. ~ N, ncol = 4) +
+  ggtheme_tufte() +
+  theme(panel.spacing.x = unit(2, "lines")) +
+  theme(panel.spacing.y = unit(2, "lines")) +
+  theme(axis.text.y = element_blank(), axis.ticks.y = element_blank())
+binom_poisson_plot
+```
