@@ -24,5 +24,6 @@ rmd_files: [
   "mcmc.Rmd",
   "metropolis.Rmd",
   "mcmc-convergence.Rmd",
-  "exponential.Rmd"
+  "exponential.Rmd",
+  "conjugacy.Rmd"
 ]
