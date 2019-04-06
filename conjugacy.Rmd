@@ -1,0 +1,19 @@
+# Conjugate Priors
+
+Hello there.
+
+```{r, engine='tikz', out.width = "100%", fig.ext="pdf",  fig.cap="Progress of streaming updates with conjugate priors.  There is an initial prior $\\mbox{beta}(\\alpha_0, \\beta_0)$ and a stream of data $y_1, y_2, \\ldots, y_N.$  After each data point $y_n$ is observed, the prior parameters $\\alpha_{n-1}, \\beta_{n-1}$ are updated to the posterior parameters $\\alpha_{n}, \\beta_n,$ which then acts as a prior for subsequent data."}
+\begin{tikzpicture}[->, auto, node distance=3cm, font=\normalsize]
+\node[rectangle,draw,semithick, label = below:$p(\theta)$] (A) {$\mbox{beta}(\alpha_0, \beta_0)$};
+\node[rectangle,draw,semithick, label = below:$p(\theta \mid y_1)$] (B) [right of = A] {$\mbox{beta}(\alpha_1, \beta_1)$};
+\node[rectangle,draw,semithick, , label = below:$p(\theta \mid y_{1:2})$] (C) [right of = B] {$\mbox{beta}(\alpha_2, \beta_2)$};
+\node[draw=none, fill=none] (D) [right of = C] {$\cdots$};
+\node[rectangle,draw,semithick,, label = below:$p(\theta \mid y_{1:N})$] (E) [right of = D] {$\mbox{beta}(\alpha_N, \beta_N)$};
+\path(A) edge [ ] node {$y_1$} (B);
+\path(B) edge [ ] node {$y_2$} (C);
+\path(C) edge [ ] node {$y_3$} (D);
+\path(D) edge [ ] node {$y_N$} (E);
+\end{tikzpicture}
+```
+
+
