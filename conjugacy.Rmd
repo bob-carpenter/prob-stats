@@ -400,3 +400,138 @@ p(\theta) \cdot p(y_1 \mid \theta) \cdots p(y_N \mid \theta).
         \mid \alpha_0 + \textrm{sum}(y), \beta_0 + N - \textrm{sum}(y)).
 \end{array}
 $$
+
+## Gamma-Poisson conjugacy
+
+The same line of reasoning that led from a binomial distribution to a
+prior that behaved as prior data, we can reason from the Poisson
+distribution backward to a conjugate prior.  Recall that for a count
+$y \in \mathbb{N}$ and rate $\lambda \in (0, \infty)$,
+$$
+\textrm{poisson}(y \mid \lambda)
+\ = \
+\frac{1}{y!}
+\cdot \lambda^y
+\cdot \exp(-\lambda).
+$$
+Given this form, the gamma distribution provides a family of
+conjugate priors, parameters by a shape $\alpha$ and rate (inverse
+scale) $\beta$, as
+$$
+\textrm{gamma}(\lambda \mid \alpha, \beta)
+\ = \
+\frac{\beta^{\alpha}}{\Gamma(\alpha)}
+\cdot
+\lambda^{\alpha - 1}
+\cdot
+\exp(-\beta \cdot \lambda).
+$$
+
+Now let's work out the conjugacy.  Suppose we have a Poisson
+likelihood with rate parameter $\lambda$,
+$$
+\begin{array}{rcl}
+p(y \mid \lambda)
+& = & \textrm{poisson}(y \mid \lambda),
+\\[4pt]
+& = &
+\frac{1}{y!}
+\cdot \lambda^y
+\cdot \exp(-\lambda)
+\end{array}
+$$
+with a gamma prior on the rate parameter,
+$$
+\begin{array}{rcl}
+p(\lambda \mid \alpha, \beta)
+& = & \textrm{gamma}(\lambda \mid \alpha, \beta)
+\\[4pt]
+& = &
+\frac{\beta^{\alpha}}{\Gamma(\alpha)}
+\cdot
+\lambda^{\alpha - 1}
+\cdot
+\exp(-\beta \cdot \lambda).
+\end{array}
+$$
+The posterior is equal to the product of the likelihood and prior up
+to a proportion,
+$$
+\begin{array}{rcl}
+p(\lambda \mid y, \alpha, \beta)
+& = & p(y \mid \lambda) \cdot p(\lambda \mid \alpha, \beta)
+\\[4pt]
+& = &
+\textrm{poisson}(y \mid \lambda)
+\cdot \textrm{gamma}(\lambda \mid \alpha, \beta)
+\\[4pt]
+& = &
+\left(
+\frac{1}{y!}
+\cdot \lambda^y
+\cdot \exp(-\lambda)
+\right)
+\cdot
+\left(
+\frac{\beta^{\alpha}}{\Gamma(\alpha)}
+\cdot
+\lambda^{\alpha - 1}
+\cdot
+\exp(-\beta \cdot \lambda)
+\right)
+\\[4pt]
+& \propto &
+\left( \lambda^y \cdot \exp(-\lambda) \right)
+\cdot
+\left( \lambda^{\alpha - 1} \cdot \exp(-\beta \cdot \lambda) \right)
+\\[4pt]
+& = &
+\lambda^{y + \alpha - 1} \cdot \exp(-(\beta + 1) \cdot \lambda)
+\\[4pt]
+& \propto &
+\textrm{gamma}(\alpha + y, \beta + 1).
+\end{array}
+$$
+
+Now suppose we have a sequence of count observations $y_1, \ldots, y_N
+\in \mathbb{N}.$  Assuming a $\textrm{poisson}(\lambda)$ likelihood
+with prior $\textrm{gamma}(\lambda \mid \alpha_0, \beta_0)$, we can
+update with $y_1$ to produce a posterior
+$$
+p(\lambda \mid y_1, \alpha_0, \beta_0)
+\ = \
+\textrm{gamma}(\alpha_0 + y_1, \beta_0 + 1).
+$$
+Using this as a prior for $y_2$, the posterior becomes
+$$
+p(\lambda \mid y_1, y_2, \alpha_0, \beta_0)
+\ = \
+\textrm{gamma}(\alpha_0 + y_1 + y_2, \beta_0 + 2).
+$$
+Extending this logic, we can take a whole batch of observations $y_1,
+\ldots, y_N$ at once to produce a posterior,
+$$
+p(\lambda \mid y_1, \ldots, y_N, \alpha_0, \beta_0)
+\ = \
+\textrm{gamma}(\alpha_0 + \textrm{sum}(y), \beta_0 + N).
+$$
+Worked out one step at a time, the posterior after observing $y_1,
+\ldots, y_n$ is 
+$$
+p(\lambda \mid y_1, \ldots, y_n, \alpha_0, \beta_0)
+\ = \
+p(\lambda \mid \alpha_n, \beta_n)
+$$
+where $(\alpha_0, \beta_0)$ are given as initial priors, and
+$$
+(\alpha_{n + 1}, \beta_{n + 1})
+\ = \
+(\alpha_n + y_{n+1}, \beta_n + 1).
+$$
+
+Thinking of the gamma prior in terms of Poisson data,
+$\textrm{gamma}(\alpha, \beta)$ represents a total of $\beta$ prior
+observations, with a sum total of $\alpha$.  For example, if we have a
+single prior observation $y$, that corresponds to a $\textrm{gamma}(y,
+1)$ prior; if we have three prior observations $12, 7, 9$, that'd be
+represented by a $\textrm{gamma}(26, 3)$ prior.
