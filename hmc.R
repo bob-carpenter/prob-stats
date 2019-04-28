@@ -1,24 +1,27 @@
 library(ggplot2)
-library(rstan)
-printf <- function(pattern, ...) print(sprintf(pattern, ...), quote = FALSE)
+
+source("hmc-sampler.R")
+
+# ESTIMATE MONTE CARLO STANDARD ERROR FOR Y, Y^2
+#
+M <- 500
+sq_err <- rep(NA, 10000)
+sd_sq_err <- rep(NA, 10000)
+for (i in 1:10000) {
+  y_mc <- rnorm(M)
+  sq_err[i] <- (mean(y_mc) - 0)^2
+  sd_sq_err[i] <- (mean(y_mc^2) - 1)^2
+}
+printf("Independent Draws:  mc se Y = %4.3f;  mc se Y^2 = %4.3f;  ess Y = %3.0f;  ess Y^2 = %3.0f",
+       sqrt(mean(sq_err)), sqrt(mean(sd_sq_err)),
+       1 / mean(sq_err), 2 / mean(sd_sq_err))
 
 
-## ESTIMATE MONTE CARLO STANDARD ERROR FOR Y, Y^2
-#
-# M <- 500
-# sq_err <- rep(NA, 10000)
-# sd_sq_err <- rep(NA, 10000)
-# for (i in 1:10000) {
-#   y_mc <- rnorm(M)
-#   sq_err[i] <- (mean(y_mc) - 0)^2
-#   sd_sq_err[i] <- (mean(y_mc^2) - 1)^2
-# }
-# printf("Independent Draws:  mc se Y = %4.3f;  mc se Y^2 = %4.3f",
-#        sqrt(mean(sq_err)), sqrt(mean(sd_sq_err)))
-#
-#
+# Stan run edited out to save time as I only need them once
+
 # # ESTIMATE STAN MARKOV CHAIN MONTE CARLO STANDARD ERROR FOR Y, Y^2
 #
+# library(rstan)
 # program <- "parameters { vector[1000] theta; } model { theta ~ normal(0, 1); }"
 # model <- stan_model(model_code = program)
 # J <- 100
@@ -26,7 +29,8 @@ printf <- function(pattern, ...) print(sprintf(pattern, ...), quote = FALSE)
 # sq_err_y_sq <- rep(NA, J)
 # for (j in 1:J) {
 #   printf("Stan run = %d / %J", j, J)
-#   stan_fit <- sampling(model, chains = 1, iter = 1500, warmup = 1000, refresh = 0, control = list(metric = "unit_e"))
+#   stan_fit <- sampling(model, chains = 1, iter = 1500, warmup = 1000,
+#                        refresh = 0, control = list(metric = "unit_e"))
 #   sim_theta_1 <- extract(fit)$theta[ , 1]
 #   y_hat <- mean(sim_theta_1)
 #   y_sq_hat <- mean(sim_theta_1^2)
@@ -37,64 +41,6 @@ printf <- function(pattern, ...) print(sprintf(pattern, ...), quote = FALSE)
 #        sqrt(mean(sq_err_y)), sqrt(mean(sq_err_y_sq)))
 # sampler_params <- get_sampler_params(stan_fit, inc_warmup = FALSE)
 
-
-# HAMILTONIAN MONTE CARLO
-
-momenta_lpdf <- function(p) sum(dnorm(p, log = TRUE))
-
-hmc <- function(lpdf, grad_lpdf, init_params, epsilon, max_leapfrog_steps, num_draws, algorithm = "hmc") {
-  num_params <- length(init_params)
-  theta <- matrix(NA, num_draws, num_params);  theta[1, ] <- init_params
-
-  accept <- 0;  reject <- 0
-  for (draw in 2:num_draws) {
-
-    # algorithm selects number of steps per draw
-    if (algorithm == "hmc") {
-      leapfrog_steps <- max_leapfrog_steps
-      evals <- max_leapfrog_steps
-    } else if (algorithm == "hmc-jitter") {
-      leapfrog_steps = sample(max_leapfrog_steps, 1)
-      evals <- max_leapfrog_steps / 2 + 0.5
-    } else {
-      printf("hmc(): ERROR: unkown algorithm = %s", algorithm)
-      return(-1)
-    }
-
-    # random initial momentum drawn from marginal (std normal)
-    p1 <- rnorm(num_params)             # initial momentum
-
-    # leapfrog algorithm to simulate Hamiltonian Dynamics
-    p <- p1                             # momentum
-    q <- theta[draw - 1, ]              # position
-    grad <- -grad_lpdf(q)               # gradient of potential at initial position
-    for (l in 1:leapfrog_steps) {
-      p <- p - (epsilon / 2) * grad;    # half step in momentum
-      q <- q + epsilon * p;             # step in position
-      grad <- -grad_lpdf(q)             # only update gradient here
-      p <- p - (epsilon / 2) * grad;    # half step in momentum
-    }
-    pL <- p                             # final momentum
-
-    # Metropolis-Hastings accept step
-    accept_lp <-
-      ( lpdf(q) - lpdf(theta[draw - 1, ])
-        + momenta_lpdf(pL) - momenta_lpdf(p1) )
-    u <- runif(1)                       # uniform(0, 1) variate
-    if (log(u) < accept_lp) {
-      theta[draw, ] <- q
-      accept <- accept + 1
-    } else {
-      theta[draw, ] <- theta[draw - 1, ]
-      reject <- reject + 1
-    }
-
-  }
-
-  return(list(theta = theta,
-              accept_rate = accept / (accept + reject),
-	      evals = evals))
-}
 
 
 # STANDARD NORMAL DENSITY AND GRADIENT
@@ -157,12 +103,9 @@ for (algorithm in algorithms) {
 plot_hmc <-
   ggplot(df_hmc, aes(x = epsilon, y = ess_y_per_eval)) +
   facet_grid(algorithm ~ L) +
-#  geom_hline(yintercept = 500, color = "black", size = 0.25, alpha = 1, linetype = "dashed") +
   geom_hline(yintercept = 1480 / (16 * 500), color = "blue", size = 0.25, alpha = 1, linetype = "dashed") +
   geom_hline(yintercept = 160 / (16 * 500), color = "red", size = 0.25, alpha = 1, linetype = "dashed") +
   geom_vline(xintercept = 0.315, color = "darkgreen", size = 0.25) +  # NUTS STEP SIZE
-#  geom_vline(xintercept = 0.315 / 2, color = "darkgreen", linetype = "dashed", size = 0.35) +  # NUTS STEP SIZE / 2
-#  geom_vline(xintercept = 0.315 / 4, color = "darkgreen", linetype = "dotted", size = 0.5) +  # NUTS STEP SIZE / 4
   geom_line(color = "blue") +
   geom_line(mapping = aes(x = epsilon, y = ess_y_sq_per_eval),  color = "red") +
   scale_x_continuous(breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1.0)) +

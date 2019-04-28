@@ -1,6 +1,216 @@
 # Conjugate Priors
 
-Hello there.
+## Uniform prior and binomial likelihood
+
+Suppose we have a uniform prior for parameter $\theta \in (0, 1)$,
+$$
+\theta \sim \mbox{uniform}(0, 1),
+$$
+and combine it with a a likelihood for data $y \in 0:N$,
+$$
+y \sim \mbox{binomial}(N, \theta).
+$$
+We know from Bayes's rule that the posterior is proportional to the
+likelihood times the prior.  Writing this out in symbols,
+$$
+\begin{array}{rcl}
+p(\theta \mid y, N)
+& \propto &
+\displaystyle
+\frac{p(y \mid \theta, N) \cdot p(\theta)}
+     {p(y \mid N)}
+\\[6pt]
+& \propto &
+p(y \mid \theta) \cdot p(\theta)
+\\[4pt]
+& = & \mbox{binomial}(y \mid N, \theta) \cdot \mbox{uniform}(\theta \mid 0,
+1)
+\\[4pt]
+& = &
+\displaystyle
+\binom{N}{y} \cdot \theta^y \cdot (1 - \theta)^{N - y} \cdot 1
+\\[4pt]
+& \propto &
+\displaystyle
+\theta^y \cdot (1 - \theta)^{N - y}.
+\end{array}
+$$
+
+Now that we know $p(\theta \mid y) \propto \theta^y \cdot (1 -
+\theta)^{N - y},$ we can follow Laplace in applying Euler's beta
+function to normalize,^[Euler's beta function is defined by
+$$
+\begin{array}{rcl}
+\mbox{B}(\alpha, \beta)
+& = &
+\displaystyle
+\int_0^1 u^{\alpha - 1} \cdot (1 - u)^{\beta - 1} \mathrm{d}u
+\\[4pt]
+& = &
+\displaystyle
+\frac{\Gamma(\alpha) \cdot \Gamma(\beta)}
+     {\Gamma(\alpha + \beta)},
+\end{array}
+$$
+where the gamma function is defined by
+$$
+\textstyle \Gamma(\gamma) = \int_0^{\infty} u^{\gamma - 1} \cdot \exp(-u) \, \mbox{d}u.
+$$
+The gamma function generalizes the integer factorial function, satisfying
+$$
+\Gamma(u + 1) = u!
+$$
+for all integers $u \in \mathbb{N}.$
+]
+$$
+\begin{array}{rcl}
+p(\theta \mid y, N)
+& = &
+\displaystyle
+\frac{\theta^y \cdot (1 - \theta)^{N - y}}
+     {\int_0^1 \theta^y \cdot (1 - \theta)^{N - y} \, \mbox{d}\theta}
+\\[6pt]
+& = &
+\displaystyle
+\frac{1}
+     {\mathrm{B}(y, N - y)}
+\cdot \theta^y \cdot (1 - \theta)^{N - y}
+\\[6pt]
+& = &
+\displaystyle
+\frac{\Gamma(N)}
+     {\Gamma(y) \cdot \Gamma(N - y)}
+\cdot \theta^y \cdot (1 - \theta)^{N - y.}
+\end{array}
+$$
+
+Another way of arriving at the same result is to just work through
+Bayes's rule by brute force,
+$$
+p(\theta \mid y)
+= \frac{p(y \mid \theta) \cdot p(\theta)}
+       {\int_0^1 p(y \mid \theta) \cdot p(\theta) \, \mbox{d}\theta}.
+$$
+The integral in the denominator is just the beta function given above.
+
+
+## Beta prior and binomial likelihood produces a beta posterior
+
+A $\mbox{beta}(1, 1)$ distribution is identical to a $\mbox{uniform}(0,
+1)$ distribution, because
+$$
+\begin{array}{rcl}
+\mbox{beta}(\theta \mid 1, 1)
+& \propto &
+\theta^{1 - 1} \cdot (1 - \theta)^{1 - 1}
+\\[4pt]
+& = &
+1
+\\[4pt]
+& = &
+\mbox{uniform}(\theta \mid 0, 1).
+\end{array}
+$$
+
+Now suppose we assume a beta prior with parameters $\alpha, \beta >
+0,$
+$$
+\theta \sim \mbox{beta}(\alpha, \beta).
+$$
+When combined with a binomial likelihood,
+$$
+y \sim \mbox{binomial}(N, \theta),
+$$
+the result is a posterior of the following form
+$$
+\begin{array}{rcl}
+p(\theta \mid y, N)
+& \propto &
+p(y \mid N, \theta) \cdot p(\theta)
+\\[4pt]
+& = &
+\mbox{binomial}(y \mid N, \theta) \cdot \mbox{beta}(\theta \mid
+\alpha, \beta)
+\\[4pt]
+& \propto &
+\left( \theta^y \cdot (1 - \theta)^{N - y} \right)
+\cdot
+\left( \theta^{\alpha - 1} \cdot (1 - \theta)^{\beta - 1} \right)
+\\[8pt]
+& = &
+\theta^{y + \alpha - 1} \cdot (1 - \theta)^{N - y + \beta - 1}
+\\[6pt]
+& \propto &
+\mbox{beta}(y + \alpha, N - y + \beta).
+\end{array}
+$$
+The rearrangement of terms in the penultimate step^[This uses the rule
+of exponents from algebra,
+$$\theta^u \cdot \theta^v = \theta^{u = v}.$$] lets us collect a
+result that matches the kernel of a beta distribution.
+
+The takeaway message is that if the prior is a beta distribution and
+the likelihood is binomial, then the posterior is also a beta
+distribution.
+
+## Conjugate priors
+
+In general, a family $\mathcal{F}$ of priors is said to be *conjugate*
+to a family $\mathcal{G}$ of likelihood functions, if $p(\theta) \in
+\mathcal{F}$ and $p(y \mid \theta) \in \mathcal{G}$ imply that
+$p(\theta \mid y) \in \mathcal{F}$.  We have already seen one example
+of conjugacy, with the family of beta priors and binomial likelihoods, 
+$$
+\begin{array}{rcl}
+\mathcal{F} & = &
+\{ \, \mbox{beta}(\alpha, \beta) \mid \alpha, \beta > 0 \, \}
+\\[6pt]
+\mathcal{G} & = &
+\{ \, \mbox{binomial}(N, \theta) \mid N \in \mathbb{N}, \
+\theta \in (0, 1) \, \}.
+\end{array}
+$$
+
+It is no coincidence that the likelihood and prior in our conjugate
+example have matching forms,
+$$
+\begin{array}{r|rllll}
+\mbox{Prior}
+& \mbox{beta}(\theta \mid \alpha, \beta)
+& \propto &
+\theta^{\alpha - 1}
+& \cdot &
+(1 - \theta)^{\beta - 1}
+\\[6pt]
+\mbox{Likelihood}
+& 
+\mbox{binomial}(y \mid N, \theta)
+& \propto &
+\theta^y
+& \cdot &
+(1 - \theta)^{N - y}
+\\[4pt] \hline
+\mbox{Posterior}
+&
+\mbox{beta}(\theta \mid y + \alpha, N - y + \beta)
+& \propto &
+\theta^{y + \alpha - 1}
+& \cdot &
+(1 - \theta)^{N - y + \beta - 1}
+\end{array}
+$$
+
+Thinking of the exponents $y$ and $N - y$ as success and failure
+counts respectively, we can think of the exponents $\alpha - 1$ and
+$\beta - 1$ as the prior number of succcesses and failures.  We then
+just add the prior successes and the likelihood successes to get $y +
+\alpha - 1$ posterior succesess; the prior failures work similarly,
+with $\beta - 1$ prior failures and $N - y$ observed failures
+producing a $N - y + \beta - 1$ posterior failure count.
+
+
+
+## Chained updates
 
 ```{r, engine='tikz', out.width = "100%", fig.ext="pdf",  fig.cap="Progress of streaming updates with conjugate priors.  There is an initial prior $\\mbox{beta}(\\alpha_0, \\beta_0)$ and a stream of data $y_1, y_2, \\ldots, y_N.$  After each data point $y_n$ is observed, the prior parameters $\\alpha_{n-1}, \\beta_{n-1}$ are updated to the posterior parameters $\\alpha_{n}, \\beta_n,$ which then acts as a prior for subsequent data."}
 \begin{tikzpicture}[->, auto, node distance=3cm, font=\normalsize]
