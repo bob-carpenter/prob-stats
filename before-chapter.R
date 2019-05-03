@@ -1,6 +1,8 @@
 # LIBRARY CONFIGURATION
 
 library(ggplot2)
+library(grid)
+library(gridExtra)
 library(knitr)
 knitr::opts_chunk$set(
   include = TRUE,
