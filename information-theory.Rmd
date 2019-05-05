@@ -1,0 +1,181 @@
+# Information Theory
+
+Information theory was developed as a means to deal with coding of
+signals across noisy channels, such as telegraph signals in a discrete
+case or or telephone signals in a continuous case.  We will largely be
+using information theory to give us an alternative to variance to
+describe the variability (entropy) of a distribution and two
+alternatives to correlation to describe the similarity of two random
+variables (mutual information) and two distributions (divergence).
+
+## Entropy
+
+The entropy of a univariate random variable $Y$ is defined as the
+expectation of its negative log probability function,
+$$
+\textrm{H}[Y]
+\ = \
+\mathbb{E}[- \log p_Y(Y)].
+$$
+Because we are using the natural logarithm, the units of entropy are
+called *nats*.^[Information theory is often expressed using base 2
+logarithms, which yields units of bits, which are easily interpretable
+as the amount of information in a coin flip, i.e., if 
+$Y \sim \\textrm{bernoulli}(\\frac{1}{2}).$, entropy in bits is 1.]
+
+## Entropy in the discrete case
+
+For a discrete distribution, $p_Y$ is a probability mass function and
+the expectation expands to a sum over all possible integer values $y
+\in \mathbb{Z}$,
+$$
+\begin{array}{rcl}
+\textrm{H}[Y]
+& = & \mathbb{E}[\log p_Y(y)]
+\\[4pt]
+& = & \sum_{y \in \mathbb{Z}} p_Y(y) \cdot \log p_Y(y).
+\end{array}
+$$
+
+In finite cases, the entropy is particularly simple to compute.  For
+example, suppose $Y \sim \textrm{bernoulli}(\theta).$  Then
+$$
+\mathrm{H}[Y]
+\ = \
+\theta \cdot \log \theta
++ (1 - \theta) \cdot \log (1 - \theta).
+$$
+We can plot what this looks like for $\theta \in (0, 1)$ to get a
+sense for the behavior of entropy in a simple case.
+
+```{r, out.width = "100%", fig.asp = 0.4, fig.cap = "Left) entropy of a variable $Y \\sim \\textrm{bernoulli}(\\theta)$ as a function of $\\theta.$ Right) standard deviation of the same variable as a function of $\\theta.$ The shapes are not identical, but share the same mode of $\\theta = 0.5$ and mimima at $\\theta = 0$ and $\\theta = 1.$"}
+
+theta <- seq(0.001, 0.999, by = 0.001)
+H_theta <- - (theta * log(theta) + (1 - theta) * log(1 - theta))
+sd_theta <- sqrt(theta * (1 - theta))
+
+bernoulli_entropy_df <-
+  rbind(data.frame(theta = theta, H = H_theta, sd = sd_theta),
+        data.frame(theta = c(0, 1), H = c(0, 0), sd = c(0, 0)))
+	
+bernoulli_entropy_plot <-
+  ggplot(bernoulli_entropy_df, aes(x = theta, y = H)) +
+  geom_line(size = 0.5) +
+  scale_x_continuous(breaks = c(0, 1/4, 1/2, 3/4, 1),
+                     labels = c("0", "1/4", "1/2", "3/4", "1")) +
+  xlab(expression(theta)) +
+  ylab("H[Y]") +
+  ggtheme_tufte()
+  
+bernoulli_sd_plot <-
+  ggplot(bernoulli_entropy_df, aes(x = theta, y = sd)) +
+  geom_line(size = 0.5) +
+  scale_x_continuous(breaks = c(0, 1/4, 1/2, 3/4, 1),
+                     labels = c("0", "1/4", "1/2", "3/4", "1")) +
+  xlab(expression(theta)) +
+  ylab("sd[Y]") +
+  ggtheme_tufte()
+
+grid.arrange(ggplotGrob(bernoulli_entropy_plot),
+             ggplotGrob(bernoulli_sd_plot),
+             ncol = 2)
+```
+
+The maximum entropy for $Y \sim \textrm{bernoulli}(\theta)$ occurs at
+$\theta = 0.5$, when there is a 50% chance of each outcome.  This
+represents the maximum amount of uncertainty possible.  At the other
+extreme, $\theta = 0$ and $\theta = 1$ correspond to complete
+certainty in the outcome and thus the entropy is zero.  Other values
+are in between.  At $\theta = 0.9$, for example, the variable is much
+more likely to be one than zero.  
+
+## Differential entropy
+
+In the continuous case, $p_Y$ is a probabiltiy density function and
+the expectation expands to an integral over all possible real values
+$y \in \mathbb{R}$,
+$$
+\begin{array}{rcl}
+\textrm{H}[Y]
+& = & \mathbb{E}[-\log p_Y(y)]
+\\[4pt]
+& = & \int_{\mathbb{R}} \ - \log p_Y(y) \cdot p_Y(y) \, \textrm{d}y.
+\end{array}
+$$
+
+Because density values may be greater than one, differential entropy can be negative with very narrowly distributed variables, which makes it a less than  desirable general measure of information.
+
+## Calculating entropy with simulation
+
+Because entropy is defined as an expectation, it can be computed using
+simulation.  Suppose $y^{(1)}, \ldots, y^{(M)}$ drawn according to
+$p_Y(y)$.  The entropy of $Y$ is then calculated by plugging the draws
+in for the random variable $Y$ and averaging,
+$$
+\begin{array}{rcl}
+\textrm{H}[Y]
+& = & \mathbb{E}[\log p_Y(y)]
+\\[4pt]
+& \approx &
+\frac{1}{M} \sum_{m=1}^M \log p_Y\!\left(y^{(m)}\right).
+\end{array}
+$$
+
+For example, let's calculate the entropy of a normally distributed random variable $Y \sim \textrm{normal}(\mu, \sigma)$ as a function of $\sigma$.^[As with standard deviation, the location parameter $\mu$ does not affect the entropy of a normally distributed variable.]  We just draw $y^{(m)} \sim \textrm{normal}(0, \sigma)$ and calculate the average $\log \textrm{normal}(y^{(m)} \mid 0, \sigma).$ value.
+
+```{r, fig.cap = "Differential entropy of a normally distributed variable $Y \\sim \\textrm{normal}(\\mu, \\sigma)$ as a function of its scale $\\sigma.$"}
+estimate_normal_entropy <- function(M, sigma) {
+  y <- rnorm(M, 0, sigma)
+  log_p_y <- dnorm(y, 0, sigma, log = TRUE)
+  -sum(log_p_y)
+}
+
+set.seed(1234)
+M <- 1e5
+sigmas <- seq(0.1, 5, by = 0.1)
+N <- length(sigmas)
+H_sigma <- rep(NA, N)
+for (n in 1:N) {
+  H_sigma[n] <- estimate_normal_entropy(M, sigmas[n])
+}
+
+normal_entropy_df <- data.frame(sigma = sigmas, H = H_sigma)
+
+normal_entropy_plot <-
+  ggplot(normal_entropy_df, aes(x = sigma, y = H)) +
+  geom_line(size = 0.5) +
+  scale_y_continuous(breaks = c(-1e5, 0, 1e5, 2e5, 3e5),
+           labels = c("-100,000", "0", "100,000", "200,000", "300,000")) +
+  xlab(expression(sigma)) +
+  ylab("H[Y]") +
+  ggtheme_tufte()
+normal_entropy_plot
+```
+
+The plot shows that differential entropy increases sublinearly as the
+scale $\sigma$ increases. The plot also shows that for values of
+$\sigma$, the differential entropy is negative.  Discrete entropy, in
+contrast, is always positive.
+
+## Maximum entropy distribution
+
+Suppose we have a normally distributed variable with expectation $\mu$
+and standard deviation $\sigma,$
+$$
+U \sim \textrm{normal}(\mu, \sigma).
+$$
+Now suppose we have another random variable $V$ and only know that it
+also has an expectation of $\mu$ and standard deviation of $\sigma$,
+$$
+\mathbb{E}[V] = \mu \ \ \ \textrm{and} \ \ \ \textrm{sd}[V] = \sigma.
+$$
+Then we know that
+$$
+H[U] \geq H[V],
+$$
+with equality only if $V$ is also normally distributed,
+$V \sim \textrm{normal}(\mu, \sigma).$
+
+Another way of saying this is that among all possible random variables
+with a given expectation and standard deviation, a normally
+distributed one has the maximum entropy.

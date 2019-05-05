@@ -325,39 +325,6 @@ distribution makes sense as a representation of many natural
 phenomena.
 
 
-## Maximum entropy distribution
-
-The normal distribution $\mbox{normal}(\mu, \sigma)$ is the
-distribution with the maximum entropy among all distributions with
-expectation $\mu$ and standard deviation $\sigma$.
-
-The *entropy* of a random variable $Y$ is defined to be its expected
-log density, 
-
-$$
-\mathrm{H}[Y]
-\ = \
-\mathbb{E}\!\left[ \log p_Y(Y) \right].
-$$
-
-For a continuous distribution, this unfolds into the integral
-
-$$
-\mathrm{H}[Y]
-\ = \
-\int_{-\infty}^{\infty} \log p_Y(y) \times p_Y(y) \, \mathrm{d}y.
-$$
-
-Because it is a simple expectation, we can compute entropy using
-simulations $y^{(1)}, \ldots, y^{(M)}$ from $p_Y(y)$ as
-
-$$
-\mathrm{H}[Y]
-\approx
-\frac{1}{M} \, \sum_{m=1}^M \log p_Y\left( y^{(m)} \right).
-$$
-
-
 ## Lognormal distribution
 
 The normal distribution arises naturally as the the distribution of a

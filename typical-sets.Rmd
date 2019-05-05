@@ -36,9 +36,14 @@ independent, that means the most probable joint result is all
 successes.  In symbols, this run of all successes maximizes the joint
 probability mass function $p_Y(y)$,
 $$
-( \underbrace{1, 1, \ldots, 1}_{100 \ \textrm{times}} )
-\ = \
+\begin{array}{rcl}
+y^*
+& = &
 \textrm{arg max}_y \ p_Y(y).
+\\[4pt]
+& = &
+( \underbrace{1, 1, \ldots, 1}_{100 \ \textrm{times}} ).
+\end{array}
 $$
 Although a straight run of succesess is the most likely result,
 given that it requires one hundred consecutive successes with only an
@@ -79,9 +84,9 @@ binom_typical_plot
 ```
 
 
-How many successes do we expect to see in one hundred independent
-trials where each has an eighty percent chance of success?  Eighty,
-as the following derivation shows.
+What is the expected number of successes in one hundred independent
+trials where each has an eighty percent chance of success? Eighty, as
+the following derivation shows.
 $$
 \begin{array}{rcl}
 \mathbb{E}[Y_1 + \cdots + Y_{100}]
@@ -105,7 +110,7 @@ $$
 \binom{100}{80}
 \ = \
 \frac{100!}{80! \cdot (100 - 80)!}
-\ \approx \ 5 \cdot 10^{20}.
+\ \approx \ 5 \cdot 10^{20}
 $$
 possible ways to sequence eighty successes and twenty failures.
 Therefore, the total probability of seeing eighty successes is the
@@ -124,7 +129,13 @@ $$
 $$
 So while there is almost no chance of seeing the most likely outcome
 with all successes, there's nearly a ten percent chance of seeing an
-outcome with eighty successes.  
+outcome with eighty successes.^[This highlights a semantic point. Even
+though eighty successes represents the expectation of
+$\textrm{sum}(Y),$ there's still only a ten percent chance of
+observing exactly eighty successes. So we don't necessarily expect to
+see the expected value. This is even clearer with continuous
+distributions, where the probability of seeing the expected value is
+zero.]
 
 The probability of $y$ successes in $N$ independent trials with a $\theta$ chance of success is given by $\textrm{binomial}(y \mid N, \theta).$  Working this out for $N = 100$ and $\theta = 0.8$, we have,
 $$
@@ -148,7 +159,7 @@ the sequences interacts, we can plot everything.  The plots on the
 left are on the linear scale and those on the right on the log scale.
 
 
-```{r fig.asp = 0.4, fig.cap = "Number of sequences with $y$ successes."}
+```{r fig.asp = 0.4, fig.cap = "Total number of binary sequences of length one hundred in which exactly eighty values are one, i.e., $\\binom{100}{y} = \\frac{100!}{80! \\cdot 20!}$."}
 choose_df <- function(Ys, theta) {
   N <- max(Ys)
   Ns <- rep(N, length(Ys))
@@ -161,15 +172,15 @@ choose_df <- function(Ys, theta) {
 choose_plot <- function(df, logy = FALSE) {
   plot <- 
     ggplot(df, aes(x = y, y = combos)) +
-    geom_line(size=0.2) +
-    geom_point(size=0.2) +
+    geom_point(size = 0.3) +
     scale_x_continuous(breaks = seq(0, 100, by = 20)) +
     xlab("y") +
     ylab(ifelse(logy, "log scale", 
-                       "(N choose y)")) +
+                       "(100 choose y)")) +
     ggtheme_tufte() +
-    theme(axis.title.y = element_text(size=10),
-          axis.text.y=element_blank(),
+    theme(axis.title.x = element_text(size = 14),
+          axis.title.y = element_text(size = 14),
+	  axis.text.y=element_blank(),
           axis.ticks.y=element_blank())
   if (logy) plot <- plot + scale_y_log10()
   plot
@@ -183,10 +194,7 @@ grid.arrange(ggplotGrob(cp), ggplotGrob(lcp),
              ncol = 2)
 ```
 
-Next, we make parallel plots of the probability of any sequence with
-$y$ successes.^[For example, this might be the sequence where all the
-successes come first,
-$$( \, \underbrace{1, 1, \ldots 1}_{y \ \textrm{times}}, 
+Next, we make parallel plots of the probability of single specific sequence with $y$ successes.^[For example, this might be the sequence where all the successes come first, $$( \, \underbrace{1, 1, \ldots 1}_{y \ \textrm{times}},
    \underbrace{0, 0, \ldots, 0}_{N - y \ \textrm{times}}).$$
 The probability of a sequence of successes isn't dependent on the order of the successes, only their total number.]
 
@@ -194,14 +202,14 @@ The probability of a sequence of successes isn't dependent on the order of the s
 seq_plot <- function(df, logy = FALSE) {
   p <-
     ggplot(df, aes(x = y, y = L)) +
-    geom_line(size=0.2) +
-    geom_point(size=0.2) +
+    geom_point(size = 0.3) +
     scale_x_continuous(breaks = seq(0, 100, by = 20)) +
     xlab("y") +
-    ylab(ifelse(logy, "log scale",
-                      "theta^y * (1 - theta)^(N - y)")) +
+    ylab(ifelse(logy, expression("log scale"),
+                      expression(0.8^y * 0.2^(N - y)))) +
     ggtheme_tufte() +
-    theme(axis.title.y = element_text(size=10),
+    theme(axis.title.x = element_text(size = 14),
+          axis.title.y = element_text(size = 14),
           axis.text.y=element_blank(),
           axis.ticks.y=element_blank())
   if (logy) p <- p + scale_y_log10()
@@ -215,23 +223,25 @@ grid.arrange(ggplotGrob(pp), ggplotGrob(lpp),
              ncol = 2)
 ```
 
-Finally, we multiply the number of possible sequences with $y$
+On the linear scale, we multiply the number of possible sequences with $y$
 successes by the probability of a single sequence with $y$ successes,
-to get the probability of drawing any sequence with $y$ successes.
+to get the probability of drawing any sequence with $y$ successes.  On
+the log scale, we add the logarithm of these quantities to get the
+resulting log-scale plot.
 
 ```{r fig.asp = 0.4, fig.cap = "Probability of $y$ successes in 100 independent trials each of which has an 80 percent chance of success. The result is the probability mass function for $\\textrm{binomial}(y \\mid 100, 0.8).$"}
 
 joint_plot <- function(df, logy = FALSE) {
   plot <-
     ggplot(df, aes(x = y, y = P)) +
-    geom_line(size = 0.2) +
-    geom_point(size = 0.2) +
+    geom_point(size = 0.3) +
     scale_x_continuous(breaks = seq(0, 100, by = 20)) +
     xlab("y") +
     ylab(ifelse(logy, "log scale", "Pr[y]")) +
     ggtheme_tufte() +
-    theme(axis.title.y = element_text(size=10),
-          axis.text.y=element_blank(),
+    theme(axis.title.x = element_text(size = 14),
+          axis.title.y = element_text(size = 14),
+	  axis.text.y=element_blank(),
           axis.ticks.y=element_blank())
   if (logy) plot <- plot + scale_y_log10()
   plot
@@ -239,8 +249,63 @@ joint_plot <- function(df, logy = FALSE) {
 
 jp <- joint_plot(choose100_df, logy = FALSE)
 ljp <- joint_plot(choose100_df, logy = TRUE)
-grid.newpage()
-grid.arrange(ggplotGrob(jp), ggplotGrob(ljp),
+grid.arrange(ggplotGrob(jp),  ggplotGrob(ljp),
              ncol = 2)
 ```
+
+## Discrete typical sets and log probability
+
+Continuing our running example, we still suppose
+$$
+Y_1, \ldots, Y_{100} \sim \textrm{bernoulli}(0.8),
+$$
+so that
+$$
+\textrm{sum}(Y) \sim \textrm{binomial}(100, 0.8).
+$$
+Now let's consider a sequence of simulations of $Y$,
+$y^{(1)}, \ldots, y^{(M)}.$  Each such $Y^{(m)}$ consists of 100
+$\textrm{bernoulli}(0.8)$ draws, $Y^{(m)}_1, \ldots, Y^{(m)}_{100}.$
+Let's look at a scatterplot of the log probabilities of the simulated
+$Y$, that is, a scatterplot of the joint log probability of all one
+hundred elements,
+$$
+\begin{array}{rcl}
+\log p_Y(y^{(m)})
+& = &
+\sum_{n = 1}^{100} \log p_{Y_n}(y^{(m)}_n)
+\\[4pt]
+& = &
+\sum_{n = 1}^{100} \log \textrm{bernoulli}(y^{(m)}_n \mid 0.8).
+\end{array}
+$$
+Here's the histogram.
+
+```{r fig.cap = "Histogram of $\\log p_Y(y^{(m)})$ for simulations $y^{(m)}$ of one hundred binary trials with an eighty percent chance of success.  The histogram is spikey because there are only a hundred trials, and thus a small number of possible outcomes.  The number of observed outcomes is even smaller as they are concentrated around the expected value of 80 successes. The dashed line is at the log density of the mode (most likely value for $Y$), which consists of 100 successes.  The observed draws have log probability between -80 and -20, whereas the mode has a log probability greater than 0."}
+
+set.seed(1234)
+M <- 1e5
+N <- 100
+lp <- rep(NA, M)
+for (m in 1:M) {
+  y_m <- rbinom(N, 1, 0.8);
+  lp[m] <- sum(dbinom(y_m, 1, 0.8, log = TRUE))
+}
+
+bern100df <- data.frame(x = lp)
+
+bern100plot <-
+  ggplot(bern100df, aes(x = x)) +
+  geom_histogram(bins = 191,
+                 color = "black", fill = "#ffffe6", size = 0.2) +
+  geom_vline(xintercept = log(sum(dbinom(rep(1, 100), 1, 0.8))),
+             linetype = "dashed", size = 0.2) +
+  xlab("log p(y)") +
+  ggtheme_tufte() +
+  theme(axis.text.y=element_blank(),
+        axis.ticks.y=element_blank())
+bern100plot  
+```
+
+The takeaway message here is that the log probability of the observed draws fall in a narrow interval that's bounded far away from the log probability of the most probabiltiy element (the sequence consisting of all successes).
 

@@ -26,5 +26,6 @@ rmd_files: [
   "mcmc-convergence.Rmd",
   "exponential.Rmd",
   "conjugacy.Rmd",
-  "typical-sets.Rmd"
+  "typical-sets.Rmd",
+  "information-theory.Rmd"
 ]
