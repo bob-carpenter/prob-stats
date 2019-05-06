@@ -157,7 +157,7 @@ scale $\sigma$ increases. The plot also shows that for values of
 $\sigma$, the differential entropy is negative.  Discrete entropy, in
 contrast, is always positive.
 
-## Maximum entropy distribution
+## Maximum entropy distributions
 
 Suppose we have a normally distributed variable with expectation $\mu$
 and standard deviation $\sigma,$
@@ -173,9 +173,214 @@ Then we know that
 $$
 H[U] \geq H[V],
 $$
-with equality only if $V$ is also normally distributed,
-$V \sim \textrm{normal}(\mu, \sigma).$
+with equality only if $V$ is also normally distributed, $V \sim
+\textrm{normal}(\mu, \sigma).$ Another way of saying this is that
+among all possible random variables with a given expectation and
+standard deviation, a normally distributed one has the maximum
+entropy.
 
-Another way of saying this is that among all possible random variables
-with a given expectation and standard deviation, a normally
-distributed one has the maximum entropy.
+## Conditional and joint entropy
+
+Entropy may also be defined conditionally and jointly, just like
+distributions.  We just take expectations of the relevant negative log
+probability functions.
+
+The joint entropy of $X, Y$ is defined as the expectation of the
+negative log joint probability function,
+$$
+\textrm{H}[X, Y]
+\ = \
+\mathbb{E}[\log p_{X,Y}(X, Y)].
+$$
+For example, if $U$ and $V$ are both discrete, their joint entropy is
+defined to be
+$$
+\textrm{H}[U, V]
+\ = \
+\sum_{u \in \mathbb{Z}}
+\
+\sum_{v \in \mathbb{Z}}
+\
+- \log p_{U, V}(u, v)
+\cdot
+p_{U,V}(u, v).
+$$
+
+Similarly, the conditional entropy is the expectation of the log
+conditional,
+$$
+\textrm{H}[Y \mid X]
+\ = \
+\mathbb{E}[\log p_{Y \mid X}(Y \mid X)].
+$$
+The expectation is read in the usual way, by averaging over all of the
+random variables, here $X$ and $Y$.  For example, if $U$ and $V$ are
+both discrete,
+$$
+\textrm{H}[V \mid U]
+\ = \
+\sum_{u \in \mathbb{Z}}
+\
+\sum_{v \in \mathbb{Z}}
+\
+- \log p_{U, V}(u \mid v)
+\cdot
+p_{U, V}(u, v).
+$$
+As usual, the expectation of an expression is calculated by averaging
+over all of the random variables in the expression weighted by their
+probability function.  So whether we take the expectation of $-\log
+p_{U, V}(u, v)$ or $-\log p_{U \mid V}(u \mid v),$ we average all
+outcomes weighted by $p_{U,V}(u, v).$
+
+Conditional and joint entropy satisfy the usual rules of
+probability,^[The derivation is purely algebraic, 
+$$
+\begin{array}{rcl}
+\textrm{H}[X] + \textrm{H}[Y \mid X]
+& = &
+\sum_x - \log p(x) \cdot p(x)
++
+\sum_x \sum_y -\log p(y \mid x) \cdot p(x, y)
+\\[4pt]
+& = &
+\sum_x - \log p(x) \cdot p(x)
++
+\sum_x \sum_y -\log p(y \mid x) \cdot p(y \mid x) \cdot p(x)
+\\[4pt]
+& = &
+\sum_x - \log p(x) \cdot p(x)
++
+\sum_x \left( \sum_y -\log p(y \mid x) \cdot p(y \mid x) \right) \cdot p(x)
+\\[4pt]
+& = &
+\sum_x
+\left(
+  -\log p(x) +
+  \left(
+    \sum_y -\log p(y \mid x) \cdot p(y \mid x)
+  \right)
+\right)  
+\cdot p(x)
+\\[4pt]
+& = &
+\sum_x \sum_y
+\left( -\log p(x) \cdot p(y \mid x) - \log p(y \mid x) \cdot p(y \mid x) \right)
+\cdot p(x)
+\\[4pt]
+& = &
+\sum_x \sum_y -\log p(x, y) \cdot p(x, y)
+\\[4pt]
+& = &
+\textrm{H}[X, Y].
+\end{array}
+$$
+The only tricky step is pulling the summation over $y$ out in the
+third to last step, which is made possible because
+$$
+\sum_y -\log p(x) \cdot p(y \mid x)
+\ = \
+-\log p(x).
+$$
+]
+$$
+\textrm{H}[X, Y]
+\ = \
+\textrm{H}[X]
++
+\textrm{H}[Y \mid X]
+$$
+Entropies add rather than multiply because they are on the log
+probability (or density) scale.
+
+
+
+
+## Divergence
+
+We can think of entropy as being how much information knowing a
+variable's distribution provides about it.  The divergence between two
+distributions is how much less information knowing a related
+distribution provides about a variable.  Like entropy, divergence only
+depends on the distributions and is usually expressed directly as a
+function on distributions.
+
+Suppose $p(y)$ and $q(y)$ are two probability functions.  If $p$ and
+$q$ are discrete, then the divergence from $p$ to $q$ is defined by
+$$
+\begin{array}{rcl}
+\mathrm{D}_{\mathrm{KL}}[p \, || \, q]
+& = &
+\sum_{y \in \mathbb{Z}}
+p(y) \cdot \log \frac{p(y)}{q(y)}
+\\[4pt]
+& = & 
+\sum_{y \in \mathbb{Z}}
+p(y) \cdot \left( \log p(y) - \log q(y) \right)
+\\[4pt]
+& = & 
+\sum_{y \in \mathbb{Z}} p(y) \cdot \log p(y)
+-
+\sum_{y \in \mathbb{Z}} p(y) \cdot \log q(y). 
+\end{array}
+$$
+
+If $p$ and $q$ are continuous, then
+$$
+\begin{array}{rcl}
+\mathrm{D}_{\mathrm{KL}}[p \, || \, q]
+& = &
+\int_{\mathbb{R}}
+p(y) \cdot \log \frac{p(y)}{q(y)} \ \textrm{d}y
+\\[4pt]
+& = & 
+\int_{\mathbb{R}}
+p(y) \cdot \left( \log p(y) - \log q(y) \right) \ \textrm{d}y
+\\[4pt]
+& = & 
+\int_{\mathbb{R}} p(y) \cdot \log p(y) \ \textrm{d}y
+-
+\int_{\mathbb{R}} p(y) \cdot \log q(y) \ \textrm{d}y
+\end{array}
+$$
+
+
+Suppose $Y$ is a random variable such that $p_Y(y) = p(y).$  Then
+whether $Y$ is discrete or continuous (or a mixture), we can
+express the KL-divergence as an expectation,
+$$
+\begin{array}{rcl}
+\mathrm{D}_{\mathrm{KL}}[p_Y \, || \, q]
+& = &
+\mathbb{E}[\log p(Y) - \log q(Y)].
+\\[4pt]
+& = &
+\mathbb{E}[\log p(Y)] - \mathbb{E}[\log q(Y)].
+\\[4pt]
+& = &
+ - \textrm{H}[Y] - \mathbb{E}[\log q(Y)].
+\\[4pt]
+& = &
+-\mathbb{E}[\log q(Y)] - \textrm{H}[Y]
+\end{array}
+$$
+this illustrates that the KL-divergence measures how much worse a
+probability function $q(y)$ is than a variable's own probability
+function $p_Y$ when it comes to expected negative log probability of
+$Y.$  Breaking this down, $-\mathbb{E}[\log q(Y)]$ is the expected
+negative log density of $Y$ under probability function $q(y)$, whereas
+$\textrm{H}[Y]$ is the expected negative log density of $Y$ under its
+own probability function $p_Y(y).$
+
+## Computing divergence with simulation
+
+If we can draw a sample $y^{(1)}, \ldots, y^{(M)}$ according to
+$p_Y(y),$ and we can compute $\log p_Y(y)$ and $\log q(y)$, then we
+can compute the KL-divergence from $p_Y$ to $q$ via simulation as
+$$
+\textrm{D}_{\textrm{KL}}[p_Y \mid q]
+\ \approx \
+\frac{1}{M} \sum_{m = 1}^M
+- \log p_Y(y^{(m)})
++ \log q(y^{(m)}).
+$$
