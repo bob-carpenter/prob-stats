@@ -27,5 +27,6 @@ rmd_files: [
   "exponential.Rmd",
   "conjugacy.Rmd",
   "typical-sets.Rmd",
-  "information-theory.Rmd"
+  "information-theory.Rmd",
+  "divergence.Rmd"
 ]
