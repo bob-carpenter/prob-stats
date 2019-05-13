@@ -272,9 +272,8 @@ p(\theta \mid y_1, y_2)
 p(\theta \mid y_1) \cdot p(y_2 \mid \theta).
 $$
 Displayed this way, the distribution $p(\theta \mid y_1)$ is acting
-like a prior with respect ot the likelihood for the single observation
-$y_2$, $p(y_2 \mid \theta).  Substituting in the actual distributions,
-we have
+like a prior with respect to the likelihood for the single observation
+$y_2$.  Substituting in the actual distributions, we have
 $$
 \begin{array}{rcl}
 p(\theta \mid y_1, y_2)

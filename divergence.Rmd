@@ -239,7 +239,7 @@ $$
 ```{r}
 M <- 1e4
 
-y <- matrix(rnorm(2 * M, 0, 1), M, 2)
+y <- matrix(rnorm(2 * M, 0, 5), M, 2)
 y_corr <- mvrnorm(M, c(0, 0), matrix(c(1, 0.9, 0.9, 1), 2, 2))
 
 kl_div_corr_df <-
@@ -251,7 +251,9 @@ kl_div_indy_df <-
 
 kl_divergence_plot <-
  ggplot(kl_div_indy_df, aes(x = y1, y = y2)) +
- geom_point(data = kl_div_corr_df, aes(x = y1, y = y2)) +
- geom_density_2d(h = 5, n = 100)
+ geom_point(data = kl_div_corr_df, aes(x = y1, y = y2), size = 0.2,
+ alpha = 0.2) +
+ geom_density_2d(h = 5, n = 200)
 kl_divergence_plot
+```
 
