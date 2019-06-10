@@ -17,11 +17,15 @@ $$
 \ = \
 \mathbb{E}[- \log p_Y(Y)].
 $$
-Because we are using the natural logarithm, the units of entropy are
-called *nats*.^[Information theory is often expressed using base 2
-logarithms, which yields units of bits, which are easily interpretable
-as the amount of information in a coin flip, i.e., if 
-$Y \sim \\textrm{bernoulli}(\\frac{1}{2}).$, entropy in bits is 1.]
+
+The logarithm can actually be computed in any base.  It is traditional
+to work in base 2 for discrete probabilities and with natural
+logarithms (base $e$) for continuous (or mixed) quantities.^[We use
+the notation $\log_2$ for base 2 logarithms and continue using simply
+$\log$ for natural logarithms.]
+In base 2, the units are called *bits*, for reasons that will be clear
+shortly; in base $e$, the units are called *nats*.
+
 
 ## Entropy in the discrete case
 
@@ -31,9 +35,9 @@ the expectation expands to a sum over all possible integer values $y
 $$
 \begin{array}{rcl}
 \textrm{H}[Y]
-& = & \mathbb{E}[\log p_Y(y)]
+& = & \mathbb{E}\left[ \log_2 p_Y(y) \right]
 \\[4pt]
-& = & \sum_{y \in \mathbb{Z}} p_Y(y) \cdot \log p_Y(y).
+& = & \sum_{y \in \mathbb{Z}} p_Y(y) \cdot \log_2 p_Y(y).
 \end{array}
 $$
 
@@ -45,8 +49,95 @@ $$
 \theta \cdot \log \theta
 + (1 - \theta) \cdot \log (1 - \theta).
 $$
-We can plot what this looks like for $\theta \in (0, 1)$ to get a
-sense for the behavior of entropy in a simple case.
+
+Let's look at the case where $Y \sim \textrm{Bernoulli}\left(
+\frac{1}{2} \right).$ There is a 50% chance that $Y = 1$ and a 50%
+chance that $Y = 0.$ The entropy is calculated as derived above, 
+$$
+\begin{array}{rcl}
+\mathrm{H}\left[ Y \right]
+& = &
+- \frac{1}{2} \cdot \log_2 \, \frac{1}{2}
+- \frac{1}{2} \cdot \log_2 \, \frac{1}{2}
+\\[4pt]
+& = & -\log_2 \, \frac{1}{2}
+\\[4pt]
+& = & -\log_2 \, 2^{-1}
+\\[4pt]
+& = & - - \log_2 \, 2
+\\[4pt]
+& = & \log_2 \, 2
+\\[4pt]
+& = & 1.
+\end{array}
+$$
+
+The entropy of $Y \sim \textrm{Bernoulli}\left( \frac{1}{2} \right)$
+is one bit.  This provides a natural scale for entropy---a single coin
+flip is a single bit of information.^[Information theory was
+originally applied to coding discrete symbols for transmission.  Morse
+Code, for example, is a way to code the Latin alphabet using binary
+symbols (conventionally written $\cdot$ and $-$).  The genetic code is
+a way of coding amino acids using sequences of three base pairs, each
+of which can take on four possible values (conventionally written `a`,
+`c`, `g`, and `t`).  There is no computer code which can faithfully
+encode the result a sequence of $N$ coin flips that uses fewer than $N$ bits on average.]
+
+Now consider a categorical variable $Z \sim
+\textrm{categorical}(\theta)$, where $\theta = \left( \frac{1}{4},
+\frac{1}{4}, \frac{1}{4}, \frac{1}{4} \right).$ What is the entropy of
+$Z$?^[You may want to take a guess based on the notion of bits
+required to encode outcomes.]
+$$
+\begin{array}{rcl}
+\textrm{H}\left[ Z \right]
+& = &  \sum_{n=1}^4 -\frac{1}{4} \log_2 \frac{1}{4}
+\\[4pt]
+& = & - \log_2 2^{-2}
+\\[4pt]
+& = & 2.
+\end{array}
+$$
+
+As we might have expected, the entropy of rolling a four-sided die is
+$\log_2 4 = 2$ bits.  That's because we can use two computer bits to
+encode a four-way outcome, with codes `00`, `01`, `10`, and `11`.  The
+entropy of the outcome of rolling an eight-side die is $\log_2 8 = 3$
+bits, with codes `000`, `001`, `010`, `011`, `100`, `101` `110`,
+`111`.
+
+What is the entropy of two coin flips, $Y_1, Y_2 \sim
+\textrm{Bernoulli}\left( \frac{1}{2} \right)?$  We just combine them
+into a joint variable $Z = (Y_1, Y_2)$ and proceed as usual, taking
+$$
+\textrm{H}\left[ Z \right]
+\ = \ \mathbb{E}[-\log_2 p_Z(z)].
+$$
+
+The expectation is computed as usual, by enumerating possible values
+for $Z$, which looks like
+$$
+\begin{array}{rcl}
+\textrm{H}\left[ Z \right]
+& = &
+\sum_{y_1 = 0}^1 \sum_{y_2 = 0}^1 \, p_{Y_1, Y_2}(y_1, y_2) \cdot \log
+p_{Y_1, Y_2}(y_1, y_2)
+\\[4pt]
+& = &
+-\frac{1}{4} \cdot \log_2 \frac{1}{4}
+-\frac{1}{4} \cdot \log_2 \frac{1}{4}
+-\frac{1}{4} \cdot \log_2 \frac{1}{4}
+-\frac{1}{4} \cdot \log_2 \frac{1}{4}
+\\[4pt]
+& = &
+-\log_2 4^{-1}
+\\[4pt]
+& = & 2.
+\end{array}
+$$
+
+So far, we've only considered balanced outcomes, as in a coin toss.
+Now suppose that $Y \sim \textrm{bernoulli}(\theta)$.  The following plot shows the entropy $\textrm{H}\left[ Y \right]$ as a functiono f $\theta.$
 
 ```{r, out.width = "100%", fig.asp = 0.4, fig.cap = "Left) entropy of a variable $Y \\sim \\textrm{bernoulli}(\\theta)$ as a function of $\\theta.$ Right) standard deviation of the same variable as a function of $\\theta.$ The shapes are not identical, but share the same mode of $\\theta = 0.5$ and mimima at $\\theta = 0$ and $\\theta = 1.$"}
 
