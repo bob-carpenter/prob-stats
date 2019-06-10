@@ -888,3 +888,208 @@ Thus after all the dust has settled, we know that if $\Theta \sim
 \mbox{uniform}(0, 1)$ and $\Phi = \mbox{logit}(\Theta)$, then $\Phi
 \sim \mbox{logistic}(0, 1)$.^[The meaning of the parameters 0 and
 1 will be explained in the next section.]
+
+## Exponential distributions
+
+We have already seen that if we take a uniformaly distributed variable,
+$$
+U \sim \textrm{uniform}(0, 1),
+$$
+and log-odds transform it to
+$$
+V = \textrm{logit}(U),$
+$$
+the resulting variable has a standard logistic
+distribution,
+$$
+V \sim \textrm{logistic}(0, 1).
+$$
+
+In this section, we consider a negative log transform,
+$$
+Y = -\log U,
+$$
+We know that if $U \in (0, 1)$, then $\log U \in (-\infty, 0)$, and hence
+$$
+Y = -\log U \in (0, \infty).
+$$
+
+Let's plot a histogram of simulated values of $Y$ to see what its
+density looks like.  The simulation is trivial.
+```
+u = uniform_rng(0, 1)
+y = -log(u)
+```
+
+We'll generate $M = 10^6$ draws and calculate some summary statistics.
+
+```{r}
+printf("mean(y) = %3.2f\n", mean(y))
+printf("sd(y) = %3.2f\n", sd(y))
+printf("central 95 pct interval = (%3.2f, %3.2f)\n",
+       quantile(y, 0.025), quantile(y, 0.975))
+printf("min = %3.2f;  max = %3.2f", min(y), max(y))
+```
+
+It's clear that the variable has a mean and standard deviation of one,
+but is highly right skewed.  
+
+```{r fig.cap="Histogram of $M = 10^6$ draws from $U \\sim \\textrm{uniform}(0, 1)$ transformed to $Y = -\\log U.$  The mean and standard deviation are 1, but the distribution is highly right skewed."}
+
+y = -log(runif(1e6))
+exp_df <- data.frame(y = y)
+exp_hist_plot <-
+  ggplot(exp_df, aes(x = y)) +
+  geom_histogram(color = "black", fill = "#ffffe6",
+                 size = 0.25, bins = 100) +
+  xlab("y") +
+  ylab("count") +
+  ggtheme_tufte() +
+  theme(axis.text.y = element_blank(),
+        axis.ticks.y = element_blank())
+exp_hist_plot
+```
+
+While the histogram plot lets us visualize the density, we can also
+derive the density $p_Y$ from the uniform density $p_U$ given the
+transform
+$$
+Y \ = \ f(U) \ = \ -\log U.
+$$
+First, we calculate the inverse transform,
+$$
+\begin{array}{rcl}
+Y & = & -\log U \\[3pt]
+-Y & = & \log U \\[3pt]
+\exp(-Y) & = & U
+\end{array}
+$$
+so that
+$$
+f^{-1}(Y) = \exp(-U).
+$$
+We'll need the derivative of this inverse for the Jacobian,^[We need
+to employ the chain rule here,
+$$
+\frac{\textrm{d}}{\textrm{d}x} a(b(x))
+\ = \
+\left( \frac{\textrm{d}}{\textrm{d}u} a(u) \Bigg|_u = b(x) \right)
+ \cdot
+\left( \frac{\textrm{d}}{\textrm{d}{x}} b(x) \right),
+$$
+with $a(u) = \exp(u)$ and $b(x) = -x.$
+]
+$$
+\begin{array}{rcl}
+\frac{\textrm{d}}{\textrm{d}y} f^{-1}(y)
+& = & \frac{\textrm{d}}{\textrm{d}y} \exp(-y)
+\\[4pt]
+& = & -\exp(-y).
+\end{array}
+$$
+We can now derive the density of $Y = f(U) = -\log U$, where $U \sim
+ \textrm{uniform}(0, 1),$
+$$
+\begin{array}{rcl}
+p_Y(y)
+& = &
+p_U(f^{-1}(y))
+\cdot
+\left|
+\frac{\textrm{d}}{\textrm{d}y} \exp(-y)
+\right|
+\\[8pt]
+& = &
+\textrm{uniform}(f^{-1}(y) \mid 0, 1)
+\cdot
+\left| -\exp(-y) \right|
+\\[8pt]
+& = & \exp(-y).
+\end{array}
+$$
+The result, as simple as it looks, is a properly normalized
+density.^[Given the derivative $$\frac{\textrm{d}}{\textrm{d}y}
+-\exp(-y) \ = \
+\exp(-y),$$ the basic rule for computing definite integrals,
+$$
+\begin{array}{rcl}
+\int_a^b f(x) \, \textrm{d}x
+& = &
+\int f(x) \, \textrm{d}x \, \Big|_{x = b}
+\ - \ 
+\int f(x) \, \textrm{d}x \, \Big|_{x = a}
+\\[6pt]
+& = & -\exp(-x)\Big|_{x = b} - -\exp(-x)\Big|_{x = a}
+\\[6pt]
+& = & -\exp(-b) + \exp(-a).
+\end{array}
+$$
+Plugging in $a = 0$ and $b = \infty$ (the latter is really taking a
+limit), gives us $$-\exp(-\infty) + \exp(-0) = 0 + 1 = 1.$$]
+
+This distribution is popular enough to get its own name, the
+exponential distribution, the standard version of which is
+conventionally defined by
+$$
+\textrm{exponential}(y \mid 1) = \exp(-y).
+$$
+As for other distributions, we will write $Y \sim
+\textrm{exponential}(1)$ if $p_Y(y) = \textrm{exponential}(y) =
+\exp(-y).$
+
+We will generalize the standard exponential by allowing it to be
+scaled.  Unlike the normal distribution, which scales a standard
+normal by multiplying it by a scale parameter, it is convential to
+divide a standard exponential variate by a rate parameter to get a
+general exponential variate.  Suppose $V \sim \textrm{exponential}(1)$
+and we define a new variable $Y = V / \lambda$ for some rate $\lambda
+> 0.$^[A rate parameter divides a variable in contrast to a rate
+parameter, which multiplies a parameter.]  This gives us a general
+exponential variate, $Y \sim \textrm{exponential}(\lambda).$
+
+To define the general exponential density, we just apply the Jacobian
+formula again, keeping in mind that our transform is
+$$
+h(V) = V / \lambda,
+$$
+which has an inverse
+$$
+h^{-1}(Y) = \lambda \cdot Y.
+$$
+Plugging this into the formula for a change of variables, we get
+$$
+\begin{array}{rcl}
+p_Y(y)
+& = &
+p_V\left(h^{-1}(y)\right)
+\cdot
+\left|
+\frac{\textrm{d}}{\textrm{d}y} h^{-1}(y)
+\right|
+\\[8pt]
+& = &
+p_V(\lambda \cdot y)
+\cdot
+\left| \frac{\textrm{d}}{\textrm{d}y} \lambda \cdot y \right|
+\\[8pt]
+& = &
+\exp(-\lambda \cdot y)
+\cdot
+\lambda.
+\end{array}
+$$
+This gives us the final form of the exponential distribution,
+$$
+\textrm{exponential}(y \mid \lambda)
+\ = \
+\lambda \cdot \exp(-\lambda \cdot y).
+$$
+
+By construction, we know that if the standard distribution has a mean
+of 1, then the transformed version has a mean of $1 / \lambda.$
+Similarly, the trasnformed version also has a standard deviation of $1
+/ \lambda$.^[The inverse cumulative distribution function for the
+standard exponential is just the function $-\log u$ used to construct
+the variable.  It is thus simple symbolically to derive the cumulative
+distribution function and the generalized version with a non-unit rate.]
+
