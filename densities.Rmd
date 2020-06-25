@@ -897,7 +897,7 @@ U \sim \textrm{uniform}(0, 1),
 $$
 and log-odds transform it to
 $$
-V = \textrm{logit}(U),$
+V = \textrm{logit}(U),
 $$
 the resulting variable has a standard logistic
 distribution,
@@ -932,7 +932,7 @@ printf("min = %3.2f;  max = %3.2f", min(y), max(y))
 ```
 
 It's clear that the variable has a mean and standard deviation of one,
-but is highly right skewed.  
+but is highly right skewed.
 
 ```{r fig.cap="Histogram of $M = 10^6$ draws from $U \\sim \\textrm{uniform}(0, 1)$ transformed to $Y = -\\log U.$  The mean and standard deviation are 1, but the distribution is highly right skewed."}
 
@@ -1016,7 +1016,7 @@ $$
 \int_a^b f(x) \, \textrm{d}x
 & = &
 \int f(x) \, \textrm{d}x \, \Big|_{x = b}
-\ - \ 
+\ - \
 \int f(x) \, \textrm{d}x \, \Big|_{x = a}
 \\[6pt]
 & = & -\exp(-x)\Big|_{x = b} - -\exp(-x)\Big|_{x = a}
@@ -1092,4 +1092,3 @@ Similarly, the trasnformed version also has a standard deviation of $1
 standard exponential is just the function $-\log u$ used to construct
 the variable.  It is thus simple symbolically to derive the cumulative
 distribution function and the generalized version with a non-unit rate.]
-
