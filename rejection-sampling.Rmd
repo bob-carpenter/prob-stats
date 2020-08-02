@@ -27,7 +27,7 @@ y^{(m)} = F^{-1}(u^{(m)}).
 $$
 
 It turns out we've already seen an example of this strategy---it is
-how we we simulated from a logistic distribution right off the bat.
+how we simulated from a logistic distribution right off the bat.
 The log odds transform is the inverse cumulative distribution function
 for the logistic distribution. That is, if
 
@@ -190,7 +190,7 @@ vanishingly narrow in order to keep the total area at one.]
 
 ## Uniform, bounded rejection sampling
 
-How do we sample from a beta distribution?  Rejection sampling is
+How do we sample from a beta distribution?  Rejection sampling is a
 very simple algorithm to sample from general distributions for which
 we know how to compute the density.  It is a good starter algorithm
 because it is easy to understand, but points the way toward more

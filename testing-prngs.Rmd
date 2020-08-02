@@ -31,7 +31,7 @@ $$
 
 The pseudocode for generating the next random number given the
 previous random number is a one-liner.^[Such a function is typically
-set up as an iterator with either object-encapsulated or static storge
+set up as an iterator with either object-encapsulated or static storage
 of its arguments.]
 
 ```
@@ -135,7 +135,7 @@ printf("sample variance = %3.3f", var(y_unif))
 
 Because $\frac{1}{12} \approx 0.083$, it looks like we're in the right
 ballpark.  How do we turn these into proper tests, though?  We can't
-just eybeall the results every time.
+just eyeball the results every time.
 
 The central limit theorem gives us the ability to characterize the
 behavior of sample averages, which is what both mean and variance
@@ -150,9 +150,9 @@ $(N \times 12)^{-\frac{1}{2}} = \sqrt{\frac{1}{N \times 12}}$.
 We can use the variance of the mean estimate to formulate a
 probabilistic test that the mean is truly distributed as
 $\mbox{normal}\left( 0.5, (N \times 12)^{-\frac{1}{2}} \right)$.  Thus we would
-expect 99.9% of the draws to be within three standad deviations, or
+expect 99.9% of the draws to be within three standard deviations, or
 $\pm 3 \times (N \times 12)^{-\frac{1}{2}}$.  With the $10\,000$ draws
-we took, this is approximately 0.0029$, so it looks like the first run
+we took, this is approximately $0.0029$, so it looks like the first run
 of the mean test passed to within a single standard deviation.
 
 ## Probabilistic tests and false positives
@@ -175,7 +175,7 @@ normal and can be tested.  This is possible, and can lead to better
 tests, but starts to get computationally prohibitive for large number
 of draws per test.
 
-The problem of requiring probabilistic tests for pobabilistic programs
+The problem of requiring probabilistic tests for probabilistic programs
 pervades all of statistical software engineering.  There's no easy
 solution.
 
@@ -267,11 +267,11 @@ u <- y / 2^16
 m <- sum(u < 0.5)
 a <- pbinom(m, M, 0.5)
 printf('m = %d out of M = %d', m, M)
-printf('reject unformity with p-value %3.2f',
+printf('reject uniformity with p-value %3.2f',
        ifelse(a < 0.5, a, 1 - a))
 ```
 
-So our smapler passes this simple test.  Ideally we'd want to test it
+So our sampler passes this simple test.  Ideally we'd want to test it
 with a range of seeds to make sure passing isn't seed dependent as it
 may be in these simple pseudorandom number generators.
 
@@ -287,10 +287,10 @@ is well approximated by $\mbox{normal}(N \times \theta, \sqrt{N \times
 \theta \times (1 - \theta)})$ as $N$ grows.]
 
 The chi-squared test is going to require the domain of the variable
-being tested to be divided into $K$ exclusive and exhausive regions.
+being tested to be divided into $K$ exclusive and exhaustive regions.
 We'll assume that's done by dividing the domain into intervals with
 dividing points points $a_1, \ldots, a_{K-1}$, producing the
-folllowing intervals.^[As before, we needn't worry about points on the
+following intervals.^[As before, we needn't worry about points on the
 boundaries as they have probability zero.]
 
 $$
@@ -340,11 +340,11 @@ chi-squared distribution. Specifically, if $$Y_1, \ldots, Y_N \sim
 - 1$ degrees of freedom.  The subtraction of $E_k$ and division by
 $\sqrt{E_k}$ normalizes the distribution so that approximately
 $$\frac{z_k - E_k}{\sqrt{E_k}} \sim \mbox{normal}(0, 1),$$ with the
-approximation being optimal when the probabilty of success on which
+approximation being optimal when the probability of success on which
 the draws are based is 0.5.]  That means that if the null hypothesis
 of the distribution of pseudorandom numbers being uniform is correct,
 then we can set up the same kind of central hypothesis test as for the
-ibnomial test.  Specifically, we'll reject the null hypothesis that
+binomial test.  Specifically, we'll reject the null hypothesis that
 the pseudorandom number generator is behaving properly at significance
 level $\alpha$ if
 
@@ -358,7 +358,7 @@ $$
 \mbox{chi\_squared\_cdf}(X_2, K - 1) > 1 - \frac{\alpha}{2}.
 $$
 
-That is, we reject the null hypothesis at signifiance level $\alpha$
+That is, we reject the null hypothesis at significance level $\alpha$
 if the test statistic $X^2$ is outside of the central $1 - \alpha$
 interval of the chi-squared distribution.
 

@@ -45,7 +45,7 @@ y^*
 ( \underbrace{1, 1, \ldots, 1}_{100 \ \textrm{times}} ).
 \end{array}
 $$
-Although a straight run of succesess is the most likely result,
+Although a straight run of successes is the most likely result,
 given that it requires one hundred consecutive successes with only an
 eighty percent chance each, the overall probability is still very low.
 $$
@@ -104,7 +104,7 @@ How do we reconcile the fact that we expect to see eighty successes
 when one hundred successes being the most likely outcome?  By
 considering the fact that there is only a single sequence among the
 $2^{100} \approx 10^{30}$ possible outcomes that constitutes all
-successes, wheras there are a whole lot of sequneces $Y$ with eighty
+successes, whereas there are a whole lot of sequences $Y$ with eighty
 successes and twenty failures.  In fact, there are a whopping
 $$
 \binom{100}{80}

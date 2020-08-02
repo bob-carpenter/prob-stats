@@ -21,7 +21,7 @@ or more.]
 
 A floating point number consists of a fixed number of bits for a
 *significand* $a$ and a fixed number of bits for the *exponent* $b$ to
-represent the the real number $a \times 2^b$.  The significand
+represent the real number $a \times 2^b$.  The significand
 determines the precision of results and the exponent the range of
 possible results.^[This exponent causes the decimal place to float,
 giving the representation its name.]  The significand may be negative
@@ -139,7 +139,7 @@ $10^{-323}$ underflows to zero.]
 
 ## Working on the log scale
 
-Becuase of the everpresent threat of underflow in statistical
+Because of the everpresent threat of underflow in statistical
 calculations, we almost always work on the log scale.  Let's try that
 calculation again, only now, rather than calculating
 
@@ -184,7 +184,7 @@ print 'prob = ' p
 
 We have replaced the variable `p` representing the probability with
 a variable `log_p` representing the log probability.  Where `p` was
-initialized to $1$, `log_p` is initialized to $\log 1 = 0.$.  Where
+initialized to $1$, `log_p` is initialized to $\log 1 = 0$.  Where
 the probability of each case was multiplied into the total, the log
 probability is added to the total.  Let's see what happens with $N =
 2000$.  
@@ -345,5 +345,4 @@ somehow left with only 3 digits of precision.  In statistical
 computing, this problem arises in calculating variances, which involve
 differences of variates from the mean---when variance is low relative
 to the mean, catastrophic cancellation may arise.
-
 

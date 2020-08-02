@@ -205,13 +205,13 @@ $$
 
 Thinking of the exponents $y$ and $N - y$ as success and failure
 counts respectively, we can think of the exponents $\alpha - 1$ and
-$\beta - 1$ as the prior number of succcesses and failures.^[The prior
+$\beta - 1$ as the prior number of successes and failures.^[The prior
 counts are $\alpha - 1$ and $\beta - 1$ for a total prior count of
 $\alpha + beta - 2$.  The reason for the subtraction is that
 $\textrm{beta}(1, 1)$ is the uniform distribution, so $\alpha = 1, \beta
 = 1$ corresponds to a prior count of zero.]  We then just add the
 prior successes and the likelihood successes to get $y + \alpha - 1$
-posterior succesess; the prior failures work similarly, with $\beta -
+posterior successes; the prior failures work similarly, with $\beta -
 1$ prior failures and $N - y$ observed failures producing a $N - y +
 \beta - 1$ posterior failure count.
 

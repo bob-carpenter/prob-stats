@@ -199,7 +199,7 @@ We see that the extreme values have an outsized influence on the sum
 of squared errors.  That's because we're dealing with squared error,
 which reduces small errors (e.g., $0.5^2 = 0.25$) and magnifies large
 errors (e.g., $5^2 = 25$).  We can see a plot of the squared
-differences from the mean that wold be involved in calculating
+differences from the mean that would be involved in calculating
 the variance of a 20-sided die.
 
 ```{r fig.cap="Squared differences from the mean of 10.5 for a 20-sided die roll.  The mean is indicated with a dashed vertical line."}
@@ -259,7 +259,7 @@ terms of squared error.
 
 The difficulty in managing variance is that it has different units
 than the variable it is measuring the variation of.  For example, if
-$Y$ reprents the fill of a bottle with units in milliliters, then
+$Y$ represents the fill of a bottle with units in milliliters, then
 $\mathrm{var}[Y]$ has units of squared milliliters.  Squared
 milliliters are not natural.  As we saw even with the calculation for
 a single six-sided die, values of 1 and 6 had 6.25 squared difference
