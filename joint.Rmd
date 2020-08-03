@@ -15,7 +15,7 @@ Suppose the random variable $Z \in 0:1$ represents whether a
 particular subject has a specific disease.^[$Z = 1$ if the subject has
 the disease and $Z = 0$ if not.]  Now suppose there is a diagnostic
 test for whether a subject has the disease.  Further suppose the
-random variabel $Y \in 0:1$ represents the result of applying the test
+random variable $Y \in 0:1$ represents the result of applying the test
 to the same subject.^[$Y = 1$ if the test result is positive and $Y =
 0$ if it's negative.]
 
@@ -114,7 +114,7 @@ $$
 $$
 
 In words, the probability of events $\mathrm{A}$ and $\mathrm{B}$ occurring is the same
-as the probability of event $\mathrm{B}$ occurring times the probabilty of $\mathrm{A}$
+as the probability of event $\mathrm{B}$ occurring times the probability of $\mathrm{A}$
 occurring given that $\mathrm{B}$ occurs.
 
 The relation between joint and conditional probability involves simple
@@ -278,7 +278,7 @@ Recall that `z == 0`
 is an array where entry $m$ is 1 if the condition holds, here $z^{(m)}
 = 0$.
 
-The resulting etsimates with $M = 100\,000$ draws are pretty close to
+The resulting estimates with $M = 100\,000$ draws are pretty close to
 the true values,
 
 ```{r}
@@ -341,7 +341,7 @@ $$
 
 Similarly, we can work out the probability the remaining probabilities
 in the same way, for example, the probability of a subject having the
-disase and getting a negative test result,
+disease and getting a negative test result,
 
 $$
 \begin{array}{rcl}
@@ -545,7 +545,7 @@ $$
        \sum_{y' \in 1:K} \mbox{Pr}[Z = z \mid Y = y'] \times \mbox{Pr}[Y = y']}.
 $$
 
-This allows us to express Bayes's rule in terms of probabilty mass
+This allows us to express Bayes's rule in terms of probability mass
 functions as
 
 $$

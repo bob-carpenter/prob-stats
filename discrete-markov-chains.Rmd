@@ -243,7 +243,7 @@ plot_ruin
 ```
 
 Next, we'll tackle the problem of estimating the probability that a
-gambler has been run out of money at time $t$. In symbols, we are
+gambler has run out of money at time $t$. In symbols, we are
 going to use simulations $y^{(1)}, \ldots, y^{(M)}$ of the gambler's
 time series,
 
@@ -360,7 +360,7 @@ half percent chance of deciding to go to the store any hour. If we
 repeat, the mean number of arrivals is 5 and the standard deviation is
 2.2.
 
-Let's suppose that a cleark can serve up to $V_t$ customers per hour,
+Let's suppose that a clerk can serve up to $V_t$ customers per hour,
 determined by the clerk's rate $\phi$,
 
 $$
@@ -427,4 +427,4 @@ queue_plot <-
 queue_plot
 ```
 
-As can be seen in the plot, the queue not growing out of control is very sensitive to the average service rate per hour.  At an average rate of five cusotmers served per hour (matching the average customer intake), the queue quickly grows out of control.  With as few as five and a half customers served per hour, on average, it becomes stable long term; with seven customers served per hour, things settle down considerably.  When the queue goes up to 50 people, as it does with $\phi = 0.0055$, wait times are over ten hours.  Because of the cumulative nature of queues, a high server capacity is required to deal with spikes in customer arrival.
+As can be seen in the plot, the queue not growing out of control is very sensitive to the average service rate per hour.  At an average rate of five customers served per hour (matching the average customer intake), the queue quickly grows out of control.  With as few as five and a half customers served per hour, on average, it becomes stable long term; with seven customers served per hour, things settle down considerably.  When the queue goes up to 50 people, as it does with $\phi = 0.0055$, wait times are over ten hours.  Because of the cumulative nature of queues, a high server capacity is required to deal with spikes in customer arrival.

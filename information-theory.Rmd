@@ -137,9 +137,9 @@ p_{Y_1, Y_2}(y_1, y_2)
 $$
 
 So far, we've only considered balanced outcomes, as in a coin toss.
-Now suppose that $Y \sim \textrm{bernoulli}(\theta)$.  The following plot shows the entropy $\textrm{H}\left[ Y \right]$ as a functiono f $\theta.$
+Now suppose that $Y \sim \textrm{bernoulli}(\theta)$.  The following plot shows the entropy $\textrm{H}\left[ Y \right]$ as a function of $\theta.$
 
-```{r, out.width = "100%", fig.asp = 0.4, fig.cap = "Left) entropy of a variable $Y \\sim \\textrm{bernoulli}(\\theta)$ as a function of $\\theta.$ Right) standard deviation of the same variable as a function of $\\theta.$ The shapes are not identical, but share the same mode of $\\theta = 0.5$ and mimima at $\\theta = 0$ and $\\theta = 1.$"}
+```{r, out.width = "100%", fig.asp = 0.4, fig.cap = "Left) entropy of a variable $Y \\sim \\textrm{bernoulli}(\\theta)$ as a function of $\\theta.$ Right) standard deviation of the same variable as a function of $\\theta.$ The shapes are not identical, but share the same mode of $\\theta = 0.5$ and minima at $\\theta = 0$ and $\\theta = 1.$"}
 
 theta <- seq(0.001, 0.999, by = 0.001)
 H_theta <- - (theta * log(theta) + (1 - theta) * log(1 - theta))

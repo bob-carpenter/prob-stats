@@ -8,7 +8,7 @@ data $\tilde{y}$ given the observed data $y$.
 
 We are going to assume that we are still working relative to a model
 whose sampling distribution has a density $p(y \mid \theta)$.^[From
-now on, we'll be dropping random variable subscripts on probabilty
+now on, we'll be dropping random variable subscripts on probability
 functions.  The convention in applied statistics is to choose names
 for bound variables that allow the random variables to be determined
 by context.  For example, we will write $p(\theta \mid y)$ for a
@@ -173,7 +173,7 @@ developer.]
 for (m in 1:M)
   draw theta(m) from posterior p(theta | y, N)
 p = binomial(y_pred | N_pred, theta)
-print 'esimated p(y_pred | y) = ' mean(p)
+print 'estimated p(y_pred | y) = ' mean(p)
 ```
 
 Let's continue with the small data example, where $y = 3$ and $N =
@@ -182,7 +182,7 @@ the next twenty observations and calculate the probability for each
 possible $\tilde{y} \in 0:\tilde{N}$.  Then we'll plot them in a bar
 chart to inspect the distribution.
 
-```{r fig.cap = 'Probablity mass function for the posterior predictive distribution of the number of boys, $\\theta^{*} = \\frac{y}{N} = 0.3$, into the sampling distribution, to yield $\\mbox{binomial}(\\tilde{y} \\mid \\tilde{N}, \\theta^{*})$.  Compared to the full posterior taking into account estimation uncertinaty in $\\theta$, this plug-in estimate makes it seem very unlikely there will be more boys than girls born in the next 20 births.'}
+```{r fig.cap = 'Probability mass function for the posterior predictive distribution of the number of boys, $\\theta^{*} = \\frac{y}{N} = 0.3$, into the sampling distribution, to yield $\\mbox{binomial}(\\tilde{y} \\mid \\tilde{N}, \\theta^{*})$.  Compared to the full posterior taking into account estimation uncertainty in $\\theta$, this plug-in estimate makes it seem very unlikely there will be more boys than girls born in the next 20 births.'}
 
 set.seed(1234)
 log_sum_exp <- function(u) max(u) + log(sum(exp(u - max(u))))
@@ -309,7 +309,7 @@ observations, the posterior predictive distribution is only a percent
 or two away from the predictions that do not take into account
 estimation uncertainty. Whether that matters or not will depend on the
 application.^[If leveraged bets or lives are at stake, a 1%
-discrepancey in predictions can have enormous consequences.]
+discrepancy in predictions can have enormous consequences.]
 
 ## Numerically stable expectations on the log scale
 
@@ -355,7 +355,7 @@ $$
 \end{array}
 $$
 
-Extending our example, we can work on the log scale to stablize
+Extending our example, we can work on the log scale to stabilize
 calculations with larger $N$ by calculating 
 
 $$

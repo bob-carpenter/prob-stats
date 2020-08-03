@@ -187,7 +187,7 @@ A function defined as above is said to be the *probability mass
 function* of the random variable $Z$.  Every discrete random variable has
 a unique probability mass function.
 
-Probablity mass functions represent probabilities of a discrete set of
+Probability mass functions represent probabilities of a discrete set of
 outcomes.  The sum of all such probabilities must be one because at
 least one of the outcomes must occur.^[More formally, if $Y$ is a
 discrete random variable, then $$\sum_u \, p_Y(u) = 1,$$ where the
@@ -535,7 +535,7 @@ ccum_d20_plot
 
 ## Infinite discrete random variables
 
-Consider an experiment in which a coin is tossed until a heads appears
+Consider an experiment in which a coin is tossed until a heads appears.
 Let the random variable $U$ be the number of tosses that came up tails
 before the first head comes up.  The legal sequences are H (0 tails),
 TH (1 tails), TTH (2 tails), and so on.  There is no upper limit to
@@ -705,7 +705,7 @@ for (m in 1:M)
 print 'est Pr[U <= 3] = ', sum(leq3) / M
 ```
 
-Let's see what we get with $M = $100\,000$,
+Let's see what we get with $M = 100\,000$,
 
 ```{r}
 set.seed(1234)
@@ -718,7 +718,7 @@ for (m in 1:M) {
 printf('est Pr[U <= 3] = %4.3f\n', sum_leq3 / M)
 ```
 
-Writing out the analytic answer involves an infinte sum,
+Writing out the analytic answer involves an infinite sum,
 
 $$
 \mbox{Pr}[U \leq 3]
@@ -768,7 +768,7 @@ dimensions and uncountably worse with continuous random variables.]
 ## The Chevalier de Méré's challenge
 
 Antoine Gombaud, the Chevalier de Méré,^[Self appointed!] challenged
-Blaise Pascal to explain how it was possible that thre probability of
+Blaise Pascal to explain how it was possible that the probability of
 throwing at least one six in four throws of a single six-sided die is
 slightly greater than $\frac{1}{2}$, whereas the probability of
 throwing two sixes in 24 throws of a pair of six-sided die was
@@ -798,7 +798,7 @@ Z \ = \
 $$
 
 That is, $Z = 1$ if there is at least one double-six in the 24 throws.
-The Chevalier de Méré was inquiring about the the value of the event
+The Chevalier de Méré was inquiring about the value of the event
 probability $\mbox{Pr}[Z = 1]$, i.e., the chance of winning by
 throwing at least one double six in 24 fair throws of a pair of dice.
 
@@ -961,7 +961,7 @@ this standard notion of error arises when the estimand $y$ is very
 small or very large.
 
 Now consider an estimand of $y = 0.01$ and an estimate of $\hat{y} =
-0.015$.  The error is just $y - \hat{y}$ = 0.005$, which looks small.
+0.015$.  The error is just $y - \hat{y} = 0.005$, which looks small.
 But compared to the magnitude of $y$, which is only 0.01, the error
 is relatively large.
 
@@ -1048,7 +1048,7 @@ large bankroll and many repetitions to avoid ruin.]
 Suppose we have a sequence of random variables, $V_1, \ldots, V_N$,
 each with a Bernoulli distribution $V_n \sim
 \mathrm{Bernoulli}(\theta)$.  That is, each $V_n$ takes on the value 1
-with a probabilty of $\theta$.
+with a probability of $\theta$.
 
 We can think of $V_1, \ldots, V_N$ as $N$ repeated binary trials, each
 with a $\theta$ chance of success.^[The term "success" is the

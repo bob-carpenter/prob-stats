@@ -40,19 +40,19 @@ possible.
 ## Calibration 
 
 With statistical models, forecasts take on the form of posterior
-probabilty distributions conditioned on some observed data.
+probability distributions conditioned on some observed data.
 
 
 Given a prior distribution $p(\theta)$ and sampling function $p(y \mid
 \theta)$, we observe data $y$ and calculate a posterior distribution
-over the model's parameters with density $p(\theta \ mid y)$.
+over the model's parameters with density $p(\theta \mid y)$.
 Although the posterior is a distribution, we calculate it by means of
 a finite number of simulated values $\theta^{(1)}, \ldots,
 \theta^{(M)}$.
 
 A posterior distribution provides probability statements about the
 parameters $\theta$ conditioned on observing data $y$.  For example,
-they provide interval probalities, such as $\mbox{Pr}[\theta > 0.5
+they provide interval probabilities, such as $\mbox{Pr}[\theta > 0.5
 \mid y]$ or $\mbox{Pr}[0.21 < \theta < 0.32 \mid y]$.
 
 We would like these event probabilities to be calibrated in the sense
