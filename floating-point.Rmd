@@ -179,7 +179,7 @@ We can verify that it works by coding it up.
 log_p = 0
 for (n in 1:N)
   log_p += bernoulli(y[n] | 0.5)
-print 'prob = ' p
+print 'prob = ' log_p
 ```
 
 We have replaced the variable `p` representing the probability with
