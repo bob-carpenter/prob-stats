@@ -7,7 +7,7 @@ A reproducible, open-access book (BSD-3 code, CC-BY ND 4.0 text).
 * *System Prerequisites*:  `pandoc` and `pandoc-citeproc` must be installed on
   the operating system and available to be executed on the system `PATH`.
 
-* *R Prerequisitea*: All of the packages found in
+* *R Prerequisites*: All of the packages found in
   [`before-chapter.R`](before-chapter.R) must be installed: As of now,
   this includes `ggplot2`, `grid`, `gridExtra`, `knitr`, `MASS`,
   `reshape`, `rstan`, `tufte`, and `bookdown`.
