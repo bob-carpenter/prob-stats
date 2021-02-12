@@ -1,0 +1,30 @@
+language: r
+sudo: false
+cache: packages
+pandoc_version: 2.6
+warnings_are_errors: false
+git:
+  depth: 3
+r_packages:
+- bookdown
+- rstan
+- tufte
+before_install:
+- mkdir -p ~/.R
+- echo "CXX14FLAGS=-O3 -mtune=native -march=native -Wno-unused-variable -Wno-unused-function  -Wno-macro-redefined" >> ~/.R/Makevars
+- echo "CXX14=g++ -std=c++1y -fPIC" >> ~/.R/Makevars
+install:
+- Rscript -e "install.packages(c('bookdown', 'rstan', 'tufte', 'ggplot2', 'reshape'))"
+script:
+- Rscript -e "bookdown::render_book('index.Rmd')"
+deploy:
+  provider: pages
+  local-dir: _book
+  skip-cleanup: true
+  github-token: "$GITHUB_PAT"
+  keep-history: true
+  on:
+    branch: master
+env:
+  matrix:
+    secure: C99EH1DMm0DXLudLd0a+3VIf2KDtAzF6BlJe8gMybuVVpv2FtmgduhcZ3SQRAZ89c1p1N37ydYt16EjnUeCZlPoVGICkxXR9/4f5FS0hhl+H5wRU57ept0QJUkp5ohPFEhz970Kv2jI49H7nHVwMIXsfX4VNW/brN3lBRPTGQPa62pC36e365pnf0gUVN2CVGhgIJKxlTQQCntdoPjT9J9ikG0+3bRhBVqpM8GhYcqL0FC8LbDmzLyl7i419WfIgGSKSjtnNq7GxjrDwzd9q7rad7mNtyXrYgpXFE2rCyp5waiyGE3J9w0yNZi4JbBeg8w75JEVWDc8UELnWBfezS0A9sW/vMHO0iMLdjvWM1d++1IynHDCngB8FiMPoZghxB04gusBuiLYlepwFzACVnspI3k24h5UiDfM7kB3u/5Sqz4VEM0h6N8BxKRYYEoNmeAHfA4EGDh1FCn5bcLT8F1XDHWFoT10JKyFph2MxByM4QtlNyFs0PaCjKfWeLg2M5KzMnmmnjgaFj7YyLBFKTedAyhiKj/UbJ9hqJ5OVwxqEX2kOQJr1E4wy/ynmyUbHCmrMysUI0B1miXYU7XbrQSw9EW6HRkfxb7rNiYc1QKhryN5tbxE2YMx87D9iMWnVj4gTKesutybmVnrHFh29sUymbDhth0onMkA5OxWs5T8=
