@@ -407,8 +407,8 @@ plot
 With a log-scaled $x$-axis, the values between 1 and 10 are plotted
 with the same width as the values between $10\,000$ and $100\,000$;
 both take up 20% of the width of the plot. On the linear scale, the
-values between 1 and 10 take up only $\frac{10}{100\,000}$, or 0.01%$,
-of the plot, wehreas values between $10\,000$ and $100\,000$ take up
+values between 1 and 10 take up only $\frac{10}{100\,000}$, or 0.01%,
+of the plot, whereas values between $10\,000$ and $100\,000$ take up
 90% of the plot.
 
 Plotting the progression of multiple simulations demonstrates the

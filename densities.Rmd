@@ -3,7 +3,7 @@
 ## Continuous cumulative distribution functions
 
 Suppose $\Theta \sim \mbox{uniform}(0, 360)$ is the result of spinning
-a fair spinner.  The cumulative distribtution function is defined
+a fair spinner.  The cumulative distribution function is defined
 exactly as for discrete random variables,^[Note that we have moved
 from Roman to Greek letters, but have kept to our capitalization
 convention for random variables---$\Theta$ is the capitalized form of
@@ -24,7 +24,7 @@ $$
 This is a linear function of $\theta$, i.e., $\frac{1}{360} \times
 \theta$, as is reflected in the following plot.
 
-```{r echo=FALSE, fig.cap="Cumulative distribution function for the angle $\\theta$ (in degrees) resulting from a fair spin of a spinner.  The dotted line shows the value at 180 degrees, which is a probability of one half and the dashed line at 270 degrees, which is a probability of three quartersxs."}
+```{r echo=FALSE, fig.cap="Cumulative distribution function for the angle $\\theta$ (in degrees) resulting from a fair spin of a spinner.  The dotted line shows the value at 180 degrees, which is a probability of one half and the dashed line at 270 degrees, which is a probability of three quarters."}
 
 library(ggplot2)
 df_cdf_spinner <- data.frame(x = c(-90, 0, 360, 450), y = c(0, 0, 1, 1))
@@ -243,7 +243,7 @@ prob <- (1:M) / M
 
 We again plot with $M = 1\,000$ simulated values.
 
-```{r fig.cap="Plot of the cumulative distribution function of a random variable $\\Phi = \\mbox{logit}(\\Theta)$ representing the the log odds transform of a uniformly distributed random variable $\\Theta \\sim \\mbox{uniform}(0, 1)$.  The curve it picks out is S-shaped.  The asymptotes at 0 and 1 are indicated with dashed lines; the symmetries around 0 on the $x$-axis and 0.5 on the $y$-axis are picked out with dotted lines."}
+```{r fig.cap="Plot of the cumulative distribution function of a random variable $\\Phi = \\mbox{logit}(\\Theta)$ representing the log odds transform of a uniformly distributed random variable $\\Theta \\sim \\mbox{uniform}(0, 1)$.  The curve it picks out is S-shaped.  The asymptotes at 0 and 1 are indicated with dashed lines; the symmetries around 0 on the $x$-axis and 0.5 on the $y$-axis are picked out with dotted lines."}
 
 logit <- function(u) log(u / (1 - u))
 
@@ -359,7 +359,7 @@ true value of the variance is $\frac{\pi^2}{3} \approx 3.29$.^[The
 true mean and variance for the logistic distribution can be calculated
 analytically. See the final section on this chapter for the analytic
 derivativation of the probability density function.  The density must
-be integrated to analytically calcuate the mean and variance, though
+be integrated to analytically calculate the mean and variance, though
 the result for the mean also arises from symmetry.]
 
 ## From histograms to densities
@@ -606,7 +606,7 @@ replace it with wrangling computer code for simulations.  This lets us
 solve much harder problems directly.
 
 Let's actually solve the integral we mentioned in the last section,
-namely the probabilty that a log odds variable will land between -2
+namely the probability that a log odds variable will land between -2
 and 2.
 
 ```
@@ -631,7 +631,7 @@ printf('Pr[-2 < Phi < 2] = %3.2f\n', success / M)
 ```
 
 What is perhaps more remarkable than not requiring calculus is that we
-don't even require the formula for the density functin $p_{\Phi}$---we
+don't even require the formula for the density function $p_{\Phi}$---we
 only need to be able to simulate random instantiations of the random
 variable in question.
 
@@ -649,7 +649,7 @@ probability density function $p_Y$ is the limit of the histogram of
 simulation draws.  Using calculus, the density $p_Y$ of a continuous
 random variable $Y$ is defined as the derivative of the cumulative
 distribution function $F_Y$,^[Differential notation avoids the fiddly
-notation arising from bound vaiables, e.g., $$p_Y(y) \ = \
+notation arising from bound variables, e.g., $$p_Y(y) \ = \
 \frac{\mathrm{d}}{\mathrm{d}y} F_Y(y).$$ With multivariate functions,
 the derivative operator is replaced with the gradient operator $\nabla.$]
 
@@ -657,7 +657,7 @@ $$
 p_Y = \mathrm{d} F_Y.
 $$
 
-Joint cumulative distibution functions for a pair of continuous random
+Joint cumulative distribution functions for a pair of continuous random
 variables $X, Y$ are defined as expected,
 
 $$
@@ -800,7 +800,7 @@ sample mean to estimate variance.  The maximum likelihood estimate
 resulting from dividing by $M$ is biased to underestimate variance
 with finite samples; asymptotically, it provides the correct
 result, because the $\frac{M}{M-1}$ correction factor approaches one
-as as $M$ increases.]
+as $M$ increases.]
 
 
 
@@ -891,13 +891,13 @@ Thus after all the dust has settled, we know that if $\Theta \sim
 
 ## Exponential distributions
 
-We have already seen that if we take a uniformaly distributed variable,
+We have already seen that if we take a uniformly distributed variable,
 $$
 U \sim \textrm{uniform}(0, 1),
 $$
 and log-odds transform it to
 $$
-V = \textrm{logit}(U),$
+V = \textrm{logit}(U),
 $$
 the resulting variable has a standard logistic
 distribution,
@@ -932,7 +932,7 @@ printf("min = %3.2f;  max = %3.2f", min(y), max(y))
 ```
 
 It's clear that the variable has a mean and standard deviation of one,
-but is highly right skewed.  
+but is highly right skewed.
 
 ```{r fig.cap="Histogram of $M = 10^6$ draws from $U \\sim \\textrm{uniform}(0, 1)$ transformed to $Y = -\\log U.$  The mean and standard deviation are 1, but the distribution is highly right skewed."}
 
@@ -1016,7 +1016,7 @@ $$
 \int_a^b f(x) \, \textrm{d}x
 & = &
 \int f(x) \, \textrm{d}x \, \Big|_{x = b}
-\ - \ 
+\ - \
 \int f(x) \, \textrm{d}x \, \Big|_{x = a}
 \\[6pt]
 & = & -\exp(-x)\Big|_{x = b} - -\exp(-x)\Big|_{x = a}
@@ -1039,7 +1039,7 @@ As for other distributions, we will write $Y \sim
 
 We will generalize the standard exponential by allowing it to be
 scaled.  Unlike the normal distribution, which scales a standard
-normal by multiplying it by a scale parameter, it is convential to
+normal by multiplying it by a scale parameter, it is conventional to
 divide a standard exponential variate by a rate parameter to get a
 general exponential variate.  Suppose $V \sim \textrm{exponential}(1)$
 and we define a new variable $Y = V / \lambda$ for some rate $\lambda
@@ -1087,9 +1087,8 @@ $$
 
 By construction, we know that if the standard distribution has a mean
 of 1, then the transformed version has a mean of $1 / \lambda.$
-Similarly, the trasnformed version also has a standard deviation of $1
+Similarly, the transformed version also has a standard deviation of $1
 / \lambda$.^[The inverse cumulative distribution function for the
 standard exponential is just the function $-\log u$ used to construct
 the variable.  It is thus simple symbolically to derive the cumulative
 distribution function and the generalized version with a non-unit rate.]
-

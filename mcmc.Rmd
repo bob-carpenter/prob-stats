@@ -47,7 +47,7 @@ are independent, the central limit theorem governs the convergence.]
 ## Continuous-state Markov chains
 
 The definitions we have already made for Markov chains apply to chains
-with continuous values.  A random process $Y = Y_1, Y_2, \ldots, $ has
+with continuous values.  A random process $Y = Y_1, Y_2, \ldots,$ has
 discrete time steps but may have discrete or continuous values or even
 multivariate values, which may themselves be discrete, continuous, or
 a mixture of the two.  Such a process is a *Markov chain* if for all
@@ -103,7 +103,7 @@ $$
 $$
 
 In words, $\pi$ is a stationary density if its value at a point $u$ is
-the the average transition probability $\tau(v, u)$, where the average
+the average transition probability $\tau(v, u)$, where the average
 is weighted by the stationary density of $v$.
 
 In order to sample from the posterior of a model with posterior

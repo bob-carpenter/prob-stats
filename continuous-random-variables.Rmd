@@ -303,7 +303,7 @@ for (m in 1:M)
   y[m] = uniform_rng(-1, 1)
   inside[m] = (x[m]^2 + y[m]^2 <= 1)
 print 'Pr[in circle] = ' sum(inside) / M
-print 'esimtated pi = ' 4 * sum(inside) / M
+print 'estimated pi = ' 4 * sum(inside) / M
 ```
 
 We recover the simulation-based estimate of $\pi$ by multiplying the
@@ -429,7 +429,7 @@ for (log2_N in 1:max_log2_N)
 ```
 
 We take `x^2` to operate elementwise on the members of `x`, e.g.,
-$(1, 2, 3)^2 = (1, 4, 9)$.  The square root, sum, and other operaitons
+$(1, 2, 3)^2 = (1, 4, 9)$.  The square root, sum, and other operations
 should be self explanatory.  The Euclidean length function is being
 defined with *lambda abstraction*, where the `x.` indicates that the
 argument to the function is `x` and the result is the result of

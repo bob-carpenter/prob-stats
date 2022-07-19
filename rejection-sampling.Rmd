@@ -2,7 +2,6 @@
 
 ## Inverse cumulative distribution generation
 
-
 We have so far assumed we have a uniform random number generator that
 can sample from a $\mbox{uniform}(0, 1)$ distribution. That
 immediately lets us simulate from a $\mbox{uniform}(a, b).$^[If $$ U
@@ -28,7 +27,7 @@ y^{(m)} = F^{-1}(u^{(m)}).
 $$
 
 It turns out we've already seen an example of this strategy---it is
-how we we simulated from a logistic distribution right off the bat.
+how we simulated from a logistic distribution right off the bat.
 The log odds transform is the inverse cumulative distribution function
 for the logistic distribution. That is, if
 
@@ -110,7 +109,7 @@ conflated.] The higher the total count, lower the variance. For
 example, here is a plot of a few beta distributions organized by total
 count and mean.
 
-```{r, out.width = "100%", fig.width=9, fig.asp = 0.8, fig.cap="Plots of the densities $\\mbox{beta}(\\theta \\mid \\alpha, \\beta)$ for different total counts $\\alpha + \\beta$ and different means $\\alpha / (\\alpha + \\beta).$ The vertical dotted lines are drawn at the mean. Only the distribution with 0.5 mean has a symmetric density; the other densities are skewed toward the right and thus have means to the left of their modes (maxima), where the modes exist."}
+```{r, out.width = "100%", fig.width=9, fig.asp = 0.8, fig.cap="Plots of the densities"}
 
 beta_density_df <-
   data.frame(theta = c(), p_theta = c(), count = c(), mean = c())
@@ -191,7 +190,7 @@ vanishingly narrow in order to keep the total area at one.]
 
 ## Uniform, bounded rejection sampling
 
-How do we sample from a beta distribution?  Rejection sampling is
+How do we sample from a beta distribution?  Rejection sampling is a
 very simple algorithm to sample from general distributions for which
 we know how to compute the density.  It is a good starter algorithm
 because it is easy to understand, but points the way toward more
@@ -202,10 +201,7 @@ where we have a bounded distribution like a beta distribution. The
 values drawn from a beta distribution are bounded between 0 and 1 by
 construction. Furthermore, if $\alpha, \beta > 1$, as we will assume
 for the time being, then there is a maximum value for
-$\mbox{beta}(\theta \mid \alpha, \beta)$.^[The maximum density occurs
-at the *mode* of the distribution, which for
-$\\mbox{beta}(\\theta \\mid \\alpha, \\beta)$ is given by
-$$\\theta^* = \\frac{\\alpha - 1}{\\alpha + \\beta - 2}.$$]
+$\mbox{beta}(\theta \mid \alpha, \beta)$.^[The maximum density occurs at the *mode* of the distribution, which for $\textrm{beta}(\theta \mid \alpha, \beta)$ is given by $$\theta^* = \frac{\alpha - 1}{\alpha + \beta - 2}.$$]
 
 
 For concreteness, let's start specifically with a $\mbox{beta}(6.8,

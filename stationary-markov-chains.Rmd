@@ -6,7 +6,7 @@ A random process $Y = Y_1, Y_2, \ldots$ is said to be *stationary* if
 the marginal probability of a sequence of elements does not depend on
 where it starts in the chain.  In symbols, a discrete-time random
 process $Y$ is stationary if for any $t \geq 1$ and any sequence
-sequence $u_1, \ldots, u_N \in \mathbb{R}^N$ of size $N$, we have
+$u_1, \ldots, u_N \in \mathbb{R}^N$ of size $N$, we have
 
 $$
 p_{Y_1, \ldots, Y_N}(u_1, \ldots, u_N)
@@ -16,7 +16,7 @@ $$
 None of the chains we will construct for practical applications will
 be stationary in this sense, because we would need to know the
 appropriate initial distribution $p_{Y_1}(y_1)$.  For example,
-consider the fishes example in which we know the trandition
+consider the fishes example in which we know the transition
 probabilities, but not the stationary distribution.  If we run long
 enough, the proportion of pike stabilizes
 
@@ -71,7 +71,7 @@ $$
 p_{Y_{t + 1} \mid Y_t}(j \mid i) = \theta_{i, j},
 $$
 
-where $\theta_{i, j}$ is the probabiltiy of a transtion to state $j$
+where $\theta_{i, j}$ is the probabiltiy of a transition to state $j$
 given that the process is in state $i$.  For the pike and perch
 example, $\theta$ is fully defined by
 
@@ -218,8 +218,8 @@ probability mass on a different value.
 
 On the other hand, this chain is what is known as wide-state
 stationary in that using long-running frequency estimates are stable.
-the expected value is $\frac{1 + 2 + 3}{3} = 2$ and the standard
-deviatiation is $\sqrt{\frac{1^2 + 0^2 + 1^2}{3}} \approx 0.47$. More
+The expected value is $\frac{1 + 2 + 3}{3} = 2$ and the standard
+deviation is $\sqrt{\frac{1^2 + 0^2 + 1^2}{3}} \approx 0.47$. More
 formally, the wide-state expectation is calculated as
 
 $$
@@ -233,7 +233,7 @@ $$
 The definition of periodicity is more subtle than just deterministic
 chains.  For example, the following transition graph is also periodic.
 
-```{r, engine="tikz", fig.ext="pdf", out.width="45%", fig.cap='State diagram for finite Markov chain generating periodic state sequences alternatiing between state 1 and either state 2 or state 3.'}
+```{r, engine="tikz", fig.ext="pdf", out.width="45%", fig.cap='State diagram for finite Markov chain generating periodic state sequences alternating between state 1 and either state 2 or state 3.'}
 \begin{tikzpicture}[->, auto, node distance=2cm, font=\footnotesize]
 \node[circle,draw,semithick] (A) {1};
 \node[circle,draw,semithick] (B) [left of=A] {2};
@@ -355,7 +355,7 @@ the chains as we have a larger sample with which to estimate.]
 The fundamental theorem tells us that if a Markov chain $Y = Y_1, Y_2,
 \ldots$ is ergodic (aperiodic and irreducible) and has a stationary
 distribution, then the distribution of $Y_t$ converges to the
-stationary distribution in rhw limit. But it doesn't tell us how fast.
+stationary distribution in the limit. But it doesn't tell us how fast.
 
 As with everything else, we'll go at this by simulation to establish
 intuitions. In particular, we'll consider three chains that have
@@ -469,7 +469,7 @@ traceplot_bool(y)
 ```
 
 The flat segments are runs of the same value.  This Markov chain
-occassionally has runs of the same value, but otherwise mixes quite
+occasionally has runs of the same value, but otherwise mixes quite
 well between the values.
 
 So how fast do estimates of the stationary distribution based on an
@@ -565,11 +565,11 @@ print_3_rows_of_33(y)
 traceplot_bool(y)
 ```
 
-The draws form a dramatic sawtooth pattern as as they alternate
+The draws form a dramatic sawtooth pattern as they alternate
 between zero and one.
 
 Now let's see how quickly estimates based on long-run averages from
-the chain converge in in a side-by-side comparison.
+the chain converge in a side-by-side comparison.
 A single chain is enough to illustrate the dramatic differences.
 
 ```{r}

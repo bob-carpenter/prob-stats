@@ -2,14 +2,14 @@
 
 We know that if we run an ergodic Markov chain long enough, it will
 eventually approach stationarity.  We can even use the entire chain for
-estimation if we run long enough because eny finite error will become
+estimation if we run long enough because any finite error will become
 infinitesimal in the asymptotic regime.
 
 However, we do not live in the asymptotic regime.  We need results
 that we can trust from finitely many draws.  If we happened to know
 our chains were geometrically ergodic, so that we know they converged
-very quickly toward the stationry distribution, then our lives would
-be easy and we cold proceed with a single chain and as long as there
+very quickly toward the stationary distribution, then our lives would
+be easy and we could proceed with a single chain and as long as there
 weren't numerical problems, we could run it a long time and trust it.
 
 We are also faced with distributions defined implicitly as posteriors,

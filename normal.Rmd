@@ -42,7 +42,7 @@ binomial_limit_plot
 
 de Moivre found that the normal density function (to be developed
 below), despite coming from a continuous distribution, provided a
-tight approximation to the binomial probablity mass function as $N$
+tight approximation to the binomial probability mass function as $N$
 becomes large.^[This is because the interval between integers is 1, so
 that
 $$\begin{array}{rcl}
@@ -105,7 +105,7 @@ $$
 to be finite.]
 
 In order for the standard deviation and variance to work out to unity,
-it is convenient to work with half th squared error. Therefore, the
+it is convenient to work with half the squared error. Therefore, the
 standard normal distribution is defined on the log scale up to an
 additive constant that doesn't depend on $y$ by
 
@@ -123,7 +123,7 @@ $$
 \mbox{normal}(y) \propto \exp \left( -\frac{1}{2} y^2 \right).
 $$
 
-The *kernel* of a probabilty function defines it as a function of
+The *kernel* of a probability function defines it as a function of
 parameters and variate outcome up to a proportion. Most of the algebra
 in statistics only requires probability functions up to a proportion,
 so it's usually simpler to drop the normalizing constants.^[It's also
@@ -166,7 +166,7 @@ $$
 
 ## Adding location and scale parameters
 
-The standard normal distribution has an expectaiton of zero and standard
+The standard normal distribution has an expectation of zero and standard
 deviation one.  We can add a scale parameter $\sigma > 0$ to multiply
 the standard deviation and a location parameter $\mu$ so that if $Y
 \sim \mbox{normal}(\mu, \sigma)$, then $\mathbb{E}[Y] = \mu$ and
@@ -327,7 +327,7 @@ phenomena.
 
 ## Lognormal distribution
 
-The normal distribution arises naturally as the the distribution of a
+The normal distribution arises naturally as the distribution of a
 random variable resulting from a sum of effects. What if effects are
 multiplicative rather than additive, so that it is the product,
 
