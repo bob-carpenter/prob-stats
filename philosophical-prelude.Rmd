@@ -1,4 +1,4 @@
-# What is Probability? {-}
+
 
 The fundamental nature of probability as used in applied statistical
 inference was described succintly by John Stuart Mill as part of his
@@ -22,8 +22,8 @@ now to forecast the weather on a random day in Edinburgh next year,
 I'll forecast 52% because it rains on average 191 days per year in
 Edinburgh.^[World Weather and Climate (2018) [Edinburgh
 rainfall](https://weather-and-climate.com/average-monthly-Rainy-days,Edinburgh-uk,Scotland).]
-If I know the day is in December, I'll make an estimate of 65%
-conditioned on knowing that it rains on average 20 days in December.
+If I know the day is in December, I'll make an estimate of 58%
+conditioned on knowing that it rains on average 18 of 31 days in December.
 Continuing to add information, if it's December 7 and I have
 up-to-date radar, then my estimate of the chance of rain on December 8
 or December 9 might be anything, depending on the current
