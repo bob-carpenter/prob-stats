@@ -10,31 +10,63 @@ jupyter: python3
 
 ## Introduction
 
-Our goal with this book is to teach you about probability theory,
-statistics, and simulation-based inference.  Our approach is to go
-step-by-step like an introduction to programming and use computer
-simulation rather than analytic math to solve problems.
+Our goal with this book is to teach you the basics of probability
+theory, statistics, and simulation-based inference.  After reading
+this book, we hope you can formulate your own statistical models and
+perform relevant inference computationally.
 
-To make the book concrete, we will use `Stan`, a platform-neutral
-probabilistic programming language (PPL).
+Our approach is to go step-by-step like an introduction to
+programming.  Although we will not shy away from mathematical
+formulations of problems, we will use computer simulation rather than
+combinatorics and calculus to solve them.
+
+To make the book concrete, we have chosen several computational tools.
+We will code most of our statistical models in `Stan` and use its
+built-in inference algorithms for simulation.  For data manipulation
+and plotting, we use Python with the `cmdstanpy` interface to Stan.
+
+
+For more information about Stan and getting started instructions, as
+well as complete documtatin and examples, see
 
 * [Stan home page](https://mc-stan.org)
-
-We will interface to `Stan` using Python with Stan's `cmdstanpy`
-interface.  For installation and getting started instructions, as well
-as complete doc and examples, see
-
 * [CmdStanPy home page](https://mc-stan.org/cmdstanpy/)
 
+# 1. &nbsp; Random Variables
+
+The reason Stan is called a probabilistic programming language is that
+its variables are random rather than determinstic.  Each time Stan
+is run, these variables can take on different values.  For example,
+consider the Stan equivalent of the classic Hello World program, which
+is saved in file `flip.stan`.
+
 ```stan
-data {
-  int a;
-  int b;
+generated quantities {
+  int<lower=0, upper=1> y = bernoulli_rng(0.5);
 }
-transformed data {
-  int c = a + b;
-  print(a, " + ", b, " = ", c);
-}
+```
+
+This program assigns the random variable y to the value of random
+Bernoulli trial with a 0.5 probability of being 1 and a 0.5
+probability of being 0.
+
+We use Python to run the code and show the result of the simulated
+coin flip.
+
+
+```{python}
+import os, sys
+
+
+from cmdstanpy import CmdStanModel
+model = CmdStanModel(stan_file = "flip.stan")
+# sys.stderr = os.devnull
+fit = model.sample(show_progress=False, show_console = False)
+df = fit.draws_pd()
+y = df['y']
+
+print("========================================")
+print("Hello, your flip is ", y[0])
 ```
 
 ```{python}
