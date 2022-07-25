@@ -44,7 +44,7 @@ consider Markov chains in which the $Y_t$ are finite random variables
 taking on values $Y_t \in 0:N$ or $Y_t \in 1:N$, the range depending
 on the type of variable.^[We generalize in two later chapters, first
 to Markov chains taking on countably infinite values and then to ones
-with continous values.]
+with continuous values.]
 
 The Bernoulli process discussed in the previous section is a trivial
 example of a finite Markov chain.  Each value is generated
@@ -110,7 +110,7 @@ out of a node must sum to one.
 
 Let's simulate some fishing. The approach is to generate the type of
 each fish in the sequence, then report the overall proportion of
-pike.^[With some sleight of hand here for compatiblity with Bernoulli
+pike.^[With some sleight of hand here for compatibility with Bernoulli
 variates and to facilitate computing proportions, we have recoded
 perch as having value 0 rather than 2.] We will start with a random
 fish drawn according to $\mbox{bernoulli(1/2)}$.
@@ -178,7 +178,7 @@ $$
 because $1 - \frac{y_t}{N} = 1$. Similarly, if $Y_t = N$, then
 $Y_{t+1} = N - 1$.
 
-What happens to the distibution of $Y_t$ long term? It's easy to
+What happens to the distribution of $Y_t$ long term? It's easy to
 compute by simulation of a single long chain:^[We've used a function
 borrowed from R here called `table`, defined by $$\mbox{table}(y, A,
 B)[n] = \sum_{t=1}^T \mbox{I}[y_t = n]$$ for $n \in A:B$. For example, if $$y =
@@ -257,7 +257,7 @@ Y_2, \ldots$ be the sequence of web pages visited. Our goal now is to
 define the transition function probabilistically so that we may
 simulate the random surfer. Let $L_i \subseteq 1:N$ be the set of
 outgoing links from page $i$; each page may have any number of
-outgoing links from 0 to $N$.
+outgoing links from $0$ to $N$.
 
 The process $Y$ is most easily described in terms of an auxiliary
 process $Z = Z_1, Z_2, \ldots$ where $Z_t$ represents
@@ -387,4 +387,4 @@ coming into them and can only be visited by random chance, so all
 should have the same chance of being visited by the random surfer.
 Pages 11 and 12 are symmetric, and indeed have the same probability.
 There is a slight difference between the views of page 9 and 10 in
-that it possible ot get to 9 from 7, but 10 is only visited by chance.
+that it possible to get to 9 from 7, but 10 is only visited by chance.

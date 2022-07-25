@@ -1,7 +1,7 @@
 # Statistical Inference and Inverse Problems
 
 *Deductive inference* works from facts toward conclusions
-determinstically.  For example, if I tell you that all men are mortal
+deterministically.  For example, if I tell you that all men are mortal
 and that Socrates is a man, you can deductively conclude that Socrates
 is mortal.  *Inductive inference*, on the other hand, is a bit more
 slippery to define, as it works from observations back to facts.  That
@@ -47,7 +47,7 @@ mass function^[The constant $N$ that appears in the full binomial
 notation is suppressed in the density notation $p_{Y \mid
 \Theta}$---it is common to suppress constants in the notation to make
 the relationship between the modeled data $Y$ and parameters $\Theta$
-3easier to scan.]
+easier to scan.]
 
 $$
 p_{Y \mid \Theta}(y \mid \theta)
@@ -712,7 +712,7 @@ we will consider a very similar model with two variables, so that we
 can do some posterior comparisons.  We will consider some simple
 review data for two New York City-based Mexican restaurants.  The
 first contender is Downtown Bakery II, an East Village Mexican
-restaurnat has $Y_1 = 114$ out of $N_1 = 235$ 5-star reviews on Yelp,
+restaurant has $Y_1 = 114$ out of $N_1 = 235$ 5-star reviews on Yelp,
 La Delicias Mexicanas, in Spanish Harlem, has $Y_1 = 24$ out of $N_2 =
 51$ 5-start reviews.  Our question is, which is more likely to deliver
 a 5-star experience?  In terms of proportion of 5-star votes, they are
@@ -789,7 +789,7 @@ existence of beer goes to La Delicias Mexicanas.]
 To get a sense of the posterior, we can construct a histogram of
 posterior draws of $\Delta = \Theta_1 - \Theta_2$.
 
-```{r fig.cap = 'Histogram of posterior differences between probabilty of Downtown Bakery getting a 5-star review ($\\theta_1$) and that of La Delicias Mexicanas getting one ($\\theta_2$).  The draws for which $\\delta > 0$ (equivalently, $\\theta_1 > \\theta_2$) are shaded darker.  The area of the darker region divided by the total area is the estimate of the probability that Downtown Bakery is more likely to get a 5-star review than La Delicias Mexicanas.'}
+```{r fig.cap = 'Histogram of posterior differences between probability of Downtown Bakery getting a 5-star review ($\\theta_1$) and that of La Delicias Mexicanas getting one ($\\theta_2$).  The draws for which $\\delta > 0$ (equivalently, $\\theta_1 > \\theta_2$) are shaded darker.  The area of the darker region divided by the total area is the estimate of the probability that Downtown Bakery is more likely to get a 5-star review than La Delicias Mexicanas.'}
 
 delta <- theta1 - theta2
 delicias_df <- data.frame(delta = delta)

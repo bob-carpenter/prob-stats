@@ -1,0 +1,56 @@
+---
+title: "*Probabilistic Programming with Stan*"
+author: "Bob Carpenter"
+date: "2022-07-19"
+format:
+  html:
+    code-fold: true
+jupyter: python3
+---
+
+## Introduction
+
+Our goal with this book is to teach you about probability theory,
+statistics, and simulation-based inference.  Our approach is to go
+step-by-step like an introduction to programming and use computer
+simulation rather than analytic math to solve problems.
+
+To make the book concrete, we will use `Stan`, a platform-neutral
+probabilistic programming language (PPL).
+
+* [Stan home page](https://mc-stan.org)
+
+We will interface to `Stan` using Python with Stan's `cmdstanpy`
+interface.  For installation and getting started instructions, as well
+as complete doc and examples, see
+
+* [CmdStanPy home page](https://mc-stan.org/cmdstanpy/)
+
+```stan
+data {
+  int a;
+  int b;
+}
+transformed data {
+  int c = a + b;
+  print(a, " + ", b, " = ", c);
+}
+```
+
+```{python}
+#| label: fig-polar
+#| fig-cap: "A line plot on a really cool polar axis"
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+r = np.arange(0, 2, 0.01)
+theta = 2 * np.pi * r
+fig, ax = plt.subplots(
+  subplot_kw = {'projection': 'polar'} 
+)
+ax.plot(theta, r)
+ax.set_rticks([0.5, 1, 1.5, 2])
+ax.grid(True)
+plt.show()
+```

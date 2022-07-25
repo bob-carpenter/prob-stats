@@ -1,7 +1,7 @@
 
 
 The fundamental nature of probability as used in applied statistical
-inference was described succintly by John Stuart Mill as part of his
+inference was described succinctly by John Stuart Mill as part of his
 larger program of characterizing inductive reasoning,^[Mill, John
 Stuart.  1882.  *A System of Logic: Raciocinative and Inductive*.
 Eighth edition. Harper & Brothers, Publishers, New York. Part III,
