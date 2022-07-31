@@ -1,0 +1,93 @@
+# Introduction
+
+## Goal
+
+This book introduces the basics of probability theory and statistics
+using simulation-based inference.  After reading this book, we hope
+you are able to formulate statistical model for a theory and data of
+interest and perform any necessary inference computationally.
+
+## Open source and reproducible
+
+This book is available as *free open source*.  Specifically, we grant
+you the license to download and use all of the source code, text,
+data, and markdown formatting necessary to produce this book.  The
+code is released under the [*BSD 3-clause
+license*](https://opensource.org/licenses/BSD-3-Clause) and the text
+under the [*CC BY-NC-ND 4.0
+license*](https://creativecommons.org/licenses/by-nc-nd/4.0/).
+
+This book is *reproducible* in the sense that you can run a script to
+produce the book from its source of code, text, data, and markdown.
+
+
+## Approach
+
+Our approach is incremental and step-by-step, like an introduction to
+programming.  Although statistical inference is formulated in terms of
+combinatorics and calculus, we will solve inference problems using
+computer simulation rather than mathematical analysis.  Although we
+will not shy away from formalizing the problems we wish to solve with
+mathematics, we will solve them using computational simulation rather
+than mathematical analysis.  We forego the conventional introductions
+using examples that admit analytic solutions and jump straight into
+simulation. More concretely, we expect readers to know what limits,
+derivatives, and integrals are, but we do not expect readers to be
+fluent enough with these concepts to provide analytic solutions.
+
+## Computational tools
+
+The modern practice of applied statistics is fundamentally
+computational, because inference cannot be performed analytically for
+any but the simplest of statistical models.
+
+### Background
+
+Before beginning this book, the reader should have some experience
+with with computer programming basics including data structures
+(scalars, vectors and matrices, arrays, dictionaries), expressions
+(indexing and operators) and statements, functions, and control flow
+(loops, conditionals, function application).  The reader should also
+have some experience with the computer programming language *Python*.
+
+For a primer or refresher on programming and Python basics, we
+recommend [*A Whirlwind Tour of
+Python*](https://github.com/jakevdp/WhirlwindTourOfPython) (Jake
+VanderPlas, 2016, O'Reilly).
+
+
+### Stan
+
+We code statistical models in *Stan* and use its built-in inference
+algorithms for simulation.  We do not assume prior familiarity with
+Stan.  For documentation, source code, and information about the
+project, start with the [Stan web site](https://mc-stan.org).
+
+
+### CmdStanPy
+
+We use *cmdstanpy* to provide a Python interface to Stan.  For
+installation instructions, we suggest starting with the [CmdStanPy web
+site](https://mc-stan.org/cmdstanpy/).
+
+
+### SciPy & NumPy
+
+We use the Python packages *NumPy* and *SciPy* for matrices and
+special functions.  We will try to introduce data structures,
+functions, and programming patterns as we go.  For more depth in these
+packages, we suggest the [*Python Data Science
+Handbook*](https://jakevdp.github.io/PythonDataScienceHandbook/) (Jake
+VanderPlas, 2016, O'Reilly).
+
+
+### pandas & plotnine
+
+We use the Python packages *pandas* for managing tabular data; see the
+[pandas home page](https://pandas.pydata.org) for more information.
+We use *plotnine* for plotting; see the [plotnine home
+page](https://plotnine.readthedocs.io/en/stable/) for more
+information.
+
+
+

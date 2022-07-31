@@ -1,0 +1,23 @@
+project:
+  type: book
+
+book:
+  title: "Probability and Statistics: a simulation-based approach"
+  author: "Bob Carpenter"
+  date: "2022-07-31"
+  chapters:
+    - index.qmd
+    - intro.qmd
+    - random-variables.qmd
+    - references.qmd
+
+bibliography: references.bib
+
+format:
+  html:
+    theme: cosmo
+  pdf:
+    documentclass: scrreprt
+
+
+
