@@ -1,1 +1,11 @@
+# magic to get rid of executables (files w/o a suffix)
+*
+!/**/
+!*.*
+
+# regular old rules for quarto spew
 /.quarto/
+_book/*
+*.hpp
+intro_cache/*
+intro_files/*
