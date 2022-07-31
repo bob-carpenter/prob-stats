@@ -1,0 +1,104 @@
+
+# Random Variables
+
+Stan is a probabilistic programming language in the sense that its
+variables can be random as well as deterministic.  Each time Stan is
+run, these random variables can take on different values.
+
+## Hello, World!
+
+For example, consider the Stan equivalent of the conventional "Hello
+World" program.
+
+
+```{r}
+#| cache: true
+#| echo: true
+#| eval: true
+#| output: asis
+
+summary(cars)
+```
+
+##### `flip.stan`
+```stan
+generated quantities {
+  int<lower=0, upper=1> y = bernoulli_rng(0.5);
+}
+```
+
+```
+{{< include flip.stan >}}
+```
+
+```stan
+{{< include flip.stan >}}
+```
+
+```{r}
+print('hello')
+```
+
+
+This simple Stan program involves a single declare/define statement
+inside of a `generated quantities` block.  In Stan, the generated
+quantities block is used to generate random quantities based on the
+state of other program variables.  Here, we have a one-liner that both
+declares and defines a variable.
+
+The program `flip.stan` *declares* the variable `y` to be an integer
+by declaring it with the type `int`.  The program further declares
+*constraints* on `y` that require it to fall between the specified
+lower bound (`0`) and upper bound (`1`) inclusively.  In other words,
+this says the value of `y` must be 0 or 1.
+
+The program `flip.stan` *defines* the variable `y` to take on the
+value of executing the expression `bernoulli_rng(0.5)`.  This is done
+using the conventional equality sign (`=`), just like Python.
+
+As usual in
+programming languages, Stan uses the equality sign (`=`) for
+assignment.  Here, the variable `y` is assigned to the value
+determined by executing the *expression* `bernoulli_rng(0.5)`.  In
+general, expressions involve *numeric literals* like `0.5`, variables,
+and functions like `bernoulli_rng`.  The function `bernoulli_rng`
+returns either 1 or 0, with the probability of returning a 1 given by
+its argument `0.5`.  This is saying there's a 50% chance of returning
+1 and a 50% chance of returning 0.
+
+We use Python to run the code and show the result of the simulated
+coin flip.
+
+
+```{python}
+from cmdstanpy import CmdStanModel
+import logging
+cmdstanpy_logger = logging.getLogger("cmdstanpy")
+cmdstanpy_logger.disabled = True
+
+model = CmdStanModel(stan_file = "flip.stan")
+# sys.stderr = os.devnull
+fit = model.sample(show_progress=False, show_console = False)
+df = fit.draws_pd()
+y = df['y']
+print("Hello, your flip is", "heads." if int(y[0]) else "tails.")
+```
+
+```{python}
+#| label: fig-polar
+#| fig-cap: "A line plot on a really cool polar axis"
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+r = np.arange(0, 2, 0.01)
+theta = 2 * np.pi * r
+fig, ax = plt.subplots(
+  subplot_kw = {'projection': 'polar'} 
+)
+ax.plot(theta, r)
+ax.set_rticks([0.5, 1, 1.5, 2])
+ax.grid(True)
+plt.show()
+```
+
