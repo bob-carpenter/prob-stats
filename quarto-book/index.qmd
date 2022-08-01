@@ -1,6 +1,47 @@
-# Preface {.unnumbered}
+# About this Book {.unnumbered}
 
-This is a book created from markdown and executable code.
+## Reproducible
+
+All of the analyses in this book are generated automatically from
+markdown and knitted together using
+[*quarto*](https://quarto.org/), an open-source technical publishing
+system.
 
 See @knuth84 for additional discussion of literate programming.
+
+
+## Open Source
+
+The source code, text, and markdown for this book are managed through a
+single repository on GitHub.
+
+* [Book source repository](https://github.com/bob-carpenter/prob-stats)
+
+The top-level readme (linked above) explains how to generate this book
+from source.
+
+
+### License
+
+The text, figures, and code from this book are all released under
+free, open source licenses.  The code is released under the [*BSD
+3-clause license*](https://opensource.org/licenses/BSD-3-Clause) and
+the text under the [*CC BY-NC-ND 4.0
+license*](https://creativecommons.org/licenses/by-nc-nd/4.0/).
+
+
+## Typos, Corrections, and other Feedback
+
+We love feedback.  If you spot a typo or have a suggestion for
+improvement, the best way to help us fix it is to open an issue on
+GitHub stating the problem as clearly as possible.  If you know how to
+fix the problem yourself, you can be even more helpful and file a pull
+request through GitHub.
+
+
+
+
+
+
+
 
