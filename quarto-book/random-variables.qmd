@@ -1,11 +1,10 @@
-
 # Random Variables
 
 Stan is a probabilistic programming language in the sense that its
 variables can be random as well as deterministic.  Each time Stan is
 run, these random variables can take on different values.
 
-## Hello, World!
+## Simulating coin flips
 
 For example, consider the Stan equivalent of the conventional "Hello
 World" program. 
@@ -20,38 +19,176 @@ generated quantities {
 This trivial Stan program assigns the variable `y` randomly, with a
 50% chance of a 1 value and 50% chance of a 0 value.
 
-The program begins with a *block declaration*, here `generated
-quantities`.  The *generated quantities block* is used to generate
-random quantities based on the state of other program variables.  The
-variable `y` is declared to be an integer with `int` and to fall
-between 0 and 1 (inclusive) with `lower=0` and `upper=1`.  The
-variables value is the result of executing the function
-`bernoulli_rng` applied to the argument expression `0.5`.
+The program begins with a *block declaration*.  The *generated
+quantities block* is used to generate random quantities based on the
+state of other program variables.  The variable `y` is declared to be
+an integer with the type `int` and constrained to fall between 0 and 1
+(inclusive) with `lower=0` and `upper=1`.  The variable's value is the
+result of executing the function `bernoulli_rng` applied to the
+argument expression `0.5`.
 
 The value of `bernoulli_rng` is random, returning 1 with the specified
 probability of 0.5 (a 50% chance) and returning 0 with probability
 0.5.
 
 We use Python to run the code and show the result of the simulated
-coin flip.
+coin flip.  First, we are going to import cmdstanpy and then turn off
+its intrinsic logger to avoid cluttering our output with feedback messages intended for the console.
 
 
 ```{python}
+#| output: false
 from cmdstanpy import CmdStanModel
+
 import logging
 cmdstanpy_logger = logging.getLogger("cmdstanpy")
 cmdstanpy_logger.disabled = True
+```
 
+Next, we compile the Stan model from its source `flip.stan` using the
+constructor for the class `CmdStanModel`.
+
+```{python}
 model = CmdStanModel(stan_file = "flip.stan")
-fit = model.sample(seed=1234, show_progress=False, show_console = False)
+```
+
+Next, we use the `sample()` method on the model class to sample values
+from the program.
+
+```{python}
+fit = model.sample(seed=1234,
+                   show_progress=False,
+                   show_console = False)
+```
+
+The `seed` argument determines a random seed.  If we rerun a Stan
+program with the same random seed, we get the same sequence of
+pseudo-random simulation values.
+
+
+We can then extract the draws for `y` from the `fit` object.
+
+```{python}
 df = fit.draws_pd()
 y = df['y']
+```
+
+For example, here's the result of the first draw.
+
+```{python}
 print("first flip = {0:.0f}".format(y[0]))
 ```
 
-We'll repeat the first flip and show 9 more simulations.
+Continuing past the first simulation, here are the first dozen
+simulated values.
+
 
 ```{python}
-for i in range(10):
-    print("flip y({0:d}) = {1:.0f}".format(i, y[i]))
+for i in range(12):
+    print("y({0:d}) = {1:.0f}".format(i, y[i]), end=", ")
+    if i == 5: print("")
+print("...")
 ```
+
+We see that some of the simulated values are 1 and some are 0.  These
+do not correspond to flipping a dozen different coins or the same coin
+a dozen times, but instead represent different possible values a
+single flip of a single coin may take on.
+
+
+## Simulating stick breaking
+
+Imagine we have a stick that's twenty units long and we break it in a
+random place.  That corresponds to generating a continuous random
+number in the range $[0, 20]$.  We can simulate this code in Stan as
+follows.
+
+`stick.stan`
+```stan
+generated quantities {
+  real<lower=0, upper=20> alpha = uniform_rng(0, 20);
+}
+```
+
+In contrast to our previosu example, we declare our variable to be real-valued with the keyword `real`.  We also use a uniform random number generator, which generates a real number in the specified range at random.
+
+We will compile the model and sample in a single code block this time.
+
+```{python}
+model_stick = CmdStanModel(stan_file = "stick.stan")
+fit_stick = model_stick.sample(seed=1234, show_progress=False, show_console=False)
+alpha = fit_stick.draws_pd()["alpha"]
+for i in range(5):
+  print("alpha({0:d}) = {1:5.2f}".format(i, alpha[i]))
+```
+
+We have only printed the first two decimal places of each number, but we can see that we are generating real values between 0 and 20.
+
+
+
+
+## Random variables
+
+In probability theory notation, random variables are conventionally
+written as capital letters.  For example, we might let $Y$ be the
+random variable corresponding to the result of a specific fair coin
+flip.  Values for random variables are conventionally written using
+lower case.  For example, $y = 1$ is a particular value of the
+random variable $Y$.
+
+The variable `y` in our sample program is written in lower case
+because Stan computes with concrete values.  When we run a Stan
+program, it produces a sequence of simulated values for each random
+variable in the program.  We index sequences of values with
+parenthesized superscripts.  For example, we might write $M$ simulated
+values of the random variable $Y$ as $y^{(0)}, \ldots, y^{(M-1)}$.
+
+### Random seeds
+
+In our sampling code, we fixed a random seed, `1234`, which determines
+the sequence of random numbers generated In practical sampling code,
+this means its value is dependent on the state of the underlying
+random number generator.  This mirrors the way random variables are
+defined in measure theory as functions from sample spaces to values.  
+
+
+
+## Expectation, variance, and standard deviation
+
+The *expectation* of a random variable is defined as its average
+value. For example, if $Y$ is a random variable, we write its
+expectation as $\mathbb{E}[y]$.  We can calculate approximate
+expectation values by averaging samples.  If $y^{(0)}, \ldots,
+y^{(M-1)}$ is a sequence of $M$ simulated values for $Y$, then the *expectation* of 
+$$
+\mathbb{E}[Y] \approx \frac{1}{M} \sum_{m < M} y^{(m)}.
+$$
+
+
+### Variance and standard deviation
+
+The *variance* of a random variable is defined as its average squared
+difference from its expected value.  This is also an expectation.
+$$
+\textrm{var}[Y] = \mathbb{E}[(Y - \mathbb{E}[Y])^2] \approx \frac{1}{M} \sum_{m < M} (y^{(m)} - \mathbb{E}[Y])^2.
+$$
+The units of variance are the units of $Y$ squared, which makes it inconvenient for informal reasoning.
+
+The *standard deviation* of a random variable is defined to be the
+square root of its variance.
+$$
+\textrm{sd}[Y] = \sqrt{\textrm{var}[Y]}.
+$$
+
+
+### Quantiles
+
+
+If $\alpha \in [0, 1]$, we say that the $\alpha$-*quantile* of a the
+random variable $Y$ is the value $y$ such that the probability that
+$Y$ is less than or equal to $y$ is $\alpha$.  That is, $y$ is the
+$\alpha$-quantile of $Y$ if $\textrm{Pr}[Y < y] = \alpha$.  We can estimate the $\alpha$-quantile through sampling as
+$$
+\textrm{quantile}(Y, \alpha) \approx y^{(\lfloor \alpha \cdot M \rfloor)}.
+$$
+
