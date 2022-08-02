@@ -4,10 +4,16 @@ Stan is a probabilistic programming language in the sense that its
 variables can be random as well as deterministic.  Each time Stan is
 run, these random variables can take on different values.
 
-## Simulating coin flips
+## Simulating a fair coin flip
 
-For example, consider the Stan equivalent of the conventional "Hello
-World" program. 
+We will start with the canonical "Hello, world!" example for
+statistics, a coin flip.
+
+### Stan program for a coin flip
+
+Here's the Stan program.  When we list Stan
+programs, we title them with the file name in which they can be found
+in the source distribution.
 
 ##### `flip.stan`
 ```stan
@@ -17,19 +23,19 @@ generated quantities {
 ```
 
 This trivial Stan program assigns the variable `y` randomly, with a
-50% chance of a 1 value and 50% chance of a 0 value.
+50% chance of a 1 value and 50% chance of a 0 value.  The program
+begins with a *block declaration*.  The *generated quantities block*
+here is used to generate random quantities based on the state of other
+program variables.  The variable `y` is declared to be an integer with
+the type `int` and constrained to fall between 0 and 1 (inclusive)
+with `lower=0` and `upper=1`.  The variable's value is the result of
+executing the function `bernoulli_rng` applied to the argument
+expression `0.5`.  The value of `bernoulli_rng` is random, returning 1
+with the specified probability of 0.5 (a 50% chance) and returning 0
+with probability 0.5.
 
-The program begins with a *block declaration*.  The *generated
-quantities block* is used to generate random quantities based on the
-state of other program variables.  The variable `y` is declared to be
-an integer with the type `int` and constrained to fall between 0 and 1
-(inclusive) with `lower=0` and `upper=1`.  The variable's value is the
-result of executing the function `bernoulli_rng` applied to the
-argument expression `0.5`.
 
-The value of `bernoulli_rng` is random, returning 1 with the specified
-probability of 0.5 (a 50% chance) and returning 0 with probability
-0.5.
+### Executing Stan through Python
 
 We use Python to run the code and show the result of the simulated
 coin flip.  First, we are going to import cmdstanpy and then turn off
@@ -66,7 +72,10 @@ program with the same random seed, we get the same sequence of
 pseudo-random simulation values.
 
 
-We can then extract the draws for `y` from the `fit` object.
+### Extracting fitted results
+
+After fitting a model, we can extract the draws for `y` from the `fit`
+object.
 
 ```{python}
 df = fit.draws_pd()
@@ -92,16 +101,128 @@ print("...")
 
 We see that some of the simulated values are 1 and some are 0.  These
 do not correspond to flipping a dozen different coins or the same coin
-a dozen times, but instead represent different possible values a
-single flip of a single coin may take on.
+a dozen times.  Instead, the simulated values represent different
+possible values for a single flip of a single coin.
 
+
+## Simulating a fair die
+
+The same way we could generate two variables uniformly, we can
+define a random variable whose value falls between 1 and 6 randomly.  Here is the Stan code.
+
+`die.stan`
+```stan
+generated quantities {
+  int<lower=1, upper=6> y = categorical_rng(rep_vector(1.0 / 6.0, 6));
+}
+```
+
+Here, we have a lower bound of 1 and upper bound of 6 (inclusive), and
+we use a categorical random number generator that assigns a
+probability of `1 / 6` to each outcome (we write the numbers using
+decimal places to avoid reduction to integer arithmetic, which
+rounds toward zero).
+
+```{python}
+#| code-fold: true
+model_die = CmdStanModel(stan_file = "die.stan")
+fit_die = model_die.sample(seed=1234, show_progress=False, show_console=False)
+z = fit_die.draws_pd()["z"]
+for i in range(10):
+  print("z({0:d}) = {1:.0f}".format(i, z[i]), end=", ")
+  if i == 4: print("")
+print("...")
+```
+
+
+## Functions on random variables
+
+If $X$ is a random variable and $Y$ is a random variable, then so is
+$Z = X + Y$.  We can simulate values for $Z$ by simulating a value for
+$X$ and simulating a value for $Y$ and then adding them.  For
+instance, if we want the result of rolling two dice, we can do that
+with the following Stan program.
+
+`dice.stan`
+```stan
+generated quantities {
+  int<lower=1, upper=6> x = categorical_rng(rep_vector(1.0 / 6.0, 6));
+  int<lower=1, upper=6> y = categorical_rng(rep_vector(1.0 / 6.0, 6));
+  int<lower=2, upper=12> z = x + y;
+}
+```
+
+The Stan program defines two variables, `x` and `y`, modeling them
+both as a fair die, and defines the variable `z` to be their sum.
+Here are 20 simulations of `z`.
+
+```{python}
+#| code-fold: true
+model_dice = CmdStanModel(stan_file = "dice.stan")
+fit_dice = model_dice.sample(seed=1234, show_progress=False, show_console=False)
+z = fit_dice.draws_pd()["z"]
+for i in range(20):
+  print("z({0:2d}) = {1:2.0f}".format(i, z[i]), end=", ")
+  if (i + 1) % 5 == 0: print("")
+print("...")
+```
+
+While every outcome of throwing a single fair die is equally likely,
+this is no longer ture when throwing two dice and taking their sum.
+As you can see from the example, the outcomes 5, 6, 7, and 8 occur
+more than values like 2 and 12.
+
+### Estimating probabilities
+
+Although we could calculate the probabilities of each outcome of
+tossing two fair dice analytically, we first tackle the problem
+through simulation.  With simulation, all we need to do is run
+multiple simulations and look at simulated frequencies.  We assume we
+start with draws `z` from the previous simulation.
+
+```{python}
+fit_dice = model_dice.sample(seed=1234, show_progress=False, show_console=False)
+z = fit_dice.draws_pd()["z"]
+
+from collections import Counter
+counts = Counter(z)
+for n in range(2, 13):
+  print("Pr[Z = {0:2d}] = {1:4.2f}".format(n, counts[n] / len(z)), end="   ")
+  if ((n - 1) % 3 == 0): print("")
+```
+
+In our output, we have implicitly introduced *event probability*
+notation.  For example, we write $\textrm{Pr}[Z = 3]$ for the
+probability that the random variable $Z$ takes on the value 3.
+
+We can plot this output using a bar chart.  
+
+```{python}
+#| label: two_d_six_probs
+#| fig-cap: "Probabilities of outcomes for rolling two six-sided dice."
+import numpy as np
+import pandas as pd
+import plotnine as pn
+probs = []
+for n in range(2, 13):
+  probs.append(counts[n] / len(z))
+
+roll_probs = { "roll": range(2, 13),
+               "probability": probs }
+
+df = pd.DataFrame(roll_probs)
+
+plot = pn.ggplot(df, pn.aes(x = 'roll', y = 'probability')) \
+  + pn.geom_bar(stat="identity") \
+  + pn.scale_x_continuous(breaks=range(2, 13))
+plot.draw();  # semicolon prevents unwanted text echo
+```
 
 ## Simulating stick breaking
 
 Imagine we have a stick that's twenty units long and we break it in a
 random place.  That corresponds to generating a continuous random
-number in the range $[0, 20]$.  We can simulate this code in Stan as
-follows.
+number in the range $[0, 20]$.  We can simulate this random process with Stan as follows.
 
 `stick.stan`
 ```stan

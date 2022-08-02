@@ -4,7 +4,7 @@
 
 All of the analyses in this book are generated automatically from
 markdown and knitted together using
-[*quarto*](https://quarto.org/), an open-source technical publishing
+[*Quarto*](https://quarto.org/), an open-source technical publishing
 system.
 
 See @knuth84 for additional discussion of literate programming.
