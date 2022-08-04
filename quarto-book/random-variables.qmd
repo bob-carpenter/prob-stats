@@ -152,9 +152,9 @@ generated quantities {
 }
 ```
 
-The Stan program defines two variables, `x` and `y`, modeling them
-both as a fair die, and defines the variable `z` to be their sum.
-Here are 20 simulations of `z`.
+The Stan program defines two variables, `x` and `y`, modeling each as
+a fair die, and defines the variable `z` to be their sum.  Here are 20
+simulations of `z`.
 
 ```{python}
 #| code-fold: true
@@ -168,38 +168,95 @@ print("...")
 ```
 
 While every outcome of throwing a single fair die is equally likely,
-this is no longer ture when throwing two dice and taking their sum.
-As you can see from the example, the outcomes 5, 6, 7, and 8 occur
-more than values like 2 and 12.
+this is no longer true when throwing two dice and taking their sum.
+As you can see from the example, intermediate outcomes like 7 and 8 occur
+more frequently than extreme values like 11 and 12.
 
-### Estimating probabilities with simulation
+
+## Event probabilities
+
+A general condition on a random variable is called an *event*.
+Suppose $Z$ is a random variable representing the outcome of a fair
+roll of two six-sided dice.  Events include examples such as $Z$ being
+equal to 7, or being less than or equal to 5, or being odd.
+Informally, an event $A$ is just a subset of possible outcomes for a
+random variable.^[Defining the collection of events more formally
+requires the notion of a $\sigma$-algebra from measure theory, which
+is beyond the scope of this book.]  For example, the conditions on
+random variables we considered above correspond to events $A$,
+$B$, and $C$, where follows. 
+
+* $Z = 7$:  $\quad A = \{ 7 \}$,
+* $Z \leq 5 \ $: $\quad B = \{ 2, 3, 4, 5 \}$, and 
+* $Z \textrm{ odd}$: $\quad C = \{ 3, 5, 7, 9, 11 \}$.
+
+If $E$ is an event, we will write $\textrm{Pr}[E]$ for the
+*probability* of that $E$ occurs.^[We use the higher-order function
+notation of square brackets because events are sets of outcomes.]
+
+In the case of dice, probabilities are calculated as the sum of the
+probabilities of the individidual outcomes.  For example,
+$$
+\textrm{Pr}[Z \leq 5]
+= \textrm{Pr}[Z = 2] + \textrm{Pr}[Z = 3] + \textrm{Pr}[Z = 4] + \textrm{Pr}[Z = 5].
+$$
+Probabilities are scaled so that they so that they fall between 0 and
+1 inclusive, i.e., $\textrm{Pr}[A] \in [0, 1]$.
+
+## Estimating probabilities with simulation
 
 Although we could calculate the probabilities of each outcome of
 tossing two fair dice analytically, we first tackle the problem
 through simulation.  With simulation, all we need to do is run
-multiple simulations and look at simulated frequencies.  We assume we
-start with draws `z` from the previous simulation.
+multiple simulations and look at simulated frequencies.
+
+We begin with draws $z^{(1)}$, \ldots, $z^{(M)}$ of $Z$ corresponding
+to a fair roll of two six-sided dice. To estimate the probabilty of an
+outcome, for example $\textrm{Pr}[Z = 7]$, we can use the proportion
+of draws in which $z^{(m)} = 7$.  More formally, we will write this as
+$$
+\textrm{Pr}[Z = 7] = \frac{1}{M} \sum_{m=1}^M \textrm{I}(z^{(m)} = 7).
+$$
+
+We can calculate these estimates for all values of $Z$ in a short loop.
 
 ```{python}
-fit_dice = model_dice.sample(seed=1234, show_progress=False, show_console=False)
-z = fit_dice.draws_pd()["z"]
-
-from collections import Counter
-counts = Counter(z)
-for n in range(2, 13):
-  print("Pr[Z = {0:2d}] = {1:5.3f}".format(n, counts[n] / len(z)), end="   ")
-  if ((n - 1) % 3 == 0): print("")
+import numpy as np
+M = len(z)
+counts = np.zeros(11)
+for m in range(M):
+  counts[int(z[m]) - 2] += 1
+pr_z_eq = counts / M
 ```
 
-In our output, we have implicitly introduced *event probability*
-notation.  For example, we write $\textrm{Pr}[Z = 3]$ for the
-probability that the random variable $Z$ takes on the value 3.
-
-We can plot this output using a bar chart.  
+Printing the results, we see that not every outcome is equally probable.
 
 ```{python}
-#| label: two_d_six_probs
-#| fig-cap: "Probabilities of outcomes for rolling two six-sided dice."
+#| code-fold: true
+for n in range(len(pr_z_eq)):
+  print("Pr[Z = {0:2d}] = {1:5.3f}".format(n + 2, pr_z_eq[n]), end="   ")
+  if ((n + 1) % 3 == 0): print("")
+```
+
+A more idiomatic approach is to use a `Counter` followed by a list
+comprehension to carry out the arithmetic.
+
+```{python}
+#| code-fold: true
+from collections import Counter
+counts = Counter(z)
+M = len(z)
+pr_z_eq = [counts[n] / M for n in range(2, 13)]
+```
+
+In @fig-two-d-six We can plot our output using a bar chart, where the heights of the
+bars are proportional to the probability of the outcome listed on the
+axis.  
+
+```{python}
+#| label: fig-two-d-six
+#| fig-cap: "Probabilities of outcomes for rolling two six-sided dice"
+#| code-fold: true
 import numpy as np
 import pandas as pd
 import plotnine as pn
@@ -208,25 +265,31 @@ for n in range(2, 13):
   probs.append(counts[n] / len(z))
 
 roll_probs = { "roll": range(2, 13),
-               "probability": probs }
+               "estimated probability": probs }
 
 df = pd.DataFrame(roll_probs)
 
-plot = pn.ggplot(df, pn.aes(x = 'roll', y = 'probability')) \
+plot = pn.ggplot(df, pn.aes(x = 'roll', y = 'estimated probability')) \
   + pn.geom_bar(stat="identity") \
   + pn.scale_x_continuous(breaks=range(2, 13))
 plot.draw();  # semicolon prevents unwanted text echo
 ```
 
+We write "estimated probability" on the vertical axis of this plot to
+emphasize that we are using computational methods to approximate the
+true value rather than analytically computing it with higher
+precision.
+
 ### Calculating dice probabilities analytically
 
-In the case of two dice, it's easy enough to calculate the probability
-of each outcome analytically.  Because we have two six-sided dice,
-there are 36 possible combinations $(d_1, d_2)$, where $d_1$ is the
-result of the first die and $d_2$ the second. Each outcome $(d_1,
-d_2)$ is equally probable, so the total probability of an outcome is
-the number of ways it can be produced divided by the total number of
-outcomes. 
+In the case of two dice, it's straightforward to calculate the
+probability of each outcome analytically.  Because we have two
+six-sided dice, there are 36 possible combinations $(d_1, d_2)$, where
+$d_1$ is the result of the first die and $d_2$ the second. Each
+outcome $(d_1, d_2)$ is equally probable, so the total probability of
+an outcome is the number of ways it can be produced divided by the
+total number of outcomes.  Table @tbl-2d6 shows the probabilities for
+results 2--7.
 
 | result | combinations  | probability |
 |:-:|:-:|:-:|
@@ -237,6 +300,12 @@ outcomes.
 | 6 | (1, 5) &nbsp;  (2, 4) &nbsp;  (3, 3) &nbsp;  (4, 2) &nbsp;  (5 1) | 5/36 |
 | 7 | (1, 6) &nbsp;  (2, 5) &nbsp;  (3, 4) &nbsp;  (4, 3) &nbsp;  (5, 2) &nbsp;  (6, 1) | 6/36 |
 : Combinations of two six-sided dice leading to result (their sum), and the associated probability. Results greater than 7 are symmetric, with 8 matching 6, 9 matching 5, $\ldots$, and 12 matching 2. {#tbl-2d6}
+
+These results are very close to our estimated results, though it is
+evident the simulation provides only about two significant digits of
+accuracy compared to the analytical result.
+
+
 
 
 ## Simulating stick breaking
