@@ -1,19 +1,36 @@
-# Random Variables
+# Discrete Random Variables
 
-Stan is a probabilistic programming language in the sense that its
-variables can be random as well as deterministic.  Each time Stan is
-run, these random variables can take on different values.
+## Discrete variables and natural numbers
+
+A *random variable* is one that could take on different values. For
+example, we can represent the result of a coin flip as a random
+variable. We can also represent the location of a dart throw relative
+to the bullseye as a random variable.
+
+In this chapter, we explore random variables that are discrete.
+A *discrete variable* is one that takes on values that can be
+represented as a subset of the *natural numbers*,
+$$
+\mathbb{N} = \{ 0, 1, 2, \ldots \}.
+$$
+Rather than saying the outcome of a coin flip is "heads" or "tails",
+we will *code* heads as 1 and tails as 0.
+
+A *finite variable* is a discrete variable whose values can be encoded
+using the first $N$ natural numbers, $\{ 0, 1, \ldots, N - 1 \}$, for
+some $N \in \mathbb{N}$. A variable that is not finite is said to
+be *infinite*.
 
 ## Simulating a fair coin flip
 
 We will start with the canonical "Hello, world!" example for
 statistics, a coin flip.
 
+
 ### Stan program for a coin flip
 
-Here's the Stan program.  When we list Stan
-programs, we title them with the file name in which they can be found
-in the source distribution.
+Here's the Stan program for a coin flip.  We title Stan programs in
+the book with the file in which they can be found in the source distribution.
 
 ##### `flip.stan`
 ```stan
@@ -22,17 +39,31 @@ generated quantities {
 }
 ```
 
-This trivial Stan program assigns the variable `y` randomly, with a
-50% chance of a 1 value and 50% chance of a 0 value.  The program
-begins with a *block declaration*.  The *generated quantities block*
-here is used to generate random quantities based on the state of other
-program variables.  The variable `y` is declared to be an integer with
-the type `int` and constrained to fall between 0 and 1 (inclusive)
-with `lower=0` and `upper=1`.  The variable's value is the result of
-executing the function `bernoulli_rng` applied to the argument
-expression `0.5`.  The value of `bernoulli_rng` is random, returning 1
-with the specified probability of 0.5 (a 50% chance) and returning 0
-with probability 0.5.
+Stan is a probabilistic programming language in the sense that its
+variables can be random as well as deterministic.  The variable `y`
+here is assigned the value 1 with probabilty 0.5 and the value 0 with
+probability 0.5.
+
+Breaking the Stan program down, it starts with a `generated
+quantities` block declaration. The *generated quantities* block is
+used to generate random quantities based on other values. A
+Stan *program* is made up of a sequence of blocks, each of which is
+made up of a sequence of statements.
+
+The block here contains a single *statement*, which *declares* the
+*type* of the *variable* `y` and also *defines* its value. Every
+variable in Stan has a single type that is determined *statically*
+(i.e., before the program is run). In this case, the type of `y` is
+declared to be an integer with the keyword `int`. The value of `y`
+is *constrained* to fall between the specified lower and upper bounds.
+The lower and upper bounds are given by the numeric *literals*, `0`
+and `1`. The equal sign (`=`) is used to denote assignment, with the
+variable `y` being assigned the value of executing the *expression*
+`bernoulli_rng(0.5)`. The expression consists of a *function*
+`bernoulli_rng` and an argument, the numeric literal `0.5`. The value
+of `bernoulli_rng` is random, returning $1$ with the specified
+probability of $0.5$ (a $50\%$ chance) and returning $0$ with probability
+$1 - 0.5$ (also a $50\%$ chance).
 
 
 ### Executing Stan through Python
@@ -41,11 +72,9 @@ We use Python to run the code and show the result of the simulated
 coin flip.  First, we are going to import cmdstanpy and then turn off
 its intrinsic logger to avoid cluttering our output with feedback messages intended for the console.
 
-
 ```{python}
 #| output: false
 from cmdstanpy import CmdStanModel
-
 import logging
 cmdstanpy_logger = logging.getLogger("cmdstanpy")
 cmdstanpy_logger.disabled = True
@@ -67,9 +96,11 @@ fit = model.sample(seed=1234,
                    show_console = False)
 ```
 
-The `seed` argument determines a random seed.  If we rerun a Stan
-program with the same random seed, we get the same sequence of
-pseudo-random simulation values.
+With default settings, Stan's sampler simulates a sequence of values
+for all of the random variables in the program. The `seed` argument
+determines a random seed. If we rerun a Stan program with the same
+random seed, we get the same sequence of pseudo-random simulation
+values.
 
 
 ### Extracting fitted results
@@ -85,7 +116,7 @@ y = df['y']
 For example, here's the result of the first draw.
 
 ```{python}
-print("first flip = {0:.0f}".format(y[0]))
+print(f"first flip = {y[0]:.0f}")
 ```
 
 Continuing past the first simulation, here are the first dozen
@@ -94,7 +125,7 @@ simulated values.
 
 ```{python}
 for i in range(12):
-    print("y({0:d}) = {1:.0f}".format(i, y[i]), end=", ")
+    print(f"y({i:d}) = {y[i]:.0f}", end=", ")
     if i == 5: print("")
 print("...")
 ```
@@ -129,7 +160,7 @@ model_die = CmdStanModel(stan_file = "die.stan")
 fit_die = model_die.sample(seed=1234, show_progress=False, show_console=False)
 z = fit_die.draws_pd()["z"]
 for i in range(10):
-  print("z({0:d}) = {1:.0f}".format(i, z[i]), end=", ")
+  print(f"z({i:d}) = {z[i]:2.0f}", end=", ")
   if i == 4: print("")
 print("...")
 ```
@@ -162,7 +193,7 @@ model_dice = CmdStanModel(stan_file = "dice.stan")
 fit_dice = model_dice.sample(seed=1234, show_progress=False, show_console=False)
 z = fit_dice.draws_pd()["z"]
 for i in range(20):
-  print("z({0:2d}) = {1:2.0f}".format(i, z[i]), end=", ")
+  print(f"z({i:2d}) = {z[i]:2.0f}", end=", ")
   if (i + 1) % 5 == 0: print("")
 print("...")
 ```
@@ -215,30 +246,39 @@ to a fair roll of two six-sided dice. To estimate the probabilty of an
 outcome, for example $\textrm{Pr}[Z = 7]$, we can use the proportion
 of draws in which $z^{(m)} = 7$.  More formally, we will write this as
 $$
-\textrm{Pr}[Z = 7] = \frac{1}{M} \sum_{m=1}^M \textrm{I}(z^{(m)} = 7).
+\textrm{Pr}[Z = 7] = \frac{1}{M} \sum_{m=1}^M \, \textrm{I}(z^{(m)} = 7),
 $$
+where the *indicator function* $\textrm{I}$ is defined by
+$$
+\textrm{I}(\phi)
+= \begin{cases}
+    1 & \textrm{ if } \phi \textrm{ is true, and}
+    \\[2pt]
+    0 & \textrm{ otherwise.}
+\end{cases}    
+$$    
 
-We can calculate these estimates for all values of $Z$ in a short loop.
+We can calculate these estimates for all values of $Z$ by looping over
+the draws in the sample and incrementing the relevant count.
 
 ```{python}
 import numpy as np
-M = len(z)
-counts = np.zeros(11)
-for m in range(M):
-  counts[int(z[m]) - 2] += 1
-pr_z_eq = counts / M
+counts = np.zeros(13)         # initialize to 0
+for z_m in z:                 # loop over draws
+  counts[int(z_m)] += 1       # increment count for draw
+pr_z_eq = counts / len(z)     # normalize by dividing by number of draws
 ```
 
 Printing the results, we see that not every outcome is equally probable.
 
 ```{python}
 #| code-fold: true
-for n in range(len(pr_z_eq)):
-  print("Pr[Z = {0:2d}] = {1:5.3f}".format(n + 2, pr_z_eq[n]), end="   ")
-  if ((n + 1) % 3 == 0): print("")
+for n in range(2, 13):
+  print(f"Pr[Z = {n:2d}] = {pr_z_eq[n]:5.3f}", end="   ")
+  if ((n - 1) % 3 == 0): print("")
 ```
 
-A more idiomatic approach is to use a `Counter` followed by a list
+A more efficient approach is to use a `Counter` followed by a list
 comprehension to carry out the arithmetic.
 
 ```{python}
@@ -270,7 +310,7 @@ roll_probs = { "roll": range(2, 13),
 df = pd.DataFrame(roll_probs)
 
 plot = pn.ggplot(df, pn.aes(x = 'roll', y = 'estimated probability')) \
-  + pn.geom_bar(stat="identity") \
+  + pn.geom_bar(stat="identity", color="black", fill="gray") \
   + pn.scale_x_continuous(breaks=range(2, 13))
 plot.draw();  # semicolon prevents unwanted text echo
 ```
@@ -330,7 +370,7 @@ model_stick = CmdStanModel(stan_file = "stick.stan")
 fit_stick = model_stick.sample(seed=1234, show_progress=False, show_console=False)
 alpha = fit_stick.draws_pd()["alpha"]
 for i in range(5):
-  print("alpha({0:d}) = {1:5.2f}".format(i, alpha[i]))
+  print(f"alpha({i:d}) = {alpha[i]:5.2f}")
 ```
 
 We have only printed the first two decimal places of each number, but we can see that we are generating real values between 0 and 20.
@@ -394,12 +434,13 @@ $$
 
 ### Quantiles
 
-
 If $\alpha \in [0, 1]$, we say that the $\alpha$-*quantile* of a the
 random variable $Y$ is the value $y$ such that the probability that
-$Y$ is less than or equal to $y$ is $\alpha$.  That is, $y$ is the
-$\alpha$-quantile of $Y$ if $\textrm{Pr}[Y < y] = \alpha$.  We can estimate the $\alpha$-quantile through sampling as
+$Y$ is less than or equal to $y$ is $\alpha$. That is, $y$ is the
+$\alpha$-quantile of $Y$ if $\textrm{Pr}[Y < y] = \alpha$. We can
+estimate the $\alpha$-quantile through sampling as
 $$
-\textrm{quantile}(Y, \alpha) \approx y^{(\lfloor \alpha \cdot M \rfloor)}.
+\textrm{quantile}(Y, \alpha)
+\approx y^{(\lfloor \alpha \cdot M \rfloor)}.
 $$
 

@@ -3,8 +3,8 @@ project:
 
 book:
   title: "Probability and Statistics: a simulation-based approach"
-  author: "Bob Carpenter"
-  date: "2022-07-31"
+  author: "Bob Carpenter and Brian Ward"
+  date: "2022-08-04"
   chapters:
     - index.qmd
     - intro.qmd
@@ -16,7 +16,9 @@ bibliography: references.bib
 format:
   html:
     theme: cosmo
+    mainfont: palatino
     number-depth: 2
+    page-layout: full
   pdf:
     documentclass: scrreprt
 
