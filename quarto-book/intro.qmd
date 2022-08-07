@@ -86,9 +86,9 @@ VanderPlas, 2016, O'Reilly).
 #### pandas & plotnine
 
 We use the Python packages *pandas* for managing tabular data; see the
-[pandas home page](https://pandas.pydata.org) for more information.
-We use *plotnine* for plotting; see the [plotnine home
-page](https://plotnine.readthedocs.io/en/stable/) for more
+[pandas web site](https://pandas.pydata.org) for more information.
+We use *plotnine* for plotting; see the [plotnine web
+site](https://plotnine.readthedocs.io/en/stable/) for more
 information.
 
 ### Alternative open-source tools

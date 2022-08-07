@@ -1,0 +1,84 @@
+# Probability Mass Functions
+
+We can describe a discrete random variable in terms of the probability
+it assigns to each outcome.
+
+## Probability Mass Function
+
+If $Y$ is a discrete random variable, its probability mass function
+$p_Y:\mathbb{N} \rightarrow [0, 1]$ is the function assigning
+probabilities to outcomes defined by
+$$
+p_Y(y) = \textrm{Pr}[Y = y].
+$$
+For example, if $Y$ represents the result of a fair coin flip then
+$$
+p_Y(y) =
+\begin{cases}
+0.5 & \textrm{if } y = 0
+\\
+0.5 & \textrm{if } y = 1
+\\
+0 & \textrm{otherwise}
+$$
+On the other hand, if $Z$ represents the roll of two dice, then
+$$
+p_Z(z)
+= \frac{\displaystyle 6 - |z - 7|}
+       {\displaystyle 36}.
+$$
+
+## Bar charts for discrete probabilities
+
+In @fig-two-d-six, we plot the output using a *bar chart*.  In bar
+charts for probabilities, the heights of the bars are scaled to be
+proportional to the probability of the outcome.
+
+```{python}
+#| label: fig-two-d-six
+#| fig-cap: "Probabilities of outcomes for rolling two six-sided dice"
+#| code-fold: true
+import numpy as np
+import pandas as pd
+import plotnine as pn
+
+roll_probs = { "roll": range(2, 13),
+               "estimated probability": pr_z_eq[2:13] }
+
+df = pd.DataFrame(roll_probs)
+
+plot = pn.ggplot(df, pn.aes(x = 'roll', y = 'estimated probability')) \
+  + pn.geom_bar(stat="identity", color="black", fill="gray") \
+  + pn.scale_x_continuous(breaks=range(2, 13))
+plot.draw();  # semicolon prevents unwanted text echo
+```
+
+We write "estimated probability" on the vertical axis of this plot to
+emphasize that we are using computational methods to approximate the
+true value.  The alternative is to compute the value analytically, as
+we show in the next section.
+
+## Calculating dice probabilities analytically
+
+In the case of two dice, it's straightforward to calculate the
+probability of each outcome analytically.  Because we have two
+six-sided dice, there are 36 possible combinations $(d_1, d_2)$, where
+$d_1$ is the result of the first die and $d_2$ the second. Each
+outcome $(d_1, d_2)$ is equally probable, so the total probability of
+an outcome is the number of ways it can be produced divided by the
+total number of outcomes.  Table @tbl-2d6 shows the probabilities for
+results 2--7.
+
+| result | combinations  | probability |
+|:-:|:-:|:-:|
+| 2 | (1, 1) | 1/36 |
+| 3 | (1, 2) &nbsp;  (2, 1) | 2/36 |
+| 4 | (1, 3) &nbsp;  (2, 2) &nbsp;  (3, 1) | 3/36 |
+| 5 | (1, 4) &nbsp;  (2, 3) &nbsp;  (3, 2) &nbsp;  (4, 1) | 4/36 |
+| 6 | (1, 5) &nbsp;  (2, 4) &nbsp;  (3, 3) &nbsp;  (4, 2) &nbsp;  (5 1) | 5/36 |
+| 7 | (1, 6) &nbsp;  (2, 5) &nbsp;  (3, 4) &nbsp;  (4, 3) &nbsp;  (5, 2) &nbsp;  (6, 1) | 6/36 |
+: Combinations of two six-sided dice leading to result (their sum), and the associated probability. Results greater than 7 are symmetric, with 8 matching 6, 9 matching 5, $\ldots$, and 12 matching 2. {#tbl-2d6}
+
+The true results are very close to our estimated results, but only the
+first one or two significant digits are accurate.  Later, we will
+consider the general error properties of simulation-based estimators.

@@ -1,0 +1,96 @@
+# Event probabilities
+
+## Events
+
+A general condition on a random variable is called an *event*.
+Suppose $Z$ is a random variable representing the outcome of a fair
+roll of two six-sided dice.  Examples of events include $Z$ being
+equal to 7, or $Z$ being less than or equal to 5, or $Z$ being odd.
+Informally, an event $A$ is just a subset of possible outcomes for a
+random variable.^[Defining the collection of events more formally
+requires the notion of a $\sigma$-algebra from measure theory, which
+is beyond the scope of this book.]  For example, the conditions on
+random variables we considered above correspond to events $A$,
+$B$, and $C$,
+
+* $Z = 7$:  $\quad A = \{ 7 \}$,
+* $Z \leq 5 \ $: $\quad B = \{ 2, 3, 4, 5 \}$, and 
+* $Z \textrm{ odd}$: $\quad C = \{ 3, 5, 7, 9, 11 \}$.
+
+If $E$ is an event, we will write $\textrm{Pr}[E]$ for the
+*probability* that event $E$ occurs.^[We use the higher-order function
+notation of square brackets because events represent sets of possible
+outcomes.]
+
+For discrete random variables, probabilities are calculated as the sum
+of the probabilities of the individidual outcomes.  For example,
+$$
+\textrm{Pr}[Z \leq 5]
+= \textrm{Pr}[Z = 2] + \textrm{Pr}[Z = 3] + \textrm{Pr}[Z = 4] + \textrm{Pr}[Z = 5].
+$$
+Probabilities are scaled so that they so that they fall between 0 and
+1 inclusive, i.e., $\textrm{Pr}[A] \in [0, 1]$.
+
+
+## Estimating probabilities with simulation
+
+Although we could calculate the probabilities of each outcome of
+tossing two fair dice analytically, we first tackle the problem
+through simulation.  With simulation, all we need to do is run
+multiple simulations and look at simulated frequencies.
+
+We begin with draws $z^{(1)}, \ldots, z^{(M)}$ of $Z$ corresponding
+to a fair roll of two six-sided dice. To estimate the probabilty of an
+outcome, for example $\textrm{Pr}[Z = 7]$, we can use the proportion
+of draws in which $z^{(m)} = 7$.  More formally, we will write this as
+$$
+\textrm{Pr}[Z = 7] = \frac{1}{M} \sum_{m=1}^M \, \textrm{I}(z^{(m)} = 7),
+$$
+where the *indicator function* $\textrm{I}$ is defined for a condition
+$\phi$ on random variables by
+$$
+\textrm{I}(\phi)
+= \begin{cases}
+    1 & \textrm{ if } \phi \textrm{ is true, and}
+    \\[2pt]
+    0 & \textrm{ otherwise.}
+\end{cases}    
+$$    
+
+We can calculate these estimates for all values of $Z$ by looping over
+the draws in the sample and incrementing the relevant count.  
+
+```{python}
+import numpy as np
+counts = np.zeros(13)         # initialize to 0 (index by outcome)
+for z_m in z:                 # loop over draws
+  counts[int(z_m)] += 1       # increment count for draw
+pr_z_eq = counts / len(z)     # normalize by dividing by number of draws
+```
+
+We begin with a NumPy vector of zeros.  For each draw, we increment
+the element of the vector corresponding to the simulated value `z_m`.
+We have to convert `z_m` to an `int()` explicitly because cmdstanpy
+returns all simulated values as real valued.  Finally, we normalize the
+results by dividing by the number of draws `len(z)` so that the sum of
+the entries in `pr_z_eq` is one.  Here are the results.
+
+```{python}
+#| code-fold: true
+for n in range(2, 13):
+  print(f"Pr[Z = {n:2d}] = {pr_z_eq[n]:5.3f}", end="   ")
+  if ((n - 1) % 3 == 0): print("")
+```
+
+Obviously, not every outcome is equally probable.  
+
+Here's a more efficient way to count using the built-in class
+`Counter` followed by a list comprehension to normalize.
+
+```{python}
+#| code-fold: true
+import collections as co
+c = co.Counter(z)                    
+pr_z_eq = [c[n] / len(z) for n in range(0, 13)]
+```
+

@@ -1,0 +1,107 @@
+# Continuous Random Variables
+
+
+```{python}
+#| output: false
+from cmdstanpy import CmdStanModel
+import logging
+cmdstanpy_logger = logging.getLogger("cmdstanpy")
+cmdstanpy_logger.disabled = True
+```
+
+## Simulating stick breaking
+
+Imagine we have a stick that's twenty units long and we break it in a
+random place.  That corresponds to generating a continuous random
+number in the range $[0, 20]$.  We can simulate this random process with Stan as follows.
+
+`stick.stan`
+```stan
+generated quantities {
+  real<lower=0, upper=20> alpha = uniform_rng(0, 20);
+}
+```
+
+In contrast to our previosu example, we declare our variable to be real-valued with the keyword `real`.  We also use a uniform random number generator, which generates a real number in the specified range at random.
+
+We will compile the model and sample in a single code block this time.
+
+```{python}
+model_stick = CmdStanModel(stan_file = "stick.stan")
+fit_stick = model_stick.sample(seed=1234, show_progress=False, show_console=False)
+alpha = fit_stick.draws_pd()["alpha"]
+for i in range(5):
+  print(f"alpha({i:d}) = {alpha[i]:5.2f}")
+```
+
+We have only printed the first two decimal places of each number, but we can see that we are generating real values between 0 and 20.
+
+
+
+
+## Random variables
+
+In probability theory notation, random variables are conventionally
+written as capital letters.  For example, we might let $Y$ be the
+random variable corresponding to the result of a specific fair coin
+flip.  Values for random variables are conventionally written using
+lower case.  For example, $y = 1$ is a particular value of the
+random variable $Y$.
+
+The variable `y` in our sample program is written in lower case
+because Stan computes with concrete values.  When we run a Stan
+program, it produces a sequence of simulated values for each random
+variable in the program.  We index sequences of values with
+parenthesized superscripts.  For example, we might write $M$ simulated
+values of the random variable $Y$ as $y^{(0)}, \ldots, y^{(M-1)}$.
+
+### Random seeds
+
+In our sampling code, we fixed a random seed, `1234`, which determines
+the sequence of random numbers generated In practical sampling code,
+this means its value is dependent on the state of the underlying
+random number generator.  This mirrors the way random variables are
+defined in measure theory as functions from sample spaces to values.  
+
+
+
+## Expectation, variance, and standard deviation
+
+The *expectation* of a random variable is defined as its average
+value. For example, if $Y$ is a random variable, we write its
+expectation as $\mathbb{E}[y]$.  We can calculate approximate
+expectation values by averaging samples.  If $y^{(0)}, \ldots,
+y^{(M-1)}$ is a sequence of $M$ simulated values for $Y$, then the *expectation* of 
+$$
+\mathbb{E}[Y] \approx \frac{1}{M} \sum_{m < M} y^{(m)}.
+$$
+
+
+### Variance and standard deviation
+
+The *variance* of a random variable is defined as its average squared
+difference from its expected value.  This is also an expectation.
+$$
+\textrm{var}[Y] = \mathbb{E}[(Y - \mathbb{E}[Y])^2] \approx \frac{1}{M} \sum_{m < M} (y^{(m)} - \mathbb{E}[Y])^2.
+$$
+The units of variance are the units of $Y$ squared, which makes it inconvenient for informal reasoning.
+
+The *standard deviation* of a random variable is defined to be the
+square root of its variance.
+$$
+\textrm{sd}[Y] = \sqrt{\textrm{var}[Y]}.
+$$
+
+
+### Quantiles
+
+If $\alpha \in [0, 1]$, we say that the $\alpha$-*quantile* of a the
+random variable $Y$ is the value $y$ such that the probability that
+$Y$ is less than or equal to $y$ is $\alpha$. That is, $y$ is the
+$\alpha$-quantile of $Y$ if $\textrm{Pr}[Y < y] = \alpha$. We can
+estimate the $\alpha$-quantile through sampling as
+$$
+\textrm{quantile}(Y, \alpha)
+\approx y^{(\lfloor \alpha \cdot M \rfloor)}.
+$$
+

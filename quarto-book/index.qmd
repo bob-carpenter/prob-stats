@@ -30,7 +30,7 @@ the text under the [*CC BY-NC-ND 4.0
 license*](https://creativecommons.org/licenses/by-nc-nd/4.0/).
 
 
-## Typos, Corrections, and other Feedback
+## Typos, Corrections, and Feedback
 
 We love feedback.  If you spot a typo or have a suggestion for
 improvement, the best way to help us fix it is to open an issue on

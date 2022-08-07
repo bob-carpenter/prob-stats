@@ -5,10 +5,21 @@ book:
   title: "Probability and Statistics: a simulation-based approach"
   author: "Bob Carpenter and Brian Ward"
   date: "2022-08-04"
+  search: true
+  repo-url: https://github.com/bob-carpenter/prob-stats
+  repo-actions: [edit]
+#  downloads: [pdf, epub]
+#  sharing: [twitter]
+  page-navigation: false
+#  navbar:
+#    search: true
   chapters:
     - index.qmd
     - intro.qmd
     - random-variables.qmd
+#    - probability-mass-functions.qmd
+#    - event-probabilities.qmd
+#    - continuous-random-variables.qmd
     - references.qmd
 
 bibliography: references.bib
@@ -16,6 +27,7 @@ bibliography: references.bib
 format:
   html:
     theme: cosmo
+    code-copy: true
     mainfont: palatino
     number-depth: 2
     page-layout: full
