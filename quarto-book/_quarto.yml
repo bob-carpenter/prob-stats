@@ -18,8 +18,8 @@ book:
     - intro.qmd
     - random-variables.qmd
     - expectation.qmd
+    - event-probabilities.qmd
 #    - probability-mass-functions.qmd
-#    - event-probabilities.qmd
 #    - continuous-random-variables.qmd
     - references.qmd
 

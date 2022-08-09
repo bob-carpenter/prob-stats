@@ -2,6 +2,7 @@
 
 ```{python}
 #| output: false
+#| echo: false
 from cmdstanpy import CmdStanModel
 import numpy as np
 import pandas as pd
@@ -278,45 +279,45 @@ Stan provides a built in method on fit objects, called `summary()`,
 which provides a statistical summary of sampled values.
 
 ```{python}
-fit_die.summary(sig_figs=5, percentiles=(50,))
+fit_die.summary(sig_figs=5, percentiles=(50,))[1:]
 ```
 
-The output includes rows for two variables `lp__` and `z`.  The
-variable `lp__` is not relevant when we only have a generated
-quantities block, so we will ignore it for now and focus on the values
-for `z`.  The header has a short description of the values, the first
+We slice the output data frame with `[1:]` to remove the first row,
+which reports model log density and isn't relevant for simple
+simulations involving generated quantities only.
+The header has a short description of the values, the first
 four of which summarize the draws and the last three of which
-attempt to estimate how well the sampler has sampled.
+attempt to estimate how well the sampler has sampled.  
 
 * The first column, labled "Mean", is the sample average, which
 matches our manual calculation in the previous program.
 
-* The second column is the Monte Carlo standard error (MCSE); when
-things are working properly with sampling and we have more than a few
-dozen draws, the mean will usually be within two or three standard
-errors of its true value.^[Later, we will see this means there is an
-approximately 95% chance the mean is within two standard errors and
-99% chance it is within three.]  We want this value to be as low as
-possible.  The MCSE is technically redundant as it is defined to be
-the standard deviation (third column) divided by the square root of
-the effective sample size (fifth column).
+* The second column, labeled "MCSE", is the Monte Carlo standard
+error.  When things are working properly with sampling and we have
+more than a few dozen draws, the mean will usually be within two or
+three standard errors of its true value.^[Later, we will see this
+means there is an approximately 95% chance the mean is within two
+standard errors and 99% chance it is within three.]  We want this
+value to be as low as possible.  The MCSE is technically redundant as
+it is defined to be the standard deviation (third column) divided by
+the square root of the effective sample size (fifth column).
 
-* The third column, headed "StdDev", is the sample standard deviation
+* The third column, labeled "StdDev", is the sample standard deviation
 of the draws.  Its value matches the sample standard devbiation of the
 draws we computed manually above.
 
-* The fourth column, headed "50%", is the median value, which is not
+* The fourth column, labeled "50%", is the median value, which is not
 particularly relevant for discrete values; the value might have been 4
 with only slightly different simulated values.
 
-* The fifth column, headed `N_eff`, reports the effective sample
+* The fifth column, labeled `N_eff`, reports the effective sample
 size, and essentially says that the statistical power of our sample is
 the equivalent of `N_eff` number of purely random draws.  We want this
 number to be as high as possible.
 
-* The sixth column, headed n`N_eff/s`, reports `N_eff` per second.
+* The sixth column, labeled `N_eff/s`, reports `N_eff` per second.
 
-* The seventh and final column, `R_hat`, reports a diagnostic of
+* The seventh and final column, labeled `R_hat`, reports a diagnostic of
 whether sampling approached being random.  It should be very close to
 1, ideally lower than 1.01.
 
