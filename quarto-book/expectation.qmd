@@ -1,0 +1,323 @@
+# Expectation and Variance
+
+```{python}
+#| output: false
+from cmdstanpy import CmdStanModel
+import numpy as np
+import pandas as pd
+import logging
+cmdstanpy_logger = logging.getLogger("cmdstanpy")
+cmdstanpy_logger.disabled = True
+```
+
+In the previous chapter, we explored the simulation of discrete random
+variables.  So far, all we have done is printed out the results of our
+simulation.  In this chapter, we consider summary statistics over
+these draws such as averages and standard deviations.  We will see
+that these are all naturally formulated as expectations.
+
+## Expectations are averages
+
+Suppose we have a random variable $Z$.  Its *expectation* is just the
+average value that it takes on.  We use the standard notation
+$\mathbb{E}[Z]$ for the expected value of the random variable $Z$.  If
+we can simulate values $z^{(1)}, \ldots, z^{(M)}$ of $Z$, then we can
+approximate expectations by averaging the draws,
+$$
+\mathbb{E}[Z] \approx \frac{1}{M} \sum_{m=1}^M z^{(m)}.
+$$
+As the size of our sample grows, i.e., $M \rightarrow \infty$, then
+this approximation converges to the true value (albeit rather slowly
+as we will analyze later).
+
+We will generate samples using the Stan program `die.stan`, which we
+repeat here for convenience.
+
+`die.stan`
+```stan
+generated quantities {
+  int<lower=1, upper=6> z = categorical_rng(rep_vector(1.0 / 6.0, 6));
+}
+```
+
+We then extract all of the draws and average them.
+
+```{python}
+model_die = CmdStanModel(stan_file = "die.stan")
+fit_die = model_die.sample(seed=1234, show_progress=False, show_console=False)
+z = fit_die.stan_variable("z")
+E_Z = np.mean(z)
+print(f"E[Z] = {E_Z:4.2f}")
+```
+
+We use the NumPy function `mean()` to compute the mean.  In general,
+it is better to use a library function than to code a function
+yourself---they are usually more careful about arithmetic precision
+and boundary conditions.
+
+The result we get is approximately 3.5, which is the correct average
+for the result of a six-sided die.
+
+
+### Expectations of functions of random variables
+
+Because applying a function to random variables produces a random
+variable, we can, in general, compute expectations of functions of
+random variables.  So if we wanted to do something like compute the
+expectation of $Z^2$, we can do that as
+
+```{python}
+E_Zsq = np.mean(z**2)
+print(f"E[Z**2] = {E_Zsq:4.2f}")
+```
+
+Python uses the notation `**` for exponentiation.
+
+#### Expectations of linear functions
+
+Expectations distribute through linear functions.  For example, if $a,
+b \in \mathbb{R}$ are constant real values and $Y$ is a random
+variable, then 
+$$
+\mathbb{E}[a + b \cdot Y] = a + b \cdot \mathbb{E}[Y].
+$$
+Furthermore, if $Y$ and $Z$ are random variables, then
+$$
+\mathbb{E}[A + B] = \mathbb{E}[A] + \mathbb{E}[B].
+$$
+Both of these are trivial to establish with simulation-based
+estimates.  For example,
+$$
+\frac{1}{M} \sum_{m=1}^M a^{(m)} + b^{(m)}
+=
+\frac{1}{M} \sum_{m=1}^M a^{(m)}
++
+\frac{1}{M} \sum_{m=1}^M b^{(m)}.
+$$
+
+#### Expectations of non-linear functions
+
+Unless the function $f$ is linear, the expectation $\mathbb{E}[f(Z)]$
+will not be equal to $f(\mathbb{E}[Z])$.  For example, in the case of
+$Z$ being a single die throw, we know that $\mathbb{E}[Z^2] =
+15.1\bar{6}$ (the bar indicating a repeating decimal), whereas
+$\mathbb{E}[Z]^2 = 12.25$ (our estimates based on simulation are
+close, but not exact).
+
+
+## Variance
+
+The *variance* of a random variable is a standard statistical measure
+of variation.  The more a variable varies away from its expected
+value, the larger its variance will be.  Technically, variance is
+defined as the expected squared difference from the mean value.
+
+$$
+\mathrm{var}[Y]
+=
+\mathbb{E}\!\left[\left(Y - \mathbb{E}[Y]\right)^2\right].
+$$
+
+Because it's just another expectation, we can estimate variance
+through sampling.  This requires two passes through the data.  First
+we calculate the expected value of $Y$, namely $\mathbb{E}[Y]$ and
+then we can form the squared differences to average.  Because it
+involves first calculating the expectation, it can't be done within a
+single Stan program.  Here's code to calculate it on the outside.
+
+```{python}
+E_Z = np.mean(z)
+var_Z = np.mean((z - E_Z)**2)
+print(f"var[Z] = {var_Z:4.2f}")
+```
+
+A better way to do this calculation is with NumPy's `var()` function,
+function,
+
+```{python}
+var_Z_alt = np.var(z)
+print(f"var[Z] = {var_Z_alt:5.3f}")
+```
+
+### Bias in variance estimates
+
+Because we use the sample mean $\frac{1}{M} \sum_{m=1}^M z^{(m)}$
+rather than the true $\mathbb{E}[Z]$ to calculate the
+differences, we wind up systematically underestimating the differences
+with respect to the true mean.  
+
+This is because of this simple but profound theorem relating averages
+and squared differences.
+
+::: {#thm-mean-min}
+## Average minimizes sum of squared differences
+
+If we have a sequence of values $z_1, \ldots, z_M$, the sample average
+$$
+\bar{z} = \frac{1}{M} \sum_{m=1}^M z_m
+$$
+is such that it minimizes average square distance to elements,
+$$
+\bar{z} = \textrm{arg min}_{\mu} \ \frac{1}{M} \sum_{m=1}^M (z_m - \mu)^2.
+$$
+\hfill $\Box$
+:::
+
+The solution $\bar{z}$ is conventionally called the *least squares*
+solution to the minimization problem.
+
+The result is that our variance estimate is biased with respect to the
+result we'd get in the limit of infinitely many draws when our
+estimate of $\mathbb{E}[Z]$ converges to the true value.
+
+#### Quantifying the bias
+
+On average, using the sample mean $\frac{1}{M} \sum_{m=1}^M z^{(m)}$
+from a sample of $M$ draws instead of the true value $\mathbb{E}[Z]$
+underestimates the variance by a multiple of $\frac{M - 1}{M}$.  We
+can correct for this bias to generated an unbiased estimate of this
+true value by multiplying our estimate by $\frac{M}{M - 1}$.  The
+effect is that with $M$ draws, we divide the squared differences from
+the sample mean by $M - 1$ rather than by $M$.
+
+We can apply the correction automatically in Python by calling the
+variance function `var()` with its degrees of freedom argument,
+`ddof`, set to 1.
+
+```{python}
+var_Z_unbiased = np.var(z, ddof=1)
+print(f"unbiased var[Z] = {var_Z_unbiased:5.3f}")
+```
+
+The bias-adjusted estimate of the variance is known as the *sample
+variance* in statistics (in contrast to the variance of a random
+variable).  Because we have 4000 draws, the fraction $\frac{4000}{4000
+- 1} = 1.00025$ is close to 1 and the unbiased estimate of variance is
+only going to larger than the original estimate by 0.025%.
+
+
+### Decomposing variance
+
+It is often helpful to unpack the basic definition of variance one
+step further.
+
+\begin{eqnarray*}
+\mathbb{E}\!\left[\left(Y - \mathbb{E}[Y]\right)^2\right]
+& = & 
+\mathbb{E}\!\left[Y^2 - 2 \cdot Y \cdot \mathbb{E}[Y] +
+\mathbb{E}[Y]^2\right]
+\\[4pt]
+& = &
+\mathbb{E}[Y^2]
+- \mathbb{E}[2 \cdot Y \cdot \mathbb{E}[Y]]
++ \mathbb{E}[Y]^2
+\\[4pt]
+& = &
+\mathbb{E}[Y^2] - 2 \mathbb{E}[Y] \cdot \mathbb{E}[Y] +
+\mathbb{E}[Y]^2
+\\[4pt]
+& = & \mathbb{E}[Y^2] - \mathbb{E}[Y]^2.
+\end{eqnarray*}
+
+This result makes it clear that variance is the expected square minus
+the squared expectation.  We can verify that the result holds
+computationally with a Python one-liner.
+
+```{python}
+var_Z_alt = np.mean(z**2) - np.mean(z)**2
+print(f"alt var[Z] = {var_Z_alt:5.3f}")
+```
+
+
+## Standard deviation
+
+The problem with variance as a measure of uncertainty is that its
+units are squared.  If we take the square root of the variance, we are
+back on the same scale as the original measurements.  The resulting
+value is known as the *standard deviation*, and is defined for a
+random variable $Y$ as
+$$
+\textrm{sd}[Y] = \sqrt{\textrm{var}[Y]}.
+$$
+
+For our running example of the roll of a single die, we can compute
+the standard deviation by taking the square root of the variance.  As
+with variance, we have the choice to divide by $M$ or divide by $M -
+1$.  Here, we take the square root of the sample variance (i.e., the
+unbiased form), using the NumPy function `sqrt()`, to define the
+*sample standard deviation*,
+
+```{python}
+sample_sd_Z = np.sqrt(var_Z_unbiased)
+print(f"sample sd[Z] = {sample_sd_Z:6.4f}")
+```
+
+We could've computed this directly in NumPy using their built-in
+(sample) standard deviation function `std()`,
+
+```{python}
+sample_sd_Z = np.std(z, ddof=1)
+print(f"sample sd[Z] = {sample_sd_Z:6.4f}")
+```
+
+The alternative without the `ddof` argument uses the biased variance
+estimate to estimate standard deviation,
+
+```{python}
+sd_Z = np.std(z)
+print(f"sd[Z] = {sd_Z:6.4f}")
+```
+
+Because we have taken a square root, the fraction of difference is
+only $\sqrt{\frac{4000}{3999}} = 1.000125$, or 0.0125%.  So we printed
+with one more decimal place so the difference is visible.
+
+## Stan summary
+
+Stan provides a built in method on fit objects, called `summary()`,
+which provides a statistical summary of sampled values.
+
+```{python}
+fit_die.summary(sig_figs=5, percentiles=(50,))
+```
+
+The output includes rows for two variables `lp__` and `z`.  The
+variable `lp__` is not relevant when we only have a generated
+quantities block, so we will ignore it for now and focus on the values
+for `z`.  The header has a short description of the values, the first
+four of which summarize the draws and the last three of which
+attempt to estimate how well the sampler has sampled.
+
+* The first column, labled "Mean", is the sample average, which
+matches our manual calculation in the previous program.
+
+* The second column is the Monte Carlo standard error (MCSE); when
+things are working properly with sampling and we have more than a few
+dozen draws, the mean will usually be within two or three standard
+errors of its true value.^[Later, we will see this means there is an
+approximately 95% chance the mean is within two standard errors and
+99% chance it is within three.]  We want this value to be as low as
+possible.  The MCSE is technically redundant as it is defined to be
+the standard deviation (third column) divided by the square root of
+the effective sample size (fifth column).
+
+* The third column, headed "StdDev", is the sample standard deviation
+of the draws.  Its value matches the sample standard devbiation of the
+draws we computed manually above.
+
+* The fourth column, headed "50%", is the median value, which is not
+particularly relevant for discrete values; the value might have been 4
+with only slightly different simulated values.
+
+* The fifth column, headed `N_eff`, reports the effective sample
+size, and essentially says that the statistical power of our sample is
+the equivalent of `N_eff` number of purely random draws.  We want this
+number to be as high as possible.
+
+* The sixth column, headed n`N_eff/s`, reports `N_eff` per second.
+
+* The seventh and final column, `R_hat`, reports a diagnostic of
+whether sampling approached being random.  It should be very close to
+1, ideally lower than 1.01.
+
+
