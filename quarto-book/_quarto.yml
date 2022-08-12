@@ -8,9 +8,9 @@ book:
   search: true
   repo-url: https://github.com/bob-carpenter/prob-stats
   repo-actions: [edit]
+  page-navigation: false
 #  downloads: [pdf, epub]
 #  sharing: [twitter]
-  page-navigation: false
 #  navbar:
 #    search: true
   chapters:
@@ -19,10 +19,10 @@ book:
     - random-variables.qmd
     - expectation.qmd
     - event-probabilities.qmd
+    - laws-of-probability.qmd
 #    - probability-mass-functions.qmd
 #    - continuous-random-variables.qmd
     - references.qmd
-
 bibliography: references.bib
 
 format:

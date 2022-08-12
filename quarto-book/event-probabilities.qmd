@@ -1,4 +1,4 @@
-# Event probabilities
+# Event Probabilities
 
 ```{python}
 #| output: false

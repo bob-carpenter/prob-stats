@@ -123,8 +123,9 @@ Because it's just another expectation, we can estimate variance
 through sampling.  This requires two passes through the data.  First
 we calculate the expected value of $Y$, namely $\mathbb{E}[Y]$ and
 then we can form the squared differences to average.  Because it
-involves first calculating the expectation, it can't be done within a
-single Stan program.  Here's code to calculate it on the outside.
+involves an expectation, it can't be done within a single Stan
+program.  We can estimate it in two passes from the simulation draws
+$z$ as follows.
 
 ```{python}
 E_Z = np.mean(z)
@@ -132,14 +133,13 @@ var_Z = np.mean((z - E_Z)**2)
 print(f"var[Z] = {var_Z:4.2f}")
 ```
 
-A better way to do this calculation is with NumPy's `var()` function,
-function,
+NumPy encapsulates this calculation in its `var()` function, which
+provides the same answer as the code above.
 
 ```{python}
 var_Z_alt = np.var(z)
 print(f"var[Z] = {var_Z_alt:5.3f}")
 ```
-
 ### Bias in variance estimates
 
 Because we use the sample mean $\frac{1}{M} \sum_{m=1}^M z^{(m)}$
@@ -230,6 +230,7 @@ print(f"alt var[Z] = {var_Z_alt:5.3f}")
 ```
 
 
+
 ## Standard deviation
 
 The problem with variance as a measure of uncertainty is that its
@@ -272,6 +273,34 @@ print(f"sd[Z] = {sd_Z:6.4f}")
 Because we have taken a square root, the fraction of difference is
 only $\sqrt{\frac{4000}{3999}} = 1.000125$, or 0.0125%.  So we printed
 with one more decimal place so the difference is visible.
+
+
+### The quadratic nature of variance
+
+Because the term $Y - \mathbb{E}[Y]$ is squared, the further out a
+variable is from the mean, the larger its impact on variance.  For example,
+consider a vector
+$$
+y = \begin{bmatrix} 1 & 2 & 3 & 10 \end{bmatrix}.
+$$
+The sample mean of $y$ is 4, so the squared differences from the mean are are
+$$
+(y - \textrm{mean}(y))^2
+= \begin{bmatrix} 9 & 4 & 1 & 36\end{bmatrix}.
+$$
+Because it is relatively far from the mean, the value $y_4 = 10$ makes
+up most of the sum of squared differences from the mean.
+
+Consider three points, $-x$, $0$, and $x$, for $x \geq 0$.  The mean
+of the three points is 0 and their sample variance is $((-x)^2 + 0^2 +
+x^2)/(3 - 1) = x^2$, so their sample standard deviation is $x$.  As
+$x$ increases in magnitude, the standard deviation grows linearly,
+whereas the variance grows quadratically.  Another way of saying this
+is that the standard deviation determines the scale of the variation,
+whereas variance determines the squared variation.  In both cases,
+elements contribute squared differences, so extreme points still
+dominate the calculations.
+
 
 ## Stan summary
 

@@ -1,0 +1,71 @@
+# Basic Laws of Probability
+
+Now that we have events, which are the bearers of probability in
+probability theory, we are ready to introduce the basic algebraic laws
+of probability.  We have presented probability theory as a *fait
+accompli* up to this point, but will now step back and develop it more
+from first principles.
+
+## Axioms of probability
+
+An event $A$ is just a set of possible outcomes, with $\textrm{Pr}[A]
+\in [0, 1]$ being the probability of event $A$.  Probabilty theory is
+based on three simple axioms.
+
+### Axiom 1: Event probabilities are non-negative
+
+Our first axiom says that event probabilities are non-negative.
+$$
+\textrm{Pr}[A] \geq 0 \textrm{ for all events } A.
+$$
+This is consistent with our informal definition of an event
+probability as the average of indicator functions (i.e., the average
+of a sequence of 0s and 1s).
+
+
+
+
+### Axiom 2: The sample space has probability unity
+
+The set of all possible outcomes is called the *sample space*.  For
+example, if we are considering a single finite random variable taking
+on values in 2--12, then the sample space is $S = \{ 2, 3, \ldots, 12
+\}$.
+
+The second axiom says that the event consisting of all possible
+outcomes has probability unity.  That is, if $S$ is the sample space, then
+$$
+\textrm{Pr}[S] = 1.
+$$
+This assumes that the entire sample space is an event. With our
+formulation of events as conditions on random variables, we just need
+a condition $\phi$ that is always true.  For example, if $Y$ is a
+discrete random variable, then the event $Y \in \mathbb{N}$ is based
+on a condition that is always true, so that $\mathrm{I}[Y \in
+\mathbb{N}]$ always evaluates to 1, so its average over draws of
+$y^{(m)}$ is always 1, 
+$$
+\frac{1}{M} \sum_{m=1}^M \textrm{I}(y^{(m)} \in \mathbb{N})
+= 1.
+$$
+
+
+### Axiom 3: Disjoint events have additive probability
+
+A pair of sets $A$ and $B$ is *disjoint* if their intersection is
+empty, i.e., $A \cap B = \emptyset$.  A sequence of sets $A_1, A_2,
+\ldots$ is *pairwise disjoint* if $A_i$ and $A_j$ are disjoint for all
+$i \neq j$.  The last axiom of proability theory says that the
+probabilty of a union of pairwise disjoint events is the sum of their
+individual probabilities.  In symbols, if $A_1, A_2, \ldots$ is a
+pairwise disjoint sequence of events, then the axiom of countable
+additivity is
+$$
+\textrm{Pr}\left[ \bigcup_{n=1}^{\infty} A_n \right]
+    = \sum_{n=1}^{\infty} \textrm{Pr}[A_n].
+$$
+Of course, this implies finite additivity, which says that if events
+$A$ and $B$ are disjoint, then
+$$
+\textrm{Pr}[A \cup B] = \textrm{Pr}[A] + \textrm{Pr}[B].
+$$
