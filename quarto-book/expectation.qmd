@@ -44,7 +44,7 @@ generated quantities {
 We then extract all of the draws and average them.
 
 ```{python}
-model_die = CmdStanModel(stan_file = "die.stan")
+model_die = CmdStanModel(stan_file = "stan/die.stan")
 fit_die = model_die.sample(seed=1234, show_progress=False, show_console=False)
 z = fit_die.stan_variable("z")
 E_Z = np.mean(z)

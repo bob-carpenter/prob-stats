@@ -93,7 +93,7 @@ Next, we compile the Stan model from its source file `flip.stan` using
 the constructor for the class `CmdStanModel`.
 
 ```{python}
-model = CmdStanModel(stan_file = "flip.stan")
+model = CmdStanModel(stan_file = "stan/flip.stan")
 ```
 
 Next, we use the `sample()` method on the model class to sample values
@@ -179,7 +179,7 @@ the first 15 draws produced by Stan.
 
 ```{python}
 #| code-fold: true
-model_die = CmdStanModel(stan_file = "die.stan")
+model_die = CmdStanModel(stan_file = "stan/die.stan")
 fit_die = model_die.sample(seed=1234, show_progress=False, show_console=False)
 z = fit_die.draws_pd()["z"]
 for i in range(15):
@@ -211,7 +211,7 @@ simulations of `z`.
 
 ```{python}
 #| code-fold: true
-model_dice = CmdStanModel(stan_file = "dice.stan")
+model_dice = CmdStanModel(stan_file = "stan/dice.stan")
 fit_dice = model_dice.sample(seed=1234, show_progress=False, show_console=False)
 z = fit_dice.draws_pd()["z"]
 for i in range(25):
@@ -269,7 +269,7 @@ get the result.
 
 ```{python}
 #| code-fold: true
-model_dnd = CmdStanModel(stan_file = "dnd-attributes.stan")
+model_dnd = CmdStanModel(stan_file = "stan/dnd-attributes.stan")
 fit_dnd = model_dnd.sample(seed=1234, show_progress=False, show_console=False)
 y = fit_dnd.stan_variable("y")
 print("ID | STR DEX CON INT WIS DEX")
@@ -309,7 +309,7 @@ between the two rolls.
 
 ```{python}
 #| code-fold: true
-model_diff = CmdStanModel(stan_file = "dnd-diff.stan")
+model_diff = CmdStanModel(stan_file = "stan/dnd-diff.stan")
 fit_diff = model_diff.sample(seed=1234, show_progress=False, show_console=False)
 y_minus_z = fit_diff.stan_variable("y_minus_z")
 for n in range(30):

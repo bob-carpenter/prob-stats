@@ -97,7 +97,7 @@ extract the draws into a sequence `zs`.
 
 ```{python}
 #| code-fold: true
-model_dice = CmdStanModel(stan_file = "dice.stan")
+model_dice = CmdStanModel(stan_file = "stan/dice.stan")
 fit_dice = model_dice.sample(seed=1234, show_progress=False, show_console=False)
 z = fit_dice.draws_pd()["z"]
 ```
@@ -169,7 +169,7 @@ generated quantities {
 
 ```{python}
 #| code-fold: true
-model_dice_events = CmdStanModel(stan_file = "dice-events.stan")
+model_dice_events = CmdStanModel(stan_file = "stan/dice-events.stan")
 fit_dice_events = model_dice_events.sample(seed=1234, show_progress=False, show_console=False)
 fit_dice_events.summary(sig_figs=3, percentiles=(50,))
 ```

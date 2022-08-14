@@ -27,7 +27,7 @@ In contrast to our previosu example, we declare our variable to be real-valued w
 We will compile the model and sample in a single code block this time.
 
 ```{python}
-model_stick = CmdStanModel(stan_file = "stick.stan")
+model_stick = CmdStanModel(stan_file = "stan/stick.stan")
 fit_stick = model_stick.sample(seed=1234, show_progress=False, show_console=False)
 alpha = fit_stick.draws_pd()["alpha"]
 for i in range(5):
