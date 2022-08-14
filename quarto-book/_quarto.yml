@@ -19,6 +19,7 @@ book:
     - random-variables.qmd
     - expectation.qmd
     - event-probabilities.qmd
+    - conditional.qmd
     - laws-of-probability.qmd
 #    - probability-mass-functions.qmd
 #    - continuous-random-variables.qmd
