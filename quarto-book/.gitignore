@@ -10,3 +10,6 @@ _book/*
 intro_cache/*
 intro_files/*
 random-variables_cache/*
+
+# Temp ipynb notebooks
+.ipynb

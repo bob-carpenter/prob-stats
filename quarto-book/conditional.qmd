@@ -1,1 +1,213 @@
 # Conditional and Joint Probability
+
+```{python}
+#| output: false
+from cmdstanpy import CmdStanModel
+import numpy as np
+import pandas as pd
+import logging
+cmdstanpy_logger = logging.getLogger("cmdstanpy")
+cmdstanpy_logger.disabled = True
+```
+
+## Joint Probability
+
+So far, we have considered the probabiltiy $\textrm{Pr}[A]$
+of single events $A$.  We will now turn to considering the
+probabilities of events occurring together.  
+
+We will write $\textrm{Pr}[A, B]$ for the *joint probability* of
+events $A$ and $B$, which is defined by
+$$
+\textrm{Pr}[A, B] = \textrm{Pr}[A \cap B].
+$$
+
+For example, let's go back to considering a random variable $Y$
+representing the single throw of a six-sided die.  And let's consider
+two events, $A = Y \leq 2$ and $B = Y \textrm{ is odd}$.  Viewed this
+way, the intersection of $A$ and $B$ is defined by
+$$
+A \cap B = Y \leq 2 \textrm{ and } Y \textrm{ is odd}.
+$$
+Here's a table illustrating some events and their probabilities.
+
+| Event   | 1 | 2 | 3 | 4 | 5 | 6 | Probability |
+|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| $Y \leq 2$  | 1 | 1 | 0 | 0 | 0 | 0 | 1/3 |
+| $Y \leq 3$  | 1 | 1 | 1 | 0 | 0 | 0 | 1/2 |
+| $Y \textrm{ odd}$ | 1 | 0 | 1 | 0 | 1 | 0 | 1/2 |
+| $Y \leq 3 \textrm{ and } Y \textrm{ odd}$ | 1 | 0 | 1 | 0 | 0 | 0 | 1/3 |
+| $Y \leq 2 \textrm{ and } Y \textrm{ odd}$ | 1 | 0 | 0 | 0 | 0 | 0 | 1/6 |
+
+
+We can extend our single die example to illustrate with Stan.  
+
+`joint-die.stan`
+```stan
+generated quantities {
+  int<lower=1, upper=6> y = categorical_rng(rep_vector(1.0 / 6.0, 6));
+  int<lower=0, upper=1> a = y <= 3;
+  int<lower=0, upper=1> b = y % 2 == 1;
+  int<lower=0, upper=1> ab = a && b;
+}
+```
+
+Stan program defines a variable `y` represents values of $Y$,
+which are assigned uniformly at random between 1 and 6 (inclusive).
+The indicator variables `a`, `b`, and `ab` are assigned values 1 or 0,
+depending on whether the logical expression on the right hand side of
+`=` is true or false.  In this example, the variables are assigned as
+follows.  
+
+* `a` is assigned the value 1 if `y` is less than or equal to 3.
+* `b` is assigned the value 1 if `y` is odd, which holds if `y % 2 ==
+1`.
+
+    The *modulus operator*
+`%` returns the remainder of division, so that `y % 2`, read `y` mod
+2, is the remainder after dividing `y` by 2, which is 1 if `y` is odd
+and 0 otherwise.
+* `ab` is assigned the value 1 if both `a` and `b` are assigned to 1.
+
+    The *conjunction operator* `&&` returns the logical conjunction of
+  its arguments, which is 1 if both arguments are nonzero and 0 otherwise.
+
+This program illustrates that joint probabilities can be defined in
+Stan as indicators that apply logical conjunction to the indicators of
+the events being 
+
+We can simulate from the Stan program, 
+
+```{python}
+#| code-fold: true
+model_joint_die = CmdStanModel(stan_file = "stan/joint-die.stan")
+fit_joint_die = model_joint_die.sample(seed=1234,
+                       show_progress=False, show_console = False)
+```
+
+then calculate event probabilities as means of their indicator
+variables, 
+
+```{python}
+Pr_A = np.mean(fit_joint_die.stan_variable("a"))
+Pr_B = np.mean(fit_joint_die.stan_variable("b"))
+Pr_AB = np.mean(fit_joint_die.stan_variable("ab"))
+```
+
+and then print the results to three decimal places,
+
+```{python}
+#| code-fold: true
+print(f"   Pr[A] ≈ {Pr_A:5.3f}")
+print(f"   Pr[B] ≈ {Pr_B:5.3f}")
+print(f"Pr[A, B] ≈ {Pr_AB:5.3f}")
+```
+
+As we saw earlier, we can retrieve the same simulation means from the
+first column of Stan's simulation summary.
+
+```{python}
+#| code-fold: true
+fit_joint_die.summary(sig_figs=3, percentiles=(50,))[1:]
+```
+
+The summary table is cluttered, but it additionally provides the
+simulation standard error (MCSE).  Doubling the MCSE gives us bounds
+on an approximate 95% confidence interval for the estimated
+probabilities, namely 
+
+* $\textrm{Pr}[A] \approx 0.510 \pm 0.017$,
+* $\textrm{Pr}[B] = 0.499 \pm 0.016$,
+* $\textrm{Pr}{A,B} = 0.334 \pm 0.015$.
+
+We haven't introduced confidence intervals yet---we will return to
+them when we discuss inference.
+
+We can reduce the error due to simulation by running more interations.
+For example, if we run 100,000 iterations (25 times as many as
+before), we get estimates with tighter confidence intervals (roughly
+1/5 as wide).
+
+```{python}
+#| code-fold: true
+fit_joint_die_big = model_joint_die.sample(seed=1234, iter_sampling=25000,
+                         show_progress=False, show_console = False)
+fit_joint_die_big.summary(sig_figs=3, percentiles=(50,))[1:]
+```
+
+
+
+## Conditional Probability
+
+The probability that event $A$ occurs given that event $B$ occurs is
+called the *conditional probability* of $A$ given $B$ and written as
+$\textrm{Pr}[A \mid B]$.  When event $B$ has non-zero probability,
+i.e., $\textrm{Pr}[B] > 0$, then the definition of conditional
+probability is
+$$
+\textrm{Pr}[A \mid B] = \frac{\textrm{Pr}[A, B]}{\textrm{Pr}[B]}.
+$$
+
+Evaluating the conditional probability $\textrm{Pr}[A \mid B]$ is
+straightforwad if we have jointly simulated draws $a^{(m)}, b^{(m)}$
+as we have in our Stan program for a six-sided die $Y$, the event
+$A = Y \leq 3$ and the event $B = Y \textrm{ is odd}$.  The
+conditional probability is just the proportion of draws $m$ for which
+$a^{(m)} = 1$ among the draws for which $b^{(m)} = 1$.
+
+```{python}
+a = fit_joint_die.stan_variable("a")
+b = fit_joint_die.stan_variable("b")
+Pr_A_given_B = sum(np.logical_and(a == 1, b == 1)) / sum(b == 1)
+
+print(f"Pr[A | B] = {Pr_A_given_B:5.3f}")
+```
+
+
+We could've done this more easily be extracting the draws for the
+joint `ab`.
+
+```{python}
+ab = fit_joint_die.stan_variable("ab")
+Pr_A_given_B = sum(ab == 1) / sum(b == 1)
+
+print(f"Pr[A | B] = {Pr_A_given_B:5.3f}")
+```
+
+Given that we earlier computed estimates of $\textrm{Pr}[A]$ and
+$\textrm{Pr}[A, B]$, we can re-use those estimates here to calculate
+the value following the mathematical definition.  We repeat the
+probability calculations for convenience.
+
+```{python}
+Pr_B = np.mean(b)
+Pr_AB = np.mean(ab)
+Pr_A_given_B = Pr_AB / Pr_B
+
+print(f"Pr[A | B] = {Pr_A_given_B:5.3f}")
+```
+
+In this particular example, we see that $\textrm{Pr}[Y \textrm{ is
+odd} \mid Y \leq 3] = 2/3$ is greater than $\textrm{Pr}[Y \textrm{ is
+odd}] = 1/2.$ The probability can also go down or stay the same when
+conditioning on the information that another event occurred.
+
+For example, consider adding a new event, $C = Y \leq 2$.  Let's run
+the program and calculate the odds.
+
+`joint-die-2.stan`
+```{python}
+joint_die_2_model = CmdStanModel(stan_file = "stan/joint-die-2.stan")
+fit_joint_die_2 = joint_die_2_model.sample(seed=1234,
+                         show_progress=False, show_console = False)
+b = fit_joint_die_2.stan_variable("b")
+bc = fit_joint_die_2.stan_variable("bc")
+Pr_B = np.mean(b)
+Pr_BC = np.mean(bc)
+Pr_C_given_B = Pr_BC / Pr_B
+
+print(f"Pr[B] = {Pr_B:5.3f};   Pr[B, C] = {Pr_BC:5.3f}")
+print(f"Pr[C | B] = {Pr_C_given_B:5.3f}")
+```
+
+

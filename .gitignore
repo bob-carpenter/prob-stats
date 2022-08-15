@@ -34,6 +34,3 @@ vignettes/*.pdf
 
 # Shiny token, see https://shiny.rstudio.com/articles/shinyapps.html
 rsconnect/
-
-# Temp ipynb notebooks
-.ipynb
