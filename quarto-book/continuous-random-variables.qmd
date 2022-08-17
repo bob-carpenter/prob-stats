@@ -15,12 +15,7 @@ Imagine we have a stick that's twenty units long and we break it in a
 random place.  That corresponds to generating a continuous random
 number in the range $[0, 20]$.  We can simulate this random process with Stan as follows.
 
-`stick.stan`
-```stan
-generated quantities {
-  real<lower=0, upper=20> alpha = uniform_rng(0, 20);
-}
-```
+{{< showcode stan/stick.stan >}}
 
 In contrast to our previosu example, we declare our variable to be real-valued with the keyword `real`.  We also use a uniform random number generator, which generates a real number in the specified range at random.
 
@@ -61,7 +56,7 @@ In our sampling code, we fixed a random seed, `1234`, which determines
 the sequence of random numbers generated In practical sampling code,
 this means its value is dependent on the state of the underlying
 random number generator.  This mirrors the way random variables are
-defined in measure theory as functions from sample spaces to values.  
+defined in measure theory as functions from sample spaces to values.
 
 
 
@@ -71,7 +66,7 @@ The *expectation* of a random variable is defined as its average
 value. For example, if $Y$ is a random variable, we write its
 expectation as $\mathbb{E}[y]$.  We can calculate approximate
 expectation values by averaging samples.  If $y^{(0)}, \ldots,
-y^{(M-1)}$ is a sequence of $M$ simulated values for $Y$, then the *expectation* of 
+y^{(M-1)}$ is a sequence of $M$ simulated values for $Y$, then the *expectation* of
 $$
 \mathbb{E}[Y] \approx \frac{1}{M} \sum_{m < M} y^{(m)}.
 $$

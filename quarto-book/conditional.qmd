@@ -15,7 +15,7 @@ cmdstanpy_logger.disabled = True
 
 So far, we have considered the probabiltiy $\textrm{Pr}[A]$
 of single events $A$.  We will now turn to considering the
-probabilities of events occurring together.  
+probabilities of events occurring together.
 
 We will write $\textrm{Pr}[A, B]$ for the *joint probability* of
 events $A$ and $B$, which is defined by
@@ -41,24 +41,16 @@ Here's a table illustrating some events and their probabilities.
 | $Y \leq 2 \textrm{ and } Y \textrm{ odd}$ | 1 | 0 | 0 | 0 | 0 | 0 | 1/6 |
 
 
-We can extend our single die example to illustrate with Stan.  
+We can extend our single die example to illustrate with Stan.
 
-`joint-die.stan`
-```stan
-generated quantities {
-  int<lower=1, upper=6> y = categorical_rng(rep_vector(1.0 / 6.0, 6));
-  int<lower=0, upper=1> a = y <= 3;
-  int<lower=0, upper=1> b = y % 2 == 1;
-  int<lower=0, upper=1> ab = a && b;
-}
-```
+{{< showcode stan/joint-die.stan >}}
 
 Stan program defines a variable `y` represents values of $Y$,
 which are assigned uniformly at random between 1 and 6 (inclusive).
 The indicator variables `a`, `b`, and `ab` are assigned values 1 or 0,
 depending on whether the logical expression on the right hand side of
 `=` is true or false.  In this example, the variables are assigned as
-follows.  
+follows.
 
 * `a` is assigned the value 1 if `y` is less than or equal to 3.
 * `b` is assigned the value 1 if `y` is odd, which holds if `y % 2 ==
@@ -75,9 +67,9 @@ and 0 otherwise.
 
 This program illustrates that joint probabilities can be defined in
 Stan as indicators that apply logical conjunction to the indicators of
-the events being 
+the events being
 
-We can simulate from the Stan program, 
+We can simulate from the Stan program,
 
 ```{python}
 #| code-fold: true
@@ -87,7 +79,7 @@ fit_joint_die = model_joint_die.sample(seed=1234,
 ```
 
 then calculate event probabilities as means of their indicator
-variables, 
+variables,
 
 ```{python}
 Pr_A = np.mean(fit_joint_die.stan_variable("a"))
@@ -115,7 +107,7 @@ fit_joint_die.summary(sig_figs=3, percentiles=(50,))[1:]
 The summary table is cluttered, but it additionally provides the
 simulation standard error (MCSE).  Doubling the MCSE gives us bounds
 on an approximate 95% confidence interval for the estimated
-probabilities, namely 
+probabilities, namely
 
 * $\textrm{Pr}[A] \approx 0.510 \pm 0.017$,
 * $\textrm{Pr}[B] = 0.499 \pm 0.016$,
@@ -196,7 +188,8 @@ conditioning on the information that another event occurred.
 For example, consider adding a new event, $C = Y \leq 2$.  Let's run
 the program and calculate the odds.
 
-`joint-die-2.stan`
+{{< showcode stan/joint-die-2.stan >}}
+
 ```{python}
 joint_die_2_model = CmdStanModel(stan_file = "stan/joint-die-2.stan")
 fit_joint_die_2 = joint_die_2_model.sample(seed=1234,

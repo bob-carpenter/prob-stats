@@ -34,12 +34,7 @@ as we will analyze later).
 We will generate samples using the Stan program `die.stan`, which we
 repeat here for convenience.
 
-`die.stan`
-```stan
-generated quantities {
-  int<lower=1, upper=6> z = categorical_rng(rep_vector(1.0 / 6.0, 6));
-}
-```
+{{< showcode stan/die.stan >}}
 
 We then extract all of the draws and average them.
 
@@ -78,7 +73,7 @@ Python uses the notation `**` for exponentiation.
 
 Expectations distribute through linear functions.  For example, if $a,
 b \in \mathbb{R}$ are constant real values and $Y$ is a random
-variable, then 
+variable, then
 $$
 \mathbb{E}[a + b \cdot Y] = a + b \cdot \mathbb{E}[Y].
 $$
@@ -145,7 +140,7 @@ print(f"var[Z] = {var_Z_alt:5.3f}")
 Because we use the sample mean $\frac{1}{M} \sum_{m=1}^M z^{(m)}$
 rather than the true $\mathbb{E}[Z]$ to calculate the
 differences, we wind up systematically underestimating the differences
-with respect to the true mean.  
+with respect to the true mean.
 
 This is because of this simple but profound theorem relating averages
 and squared differences.
@@ -204,7 +199,7 @@ step further.
 
 \begin{eqnarray*}
 \mathbb{E}\!\left[\left(Y - \mathbb{E}[Y]\right)^2\right]
-& = & 
+& = &
 \mathbb{E}\!\left[Y^2 - 2 \cdot Y \cdot \mathbb{E}[Y] +
 \mathbb{E}[Y]^2\right]
 \\[4pt]
@@ -316,7 +311,7 @@ which reports model log density and isn't relevant for simple
 simulations involving generated quantities only.
 The header has a short description of the values, the first
 four of which summarize the draws and the last three of which
-attempt to estimate how well the sampler has sampled.  
+attempt to estimate how well the sampler has sampled.
 
 * The first column, labled "Mean", is the sample average, which
 matches our manual calculation in the previous program.

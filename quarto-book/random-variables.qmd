@@ -34,16 +34,12 @@ statistics, flipping a fair coin.
 Here's the Stan program for a coin flip.  We title Stan programs in
 the book with the file in which they can be found in the source distribution.
 
-##### `flip.stan`
-```stan
-generated quantities {
-  int<lower=0, upper=1> y = bernoulli_rng(0.5);
-}
-```
+{{< showcode stan/flip.stan >}}
+
 Stan is a probabilistic programming language in the sense that its
 variables can be random as well as deterministic.  The variable `y`
 here is random in that it is assigned the value 1 with probabilty 0.5
-and the value 0 with probability 0.5. 
+and the value 0 with probability 0.5.
 
 The Stan program `flip.stan` starts with a `generated quantities` block
 declaration. The *generated quantities* block is used to generate
@@ -120,7 +116,7 @@ because they may end up with the same time-based seed.]
 
 From the `fit` object returned by `model.sample()`, we can extract the
 sequence of values simulated for the random variables in the program
-as a pandas data frame. 
+as a pandas data frame.
 
 ```{python}
 draws = fit.draws_pd()
@@ -163,12 +159,7 @@ single coin.
 We can extend the coin example to an example involving dice.  Here's
 Stan code to simulate the roll of a fair six-sided die.
 
-`die.stan`
-```stan
-generated quantities {
-  int<lower=1, upper=6> y = categorical_rng(rep_vector(1.0 / 6.0, 6));
-}
-```
+{{< showcode stan/die.stan >}}
 
 This program places a lower bound of 1 and upper bound of 6
 (inclusive) on values.  We simulate values using a categorical
@@ -196,14 +187,8 @@ $X$ and simulating a value for $Y$ and then adding them.  For
 instance, if we want the result of rolling two dice, we can do that
 with the following Stan program.
 
-`dice.stan`
-```stan
-generated quantities {
-  int<lower=1, upper=6> x = categorical_rng(rep_vector(1.0 / 6.0, 6));
-  int<lower=1, upper=6> y = categorical_rng(rep_vector(1.0 / 6.0, 6));
-  int<lower=2, upper=12> z = x + y;
-}
-```
+{{< showcode stan/dice.stan >}}
+
 
 The Stan program defines two variables, `x` and `y`, modeling each as
 a fair die, and defines the variable `z` to be their sum.  Here are 25
@@ -233,22 +218,7 @@ Dragons* roll character attributes such as strength by taking the
 highest 3 of 4 six-sided dice.  Here's a character roller that
 generates values for all six attributes.
 
-`dnd-attributes.stan`
-```stan
-functions {
-  array[] int dice_rng(int N) {
-    array[N] int y;
-    for (n in 1:N)
-      y[n] = categorical_rng(rep_vector(1.0 / 6.0, 6));
-    return y;
-  }
-}
-generated quantities {
-  array[6] int<lower=3, upper=18> y;
-  for (n in 1:6)
-    y[n] = sum(sort_desc(dice_rng(4))[1:3]);
-}
-```
+{{< showcode stan/dnd-attributes.stan >}}
 
 We've introduced a new block for user-defined *functions*.  We use
 this function to define a new random-number generator for $N$ dice.
@@ -282,25 +252,25 @@ print("...")
 ```
 
 Because we are taking the best 3 of 4 rolls, the resulting values are
-mostly higher than the average roll of 10.5.  
+mostly higher than the average roll of 10.5.
 
-* *Exercise*:  The advantage and disadvantage system in *D & D* involves
+::: {#exr-advantage}
+
+### Advantage and Disadvantage
+
+* The advantage and disadvantage system in *D & D* involves
 rolling two 20-sided dice and taking either the highest or lowest
 value.  Write a Stan program to generate rolls with advantage and
 with disadvantage.
+:::
 
 Now let's say we're interested in figuring out how much better it is
 to roll four dice and take the best three compared to just rolling
 three dice.  We can write a Stan program to simulate the difference.
 
-`dnd-diff.stan`
-```stan
-generated quantities {
-  int<lower=3, upper=18> y = sum(sort_desc(dice_rng(4))[1:3]);
-  int<lower=3, upper=18> z = sum(dice_rng(3));
-  int<lower=-15, upper=15> y_minus_z = y - z;
-}
-```
+
+{{< showcode stan/dnd-diff.stan skiplines=8 >}}
+
 
 We have assumed the definition of `dice_rng` from the previous
 program, but haven't repeated it.  We can run this and print out the

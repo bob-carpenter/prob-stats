@@ -15,7 +15,7 @@ Events are the kinds of things that either happen or don't happen with
 some probability.  Informally, we can think of events like it raining
 today, a fair coin landing heads, or the Rays winning American
 baseball's eastern division this year.  In this chapter, we formalize
-this general idea of events.  
+this general idea of events.
 
 ## Events
 
@@ -27,7 +27,7 @@ Informally, an event $A$ is just a subset of possible outcomes for a
 random variable.^[Defining the collection of events more formally
 requires the notion of a $\sigma$-algebra from measure theory, which
 is beyond the scope of this book.]  For example, the conditions on
-random variables we considered above correspond to the following events.  
+random variables we considered above correspond to the following events.
 
 * $Z = 7$:  $\quad A = \{ 7 \}$
 * $Z \leq 5 \ $: $\quad B = \{ 2, 3, 4, 5 \}$
@@ -46,7 +46,7 @@ $$
     1 & \textrm{ if } \phi \textrm{ is true, and}
     \\[2pt]
     0 & \textrm{ otherwise.}
-\end{cases}    
+\end{cases}
 $$
 
 ### Random indicators
@@ -64,7 +64,7 @@ variables is defined as the expectation of the indicator function
 applied to the condition.  In symbols, we write $\textrm{Pr}[A]$ for
 the probability of an event $A$.  In general, when $\phi(Z)$ is a
 condition on a random variable $Z$ defining an event, the *probability*
-of the event is defined by 
+of the event is defined by
 $$
 \textrm{Pr}[\phi(Z)] = \mathbb{E}[\textrm{I}[\phi(Z)]].
 $$
@@ -135,11 +135,11 @@ The result is the number of `True` values.  This works by casting the
 boolean values to integer values (`True` to 1 and `False` to 0) so
 that the sum counts the number of `True` values.  We can then divide
 these counts by lengths to estimate the probabilities of our example
-events.  
+events.
 
 ```{python}
 p1 = sum(z == 7) / len(z)
-p2 = sum(z <= 5) / len(z) 
+p2 = sum(z <= 5) / len(z)
 p3 = sum(z % 2 == 1) / len(z)
 print(f"Pr[Z = 7] = {p1:4.2f}")
 print(f"Pr[Z <= 5] = {p2:4.2f}")
@@ -154,17 +154,7 @@ summary gives us the sample mean of all of the variables in the
 program, all we need to do is define indicators for events of
 interest.  Here's a Stan program to compute our example events.
 
-`dice-events.stan`
-```stan
-generated quantities {
-  int<lower=1, upper=6> x = categorical_rng(rep_vector(1.0 / 6.0, 6));
-  int<lower=1, upper=6> y = categorical_rng(rep_vector(1.0 / 6.0, 6));
-  int<lower=2, upper=12> z = x + y;
-  int<lower=0, upper=1> z_eq_7 = (z == 7);
-  int<lower=0, upper=1> z_lte_5 = (z <= 5);
-  int<lower=0, upper=1> z_odd = (z % 2 == 1);
-}
-```
+{{< showcode stan/dice-events.stan >}}
 
 
 ```{python}
