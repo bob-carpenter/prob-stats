@@ -1,0 +1,251 @@
+# Elementary Set Theory
+
+Probability theory is based on simple notions from set theory such as
+unions and intersections.  We will need to generalize to infite sets
+and worry about issues such as countability, all of which we define in
+this appendix.
+
+## Basic set notation
+
+One way to think of a set is as a bag of objects without duplicates.
+We write sets using curly braces.  For example, the set containing the
+numbers 1 and 2 is written as $\{ 1, 2 \}$.  Sets are not ordered, so
+the notation $\{ 1, 2 \}$ picks out the same set as $\{ 2, 1 \}$.
+
+## Ellipses notation
+
+Sets are often written with informal shorthand with *ellipses*
+($\ldots$) standing in for a sequence of elements.  For example, $\{
+1, 2, \ldots, 7\}$ would pick out the set $\{ 1, 2, 3, 4, 5, 6, 7 \}$
+and $\{ x_0, x_1, \ldots, x_4 \}$ is shorthand for $\{ x_0, x_1, x_2,
+x_3, x_4 \}$.
+
+Ellipses that end rather than separate are used to denote an unbounded
+sequence of elements.  For example, we will write $\{ 0, 1, 2, \ldots
+\}$ for the set of all counting numbers.
+
+## Sets of numbers
+
+The symbol $\mathbb{Z}$ is conventionally used for the set of all
+*integers* (i.e., whole numbers).  The symbol $\mathbb{N}$ is used for
+the set of all *counting number*s (i.e., non-negative whole numbers).
+The symbol $\mathbb{R}$ is conventionally used for the set of all
+*real numbers*.  The symbol $\mathbb{C}$ is used for the set of all
+*complex numbers*.
+
+## Membership, subsets, and equality
+
+If $A$ is a set, we write $x \in A$ if $x$ is a *member* of the set $A$,
+and we write $x \not\in A$ otherwise.  For example, $1 \in \{ 1, 2
+\}$, but $7 \not\in \{ 1, 2 \}$.
+
+If $A$ and $B$ are sets, we write $A \subseteq B$ and say that $A$ is
+a *subset* of $B$ if $x \in A$ implies $x \in B$.  For example,
+$\{ 1, 3 \} \subseteq \{ 0, 1, 2, 3, 4 \}$, but
+$\{ 1, 3 \} \not\subseteq \{ 0, 2, 4 \}$.
+
+Two sets $A$ and $B$ are *equal*, written $A = B$, if they are subsets
+of each other, $A \subseteq B$ and $B \subseteq A$.
+
+## Empty set
+
+We use the notation $\emptyset$ for the unique *empty set* which
+contains no members.  In other words, for any $x$, we know $x \not\in
+\emptyset$.  That means the empty set is a subset of every other set
+$A$, $\emptyset \subseteq A$.
+
+## Disjointness
+
+A pair of sets $A$ and $B$ are *disjoint* if $A \cap B = \emptyset$.
+A potentiall infinite sequence of sets $A_0, A_1, \ldots$ is *pairwise
+disjoint* if for every $i, j < \infty$, $A_i$ and $A_j$ are
+disjoint, $A_i \cap A_j = \emptyset$.
+
+
+
+## Finite and infinite sets
+
+A set $s$ is said to be *finite* if it can be written in the form $s =
+\{ x_0, x_1, \ldots, x_{n-1}\}$ for some $n \geq 0.$ If a set is not
+finite, it is said to be *infinite*.
+
+The *size* of a finite set is the number of distinct members it has.
+For example, the set $s = \{ 1, 2, 3 \}$ has size 3.  It is standard
+to use absolute-value notation for the size of a set, for example,
+$$
+\left|  \{ 1, 2, 3 \} \right| = 3.
+$$
+In general, every finite set $s = \{ x_0, \ldots, x_{n-1} \}$ has size
+$n$.  The empty set $\emptyset$ has size 0.
+
+## Comprehensions
+
+Comprehensions are a way to turn conditions into sets.  For example, I
+might take all the natural numbers that satisfy the condition of being
+odd or being less than 17 or both.  We use the standard
+*comprehension* notation,
+$$
+B = \{ x \in A \, : \, \phi(x) \},
+$$
+for the set $B$ that contains all of the elements of $A$ that satisfy
+the condition $\phi$.  
+
+## Unions and intersections
+
+The *union* of two sets $A$ and $B$, written $A \cup B$, contains the
+elements that are in either set,
+$$
+A \cup B = \{ x \, : \, x \in A \textrm{ or } x \in B \}.
+$$
+The *intersection* of two sets $A$ and $B$, written $A \cap B$, contains the
+elements that are in either set,
+$$
+A \cap B = \{ x \, : \, x \in A \textrm{ and } x \in B \}.
+$$
+Logically speaking, union is disjunction (or), whereas intersection is
+conjunction (and).
+
+Both unions and intersections can be extended to infinite sets using
+subscript notation.  If $A_0, A_1, \ldots$ is an infinite sequence of
+sets, then
+$$
+\bigcup_{n = 0}^{\infty} A_n = \{ x \, : \, x \in A_n \textrm{ for some }
+n < \infty \}
+$$
+and
+$$
+\bigcap_{n = 0}^{\infty} A_n = \{ x \, : \, x \in A_n \textrm{ for all }
+n < \infty \}
+$$
+In the infinite case, union parallels existential quantification (for
+some), whereas intersection parallels universal quantification (for every).
+
+## Set difference
+
+If $A$ and $B$ are sets, then their *difference*, written $A \setminus
+B$, is the set of elements in $A$ that are not in $B$,
+$$
+A \setminus B = \{ x \in A \, : \, x \not\in B \}.
+$$
+
+## Universal set
+
+A *universal* set $\mathcal{U}$ is one such that for every set $A$, we
+have
+$$
+A \subseteq \mathcal{U}.
+$$
+Depending on the sets under consideration, universal sets may not
+exist (in the sense of not being a set).  We will only be considering
+sets of numbers here rather than infinitely nested sets of sets, so
+most of the complications of more general set theory do not arise.
+
+## Complementation
+
+If there is a universal set $\mathcal{U}$, the *complement of a set
+$A$ is the set of elements not in $A$, 
+$$
+A^\complement = \{ x \in \mathcal{U} \, : \, x \not\in A \}.
+$$
+The complement $A^\complement$ is sometimes written as $\bar{A}$.
+
+If we have a universal set $\mathcal{U}$, then we can use it to define
+difference in terms of complementation through
+$$
+A \setminus B = A \cap B^\complement.
+$$
+
+
+## Basic laws of set theory
+
+### Commutativity
+
+Set operations are *commutative*, meaning that for all sets $A$ and $B$,
+$$
+A \cup B = B \cup A
+$$
+and
+$$
+A \cap B = B \cap A.
+$$
+
+### Associativity
+
+Set operations are *associative*, meaning that for all sets $A$, $B$,
+and $C$,
+$$
+(A \cup B) \cup C = A \cup (B \cup C)
+$$
+and
+$$
+(A \cap B) \cap C = A \cap (B \cap C).
+$$
+
+### Distributivity
+
+The intersection operation is *distributive* with respect to the union
+operation, so that for all sets $A$, $B$, and $C$,
+$$
+A \cap (B \cup C) = (A \cap B) \cup (A \cap C).
+$$
+Because of commutativity, this also holds on the right for $(B \cup C)
+\cap A$.
+
+### Involutivity
+
+The complementation operation is an *involution* (i.e., equal to its
+own inverse), so that for all sets $A$,
+$$
+\left(A^\complement\right)^{\complement} = A.
+$$
+
+### Identities
+
+The empty set is a left and right *identity* for union, so that for all sets $A$,
+$$
+\emptyset \cup A \ = \ A \cup \emptyset \ = \ A.
+$$
+If there is a universal set $\mathcal{U}$, it is an identity for
+intersection, so that for all sets $A$,
+$$
+\mathcal{U} \cap A \ = \ A \cap \mathcal{U} \ = \ A.
+$$
+
+### Zeroes
+
+The empty set is a *zero* for intersection, so that for all sets $A$,
+$$
+\emptyset \cap A \ = \ A \cap \emptyset \ = \ \emptyset.
+$$
+The universal set, if it exists, is a *zero* for union, so that for
+all sets $A$,
+$$
+\mathcal{U} \cup A \ = \ A \cup \mathcal{U} \ = \ \mathcal{U}.
+$$
+
+
+### Idempotence
+
+The union and intersection operations are *idempotent*, so that for all sets $A$,
+$$
+A \cup A = A
+$$
+and
+$$
+A \cap A = A.
+$$
+
+### DeMorgan's laws
+
+*DeMorgan's laws* relate complementation, intersection, and union,
+where for all sets $A$, $B$, and $C$,
+$$
+\left(A \cup B\right)^\complement
+= A^\complement \cap B^\complement.
+$$
+and
+$$
+\left(A \cap B\right)^\complement
+= A^\complement \cup B^\complement.
+$$
+

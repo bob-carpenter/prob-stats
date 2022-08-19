@@ -24,6 +24,8 @@ book:
 #    - probability-mass-functions.qmd
 #    - continuous-random-variables.qmd
     - references.qmd
+  appendices:
+    - set-theory.qmd
 bibliography: references.bib
 
 format:
