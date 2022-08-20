@@ -1,0 +1,152 @@
+# Independence
+
+Sometimes, when we learn that one event occurs, it gives us
+information about other events.  When knowing the outcome of one event
+does not give us any information about the probability of another
+event, we say that the events are independent.
+
+## Independent events
+
+::: {#def-independence}
+
+## Independent events
+
+Two events $A$ and $B$ are *independent* if
+$$
+\textrm{Pr}[A, B] = \textrm{Pr}[A] \cdot \textrm{Pr}[B].
+$$
+:::
+
+We have already seen examples of independent and dependent events in
+the [event probabilities chapter](@event-probabilities).  For example,
+consider the roll of a single six-sided die $Y$.  Now consider the
+events $Y \leq 2$, $Y \leq 3$, and $Y \textrm{ odd}$.  All
+of the events result from a condition on a single random variable $Y$,
+so it may seem strange that there is a pair of these events that is
+independent.  We can
+work out all the sums to see which one it is, with
+\begin{eqnarray*}
+\textrm{Pr}[Y \leq 2 \textrm{ and } Y \leq 3] & = & \frac{1}{3}
+& \neq & \textrm{Pr}[Y \leq 2] \cdot \textrm{Pr}[Y \leq 3] & = &
+\frac{1}{6}
+\\[6pt]
+\textrm{Pr}[Y \leq 3 \textrm{ and } Y \textrm{ odd}] & = & \frac{1}{3}
+& \neq & \textrm{Pr}[Y \leq 3] \cdot \textrm{Pr}[Y \textrm{odd}] & = &
+\frac{1}{4}
+\\[6pt]
+\textrm{Pr}[Y \leq 2 \textrm{ and } Y \textrm{ odd}] & = & \frac{1}{6}
+& = & \textrm{Pr}[Y \leq 2] \cdot \textrm{Pr}[Y \textrm{odd}] & = &
+\frac{1}{6}
+\end{eqnarray*}
+Thus we may conclude that
+
+* $Y \leq 2$ and $Y \leq 3$ are *not* independent,
+* $Y \leq 3$ and $Y \textrm{ odd}$ are *not* independent, and
+* $Y \leq 2$ and $Y \textrm{ odd}$ *are* independent.
+
+
+
+### Conditional probability and independence
+
+
+In general, we have
+$$
+\textrm{Pr}[A, B] = \textrm{Pr}[A] \cdot \textrm{Pr}[B \mid A].
+$$
+
+If it turns out that $\textrm{Pr}[B \mid A] = \textrm{Pr}[B]$, then we
+can substitute $\textrm{Pr}[B]$ for $\textrm{Pr}[B \mid A]$ to derive
+$\textrm{Pr}[A, B] = \textrm{Pr}[A] \cdot \textrm{Pr}[B].$ 
+Conversely, if $A$ and $B$ are independent, then it follows that
+$\textrm{Pr}[B \mid A] = \textrm{Pr}[B].$  Because of symmetry, this
+also holds for $\textrm{Pr}[A \mid B] = \textrm{Pr}[A].$  This
+establishes the following proposition.
+
+
+::: {#prp-independent-vs-conditional}
+
+For any events $A$ and $B$, the following three statements are
+equivalent.
+
+* $\textrm{Pr}[A, B] = \textrm{Pr}[A] \cdot \textrm{Pr}[B] \quad$  (i.e., $A$
+and $B$ are independent)
+* $\textrm{Pr}[A \mid B] = \textrm{Pr}[A]$
+* $\textrm{Pr}[B \mid A] = \textrm{Pr}[B]$
+
+:::
+
+
+
+Moving back to our running example of a fair six-sided die roll $Y$,
+we can work out the conditionals and draw the same conclusion with
+respect to independence.
+\begin{eqnarray*}
+\textrm{Pr}[Y \leq 2 \mid Y \leq 3] & = & \frac{2}{3}
+& \quad \neq \quad & \textrm{Pr}[Y \leq 2] & = & \frac{1}{3}
+\\[6pt]
+\textrm{Pr}[Y \leq 3 \mid Y \textrm{ odd}] & = & \frac{2}{3}
+& \quad \neq \quad & \textrm{Pr}[Y \leq 3] & = & \frac{1}{2}
+\\[6pt]
+\textrm{Pr}[Y \leq 2 \mid Y \textrm{ odd}] & = & \frac{1}{3}
+& \quad = \quad & \textrm{Pr}[Y \leq 2] & = & \frac{1}{3}
+\end{eqnarray*}
+That is, $Y \leq 2$ and $Y \textrm{ odd}$ are independent, but neither
+are independent from $Y \leq 3$.
+
+
+## Conditionally independent events
+
+Sometimes two events are not themselves independent, but they are
+independent when we condition on other information.  When we turn to
+statistical modeling, we will lean heavily on assumptions of
+conditional independence.
+
+
+::: {#def-conditional-independence}
+
+## Conditionallay independent events
+
+Two events $A$ and $B$ are *conditionally independent* given event $C$
+if 
+$$
+\textrm{Pr}[A, B \mid C] = \textrm{Pr}[A \mid C] \cdot \textrm{Pr}[B \mid C].
+$$
+:::
+
+As with the joint probabilty notation $\textrm{Pr}[A, B]$, the
+conditional joint notation $\textrm{Pr}[A, B \mid C]$ is shorthand for
+$\textrm{Pr}[A \cap B \mid C]$.
+
+## Independent random variables
+
+It is convenient to extend the notion of independence to random
+variables.  We can do that by turning a random variable into an event
+by comparison to a value and then quantifying over all possible
+values.
+
+::: {#def-rv-independence}
+
+## Indepent Random Variables
+
+Two random variables $X$ and $Y$ are said to be independent if the
+events $\textrm{Pr}[X < u]$ and $\textrm{Pr}[Y < v]$ are independent
+for all $u, v$.
+:::
+
+
+We can define conditional independence for random variables by
+combining the definitions of independent random variables and
+conditionally independent events.
+
+::: {#def-conditional-rv-independence}
+
+## Conditionally indepent random variables
+
+Two random variables $X$ and $Y$ are said to be conditionally
+independent given a random variable $Z$ if 
+events $\textrm{Pr}[X < u \mid Z < w]$ and $\textrm{Pr}[Y < v \mid Z <
+w]$ are independent
+for all $u, v, w$.
+:::
+
+
