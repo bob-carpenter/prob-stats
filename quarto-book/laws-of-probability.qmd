@@ -1,4 +1,4 @@
-# Axioms of Probability
+# Laws of Probability
 
 Now that we have events, which are the bearers of probability in
 probability theory, we are ready to introduce the basic algebraic laws
@@ -15,6 +15,12 @@ is a random variable taking on values in $S$, such as the sum of the
 roll of two dice, then an event such as $Y \leq 3$ picks out the event
 $A = \{ 2, 3 \}$.  Every event is a subset of the sample space, $A
 \subseteq S$.  The entire sample space $S$, for example, is an event.
+
+## Axioms of Probability
+
+@kolmogorov1950foundations introduced
+measure-theoretic models of probability that
+demonstrated the consistency of his three axiom sof probability.
 
 
 ### Axiom 1: Event probabilities are non-negative
@@ -75,3 +81,68 @@ $A$ and $B$ are disjoint, then
 $$
 \textrm{Pr}[A \cup B] = \textrm{Pr}[A] + \textrm{Pr}[B].
 $$
+
+## Basic laws of probability
+
+From the three simple axioms of probability, we can prove a range of
+additional results.
+
+### Complement law
+
+If $A$ is an event, then
+$$
+\textrm{Pr}[A^\complement] = 1 - \textrm{Pr}[A].
+$$
+This law follows from the first and last line of
+\begin{eqnarray*}
+\textrm{Pr}[A] + \textrm{Pr}[A^\complement]
+& = & \textrm{Pr}[A \cup A^\complement]
+\\[4pt]
+& = & \textrm{Pr}[S]
+\\[2pt]
+& = & 1.
+\end{eqnarray*}
+
+Given that the empty set $\emptyset = S^\complement$ is the complement of
+the universal set $S$, and $\textrm{Pr}[S] = 1$, it follows
+from the complement law that
+$$
+\textrm{Pr}[\emptyset] = 0.
+$$
+
+If $A$ is an event, then $A$ and $A^\complement$ are disjoint, and $A \cup
+A^\complement = S$.  It then follows because
+$\textrm{Pr}[A^\complement] \geq 0$ and $\textrm{Pr}[A] = 1 -
+\textrm{Pr}[A^\complement]$, that 
+$$
+\textrm{Pr}[A] \leq 1.  
+$$
+
+### Set theoretic laws
+
+If $A$ and $B$ are events, then 
+$$
+\textrm{Pr}[A \cup B]
+= \textrm{Pr}[A] + \textrm{Pr}[B] - \textrm{Pr}[A \cap B].
+$$
+
+If $A$ and $B$ are events, then
+$$
+\textrm{Pr}[B \cap A^\complement] = \textrm{Pr}[B] - \textrm{Pr}[A \cap B].
+$$
+
+If $A$ and $B$ are events, then
+$$
+A \subseteq B \ \textrm{implies} \ \textrm{Pr}[A] \leq \textrm{Pr}[B].
+$$
+
+### Partition law
+
+If $C_1, C_2, \ldots$ is a partition of the sample space $S$ (i.e.,
+the $C_i$ are pairwise disjoint and $S = \bigcup_{n < \infty} C_n$), and $A$
+is an event, then
+$$
+\textrm{Pr}[A]
+= \sum_{n = 0}^\infty \textrm{Pr}[A \cap C_n].
+$$
+

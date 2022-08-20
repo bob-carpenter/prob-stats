@@ -54,14 +54,6 @@ contains no members.  In other words, for any $x$, we know $x \not\in
 \emptyset$.  That means the empty set is a subset of every other set
 $A$, $\emptyset \subseteq A$.
 
-## Disjointness
-
-A pair of sets $A$ and $B$ are *disjoint* if $A \cap B = \emptyset$.
-A potentiall infinite sequence of sets $A_0, A_1, \ldots$ is *pairwise
-disjoint* if for every $i, j < \infty$, $A_i$ and $A_j$ are
-disjoint, $A_i \cap A_j = \emptyset$.
-
-
 
 ## Finite and infinite sets
 
@@ -119,6 +111,22 @@ n < \infty \}
 $$
 In the infinite case, union parallels existential quantification (for
 some), whereas intersection parallels universal quantification (for every).
+
+## Disjointness
+
+A pair of sets $A$ and $B$ are *disjoint* if $A \cap B = \emptyset$.
+A potentiall infinite sequence of sets $A_0, A_1, \ldots$ is *pairwise
+disjoint* if for every $i, j < \infty$, $A_i$ and $A_j$ are
+disjoint, $A_i \cap A_j = \emptyset$.
+
+## Partitions
+
+A pairwise disjoint sequence of sets $B_0, B_1, \ldots$ is said to be
+a *partition* of a set $A$ if
+$$
+A = \bigcup_{n < \infty} B_n.
+$$
+
 
 ## Set difference
 
