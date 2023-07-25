@@ -32,5 +32,5 @@ The following Python packages are also required.
 
 #### The original book
 
-Thsi current draft supersedes the
+This current draft supersedes the
 [original draft](original/README.md), which includes a pre-built pdf.
