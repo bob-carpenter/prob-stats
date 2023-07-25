@@ -93,7 +93,7 @@ information.
 
 ### Alternative open-source tools
 
-Instead of Python, we could have used Julia or R. Instead of Python,
+Instead of Python, we could have used Julia or R. Instead of Stan,
 we could have used PyMC, Pyro, NIMBLE, or Turing.jl.
 
 
